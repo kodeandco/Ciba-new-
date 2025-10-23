@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Maximize2, Minimize2 } from "lucide-react"
 import AnimatedSection from "./animated-section"
+import PanoramaTour from "./360 Panorama/PanoramaTour"
 
 export default function TourSection() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -26,40 +27,18 @@ export default function TourSection() {
 
           <motion.div
             layout
-            className={`relative rounded-2xl overflow-hidden shadow-2xl ${
-              isExpanded ? "fixed inset-4 z-50" : "w-full aspect-video"
-            }`}
+            className={`relative rounded-2xl overflow-hidden shadow-2xl ${isExpanded ? "fixed inset-4 z-50" : "w-full aspect-video"
+              }`}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            {/* Placeholder for 360 Panoramic Tour Component */}
-            <div className="w-full h-full bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 flex items-center justify-center relative overflow-hidden">
-              {/* Animated background elements */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                className="absolute inset-0 opacity-10"
-              >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(255,255,255,0.1),transparent),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.1),transparent)]" />
-              </motion.div>
-
-              <div className="relative z-10 text-center text-white">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-                  className="mb-4"
-                >
-                  <div className="w-20 h-20 mx-auto bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <Maximize2 className="w-10 h-10" />
-                  </div>
-                </motion.div>
-                <p className="text-xl font-semibold mb-2">360° Panoramic Tour</p>
-                <p className="text-blue-100">Drag to explore or click expand to fullscreen</p>
-              </div>
+            {/* PanoramaTour Component - Full Size */}
+            <div className="w-full h-full relative">
+              <PanoramaTour />
 
               {/* Expand/Collapse Button */}
               <motion.button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="absolute top-4 right-4 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-lg transition-all"
+                className="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-lg transition-all"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >

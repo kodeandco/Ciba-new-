@@ -1,8 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Award, Briefcase, Users } from "lucide-react"
-import AnimatedSection from "./animated-section"
 import { useState } from "react"
 
 const mentors = [
@@ -47,133 +45,102 @@ const mentors = [
 export default function MentorsSection() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
-
   return (
-    <AnimatedSection direction="left">
-      <section className="py-20 px-4 md:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Meet Our Mentors</h2>
-            <p className="text-lg text-blue-600 max-w-2xl mx-auto">
-              Learn from industry experts and experienced entrepreneurs who are committed to your success
-            </p>
-          </motion.div>
+    <section className="py-20 px-4 md:px-8 bg-white">
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+      `}</style>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {mentors.map((mentor) => {
-              const IconComponent = mentor.icon
-              return (
-                <motion.div
-                  key={mentor.id}
-                  variants={itemVariants}
-                  onMouseEnter={() => setHoveredId(mentor.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  className="relative group cursor-pointer"
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16 opacity-0 animate-fade-in-up">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Meet Our Mentors</h2>
+          <p className="text-lg text-blue-600 max-w-2xl mx-auto">
+            Learn from industry experts and experienced entrepreneurs who are committed to your success
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {mentors.map((mentor, index) => {
+            const IconComponent = mentor.icon
+            const isHovered = hoveredId === mentor.id
+
+            return (
+              <div
+                key={mentor.id}
+                onMouseEnter={() => setHoveredId(mentor.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className="relative group cursor-pointer opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
+              >
+                <div
+                  className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-6 h-full transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'
+                    }`}
                 >
-                  <motion.div
-                    className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-6 h-full"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    {/* Background gradient animation */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 opacity-0"
-                      animate={{ opacity: hoveredId === mentor.id ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
+                  {/* Background gradient animation */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+                      }`}
+                  />
 
-                    {/* Content */}
-                    <div className="relative z-10">
-                      {/* Image placeholder */}
-                      <motion.div
-                        className="mb-4 overflow-hidden rounded-lg"
-                        animate={{ scale: hoveredId === mentor.id ? 1.1 : 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <img
-                          src={mentor.image || "/placeholder.svg"}
-                          alt={mentor.name}
-                          className="w-full h-40 object-cover"
-                        />
-                      </motion.div>
-
-                      {/* Info - visible by default */}
-                      <motion.div
-                        animate={{
-                          opacity: hoveredId === mentor.id ? 0 : 1,
-                          y: hoveredId === mentor.id ? -10 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <IconComponent className="w-5 h-5 text-blue-600" />
-                          <h3 className="font-bold text-blue-900">{mentor.name}</h3>
-                        </div>
-                        <p className="text-sm text-blue-700 font-semibold mb-1">{mentor.role}</p>
-                        <p className="text-xs text-blue-600">{mentor.expertise}</p>
-                      </motion.div>
-
-                      {/* Bio - visible on hover */}
-                      <motion.div
-                        className="absolute inset-0 p-6 flex flex-col justify-center"
-                        animate={{
-                          opacity: hoveredId === mentor.id ? 1 : 0,
-                          y: hoveredId === mentor.id ? 0 : 10,
-                        }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <p className="text-white text-sm leading-relaxed">{mentor.bio}</p>
-                      </motion.div>
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Image placeholder */}
+                    <div
+                      className={`mb-4 overflow-hidden rounded-lg transition-transform duration-300 ${isHovered ? 'scale-110' : 'scale-100'
+                        }`}
+                    >
+                      <img
+                        src={mentor.image || "/placeholder.svg"}
+                        alt={mentor.name}
+                        className="w-full h-40 object-cover"
+                      />
                     </div>
 
-                    {/* Border animation */}
-                    <motion.div
-                      className="absolute inset-0 rounded-xl border-2 border-blue-400"
-                      animate={{
-                        opacity: hoveredId === mentor.id ? 1 : 0,
-                        boxShadow:
-                          hoveredId === mentor.id
-                            ? "0 0 20px rgba(59, 130, 246, 0.5)"
-                            : "0 0 0px rgba(59, 130, 246, 0)",
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </motion.div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
+                    {/* Info - visible by default */}
+                    <div
+                      className={`transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-3' : 'opacity-100 translate-y-0'
+                        }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <IconComponent className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-bold text-blue-900">{mentor.name}</h3>
+                      </div>
+                      <p className="text-sm text-blue-700 font-semibold mb-1">{mentor.role}</p>
+                      <p className="text-xs text-blue-600">{mentor.expertise}</p>
+                    </div>
+
+                    {/* Bio - visible on hover */}
+                    <div
+                      className={`absolute inset-0 p-6 flex flex-col justify-center transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                        }`}
+                    >
+                      <p className="text-white text-sm leading-relaxed">{mentor.bio}</p>
+                    </div>
+                  </div>
+
+                  {/* Border animation */}
+                  <div
+                    className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-all duration-300 ${isHovered ? 'opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'opacity-0'
+                      }`}
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
-      </section>
-    </AnimatedSection>
+      </div>
+    </section>
   )
 }

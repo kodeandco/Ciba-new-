@@ -22,26 +22,24 @@ export default function Hero() {
         <div
           className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
         >
-          <p className="text-primary font-semibold text-lg mb-4 animate-slide-in-left">Welcome to CIBA Mumbai</p>
+          <p className="text-primary font-semibold text-lg mb-4 animate-slide-in-left">Your Growth Partner in Navi Mumbai</p>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight animate-slide-up">
-            Centre for <span className="gradient-blue bg-clip-text text-transparent">Incubation</span> and Business
-            Acceleration
+            Accelerate Your <span className="text-blue-600">Startup Journey</span> with Expert Guidance
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed animate-slide-in-right">
-            Empowering entrepreneurs and startups in Vashi, Navi Mumbai. We provide mentorship, resources, and a vibrant
-            community to accelerate your business growth.
+            Join India's leading incubation center in Vashi. Get access to world-class mentorship, funding opportunities, and a thriving community of entrepreneurs ready to scale.
           </p>
 
           <div
             className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in"
             style={{ animationDelay: "0.3s" }}
           >
-            <button className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover-lift-interactive flex items-center justify-center gap-2 group">
-              Apply for Incubation
+            <button className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover-lift-interactive flex items-center justify-center gap-2 group shadow-lg">
+              Start Your Application
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button className="px-8 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group">
-              CIBA Startup Clinic
+              Book Free Consultation
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -49,9 +47,9 @@ export default function Hero() {
 
         <div className="grid grid-cols-3 gap-4 mt-20 max-w-2xl mx-auto">
           {[
-            { value: "50+", label: "Startups", icon: Users, delay: "0s" },
-            { value: "₹10Cr+", label: "Funding", icon: TrendingUp, delay: "0.1s" },
-            { value: "100%", label: "Success Rate", icon: Zap, delay: "0.2s" },
+            { value: "50+", label: "Active Startups", icon: Users, delay: "0s" },
+            { value: "₹10Cr+", label: "Funding Raised", icon: TrendingUp, delay: "0.1s" },
+            { value: "95%", label: "Growth Rate", icon: Zap, delay: "0.2s" },
           ].map((stat, idx) => (
             <div
               key={idx}
