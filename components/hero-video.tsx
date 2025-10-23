@@ -106,7 +106,7 @@ export default function HeroVideo() {
         >
           <div className="relative w-full h-full flex items-center justify-center">
             <video ref={videoRef} controls autoPlay className="w-full h-full object-contain">
-              <source src="/ciba-intro.mp4" type="video/mp4" />
+              <source src="/Screen Recording 2025-10-23 113537.mp4" type="video/mp4" />
             </video>
 
             {/* Close Button */}
