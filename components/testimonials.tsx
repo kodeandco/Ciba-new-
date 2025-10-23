@@ -67,6 +67,7 @@ export default function Testimonials() {
 
       <div className="relative">
         {/* Carousel Container */}
+        {/* Carousel Container */}
         <div className="overflow-hidden rounded-2xl">
           <div
             className="flex transition-transform duration-700 ease-out"
@@ -74,16 +75,25 @@ export default function Testimonials() {
           >
             {testimonials.map((testimonial) => (
               <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
-                <div className="glass-effect rounded-2xl p-8 sm:p-12 text-center hover-glow">
-                  <p className="text-5xl mb-4 animate-bounce-subtle">{testimonial.avatar}</p>
-                  <p className="text-lg text-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
-                  <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                <div className="relative rounded-2xl p-[3px] overflow-hidden transition-transform duration-500 ease-in-out hover:scale-105">
+                  {/* Animated glow border */}
+                  <div className="absolute inset-0 rounded-2xl bg-[conic-gradient(from_0deg,_#3b82f6,_#06b6d4,_#3b82f6)] animate-[spin_6s_linear_infinite]" />
+
+                  {/* Card content */}
+                  <div className="relative rounded-2xl bg-background p-8 sm:p-12 text-center">
+                    <p className="text-5xl mb-4 animate-bounce-subtle">{testimonial.avatar}</p>
+                    <p className="text-lg text-foreground mb-6 leading-relaxed">
+                      "{testimonial.content}"
+                    </p>
+                    <p className="font-semibold text-foreground">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
 
         {/* Navigation Buttons */}
         <button
