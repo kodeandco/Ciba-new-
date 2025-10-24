@@ -75,12 +75,18 @@ export default function HeroVideo() {
         {/* Centered Text Overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
           <div className="text-center px-4">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-4 leading-tight opacity-0 animate-[fadeIn_1s_ease-out_0.3s_forwards]">
-              Welcome to CIBA
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-4 leading-tight opacity-0 animate-[fadeIn_1s_ease-out_0.3s_forwards] text-white">
+              Welcome to{' '}
+              <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent">
+                CIBA
+              </span>
             </h1>
+
+
             <p className="text-xl md:text-2xl text-gray-200 mb-8 opacity-0 animate-[fadeIn_1s_ease-out_0.6s_forwards]">
-              Where Innovation Meets Opportunity
+              Where Innovation Meets <span className="text-blue-400">Opportunity</span>
             </p>
+
             <button
               onClick={handleVideoClick}
               className="text-sm text-gray-300 hover:text-white transition-colors opacity-0 animate-[fadeIn_1s_ease-out_0.9s_forwards]"

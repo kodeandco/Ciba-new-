@@ -105,6 +105,16 @@ export default function FAQChatbot() {
 
     return (
         <>
+            {/* Floating Chat Alert */}
+            {!isOpen && (
+                <div className="fixed bottom-16 right-4 z-50 flex flex-col items-center pointer-events-none">
+                    <div className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full shadow-lg animate-bounce">
+                        Click here for questions!
+                    </div>
+                    <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-blue-600 mt-1 animate-bounce"></div>
+                </div>
+            )}
+
             {/* Floating Chat Button */}
             {!isOpen && (
                 <button
@@ -155,8 +165,8 @@ export default function FAQChatbot() {
                                 )}
                                 <div
                                     className={`max-w-[75%] rounded-2xl px-3 py-2 ${message.isBot
-                                            ? "bg-white border border-blue-100 text-gray-800 shadow-sm"
-                                            : "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
+                                        ? "bg-white border border-blue-100 text-gray-800 shadow-sm"
+                                        : "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
                                         }`}
                                 >
                                     <p className="text-xs leading-relaxed">{message.text}</p>
