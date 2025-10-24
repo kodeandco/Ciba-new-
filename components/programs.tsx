@@ -30,12 +30,12 @@ const programs = [
   },
   {
     id: 3,
-    title: "Acceleration Program",
-    description: "Fast-track growth for established startups",
-    duration: "3 months",
-    benefits: ["Growth strategy consulting", "Series A preparation", "Market expansion guidance", "Executive coaching"],
+    title: "Startup Clinic",
+    description: "Book 20-min sessions with mentors to get guidance for your startup",
+    duration: "Every Tuesday & Thursday",
+    benefits: ["Personalized mentor guidance", "Startup idea feedback", "Funding advice", "Networking tips"],
     icon: Zap,
-    link: "#", // ✅ Placeholder (you can add later)
+    link: "/clinic", // ✅ Link to your booking page
   },
 ]
 
