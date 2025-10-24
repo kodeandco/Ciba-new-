@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { CheckCircle2, Sprout, Rocket, Zap } from "lucide-react"
+import { useRouter } from "next/navigation" // ✅ Import router hook
 
 const programs = [
   {
@@ -16,6 +17,7 @@ const programs = [
       "Legal & compliance support",
     ],
     icon: Sprout,
+    link: "/seed-program", // ✅ Add navigation path
   },
   {
     id: 2,
@@ -24,6 +26,7 @@ const programs = [
     duration: "12 months",
     benefits: ["Dedicated mentor", "Pitch deck preparation", "Investor connections", "Marketing & branding support"],
     icon: Rocket,
+    link: "/incubation", // ✅ Add navigation path
   },
   {
     id: 3,
@@ -32,12 +35,14 @@ const programs = [
     duration: "3 months",
     benefits: ["Growth strategy consulting", "Series A preparation", "Market expansion guidance", "Executive coaching"],
     icon: Zap,
+    link: "#", // ✅ Placeholder (you can add later)
   },
 ]
 
 export default function Programs() {
   const [visiblePrograms, setVisiblePrograms] = useState<number[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
+  const router = useRouter() // ✅ Initialize router
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -70,9 +75,8 @@ export default function Programs() {
           <div
             key={program.id}
             data-program={index}
-            className={`transition-all duration-700 ${
-              visiblePrograms.includes(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-            }`}
+            className={`transition-all duration-700 ${visiblePrograms.includes(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+              }`}
             style={{ transitionDelay: `${index * 150}ms` }}
           >
             <div className="glass-effect rounded-2xl p-8 h-full flex flex-col hover-lift-interactive interactive-card group">
@@ -90,7 +94,10 @@ export default function Programs() {
                 ))}
               </div>
 
-              <button className="mt-6 w-full py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover-lift-interactive transition-all">
+              <button
+                onClick={() => router.push(program.link)} // ✅ Navigate to respective page
+                className="mt-6 w-full py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover-lift-interactive transition-all"
+              >
                 Learn More
               </button>
             </div>
