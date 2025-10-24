@@ -16,8 +16,10 @@ import FAQChatbot from "@/components/faq_chatbot"
 export default function Home() {
   return (
     <>
+
+      <Navbar />
       <main className="min-h-screen bg-gradient-subtle scroll-smooth overflow-x-hidden scrollbar-hide">
-        <Navbar />
+
 
         {/* Video Hero Section */}
         <HeroVideo />

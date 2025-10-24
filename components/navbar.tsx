@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id)
-    element?.scrollIntoView({ behavior: "smooth" })
-    setIsOpen(false)
-  }
+    const element = document.getElementById(id);
+    element?.scrollIntoView({ behavior: "smooth" });
+    setIsOpen(false);
+  };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-border animate-fade-in">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-3 group cursor-pointer">
@@ -41,13 +41,16 @@ export default function Navbar() {
             </button>
           </div>
 
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2 hover:bg-muted rounded-lg transition-all">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 hover:bg-muted rounded-lg transition-all"
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
         {isOpen && (
-          <div className="md:hidden pb-4 space-y-2 animate-slide-up">
+          <div className="md:hidden pb-4 space-y-2">
             <button
               onClick={() => scrollToSection("home")}
               className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
@@ -64,5 +67,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }
