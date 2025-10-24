@@ -2,13 +2,43 @@
 
 import { useEffect, useState } from "react"
 import { ArrowRight, Zap, Users, TrendingUp } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function Hero() {
+  const [typedText, setTypedText] = useState("")
+  const fullText = "Accelerate Your Startup Journey with Expert Guidance"
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
+    let index = 0
+    const interval = setInterval(() => {
+      setTypedText(fullText.slice(0, index + 1))
+      index++
+      if (index === fullText.length) clearInterval(interval)
+    }, 50)
+    return () => clearInterval(interval)
   }, [])
+
+  const getStyledTitle = () => {
+    const bluePart = "Startup Journey"
+    const beforeBlue = typedText.split(bluePart)[0] || ""
+    const afterBlue = typedText.includes(bluePart) ? typedText.split(bluePart)[1] : ""
+
+    return (
+      <>
+        <span>{beforeBlue}</span>
+        {typedText.includes(bluePart) && <span className="text-blue-600">{bluePart}</span>}
+        <span>{afterBlue}</span>
+      </>
+    )
+  }
+
+  // Scroll to Programs section
+  const scrollToPrograms = () => {
+    const section = document.getElementById("programs")
+    section?.scrollIntoView({ behavior: "smooth" })
+  }
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -19,47 +49,76 @@ export default function Hero() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div
-          className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
         >
-          <p className="text-primary font-semibold text-lg mb-4 animate-slide-in-left">Your Growth Partner in Navi Mumbai</p>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight animate-slide-up">
-            Accelerate Your <span className="text-blue-600">Startup Journey</span> with Expert Guidance
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed animate-slide-in-right">
-            Join India's leading incubation center in Vashi. Get access to world-class mentorship, funding opportunities, and a thriving community of entrepreneurs ready to scale.
+          <p className="text-primary font-semibold text-lg mb-4">
+            Your Growth Partner in Navi Mumbai
           </p>
 
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in"
-            style={{ animationDelay: "0.3s" }}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+            {getStyledTitle()}
+            <span className="animate-pulse">|</span>
+          </h1>
+
+          <motion.p
+            className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 1, duration: 0.8 }}
           >
-            <button className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover-lift-interactive flex items-center justify-center gap-2 group shadow-lg">
+            Join India's leading incubation center in Vashi. Get access to world-class mentorship, funding opportunities, and a thriving community of entrepreneurs ready to scale.
+          </motion.p>
+
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 1.5, duration: 0.6 }}
+          >
+            {/* Start Your Application Button */}
+            <motion.button
+              onClick={scrollToPrograms}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold flex items-center justify-center gap-2 group shadow-lg"
+            >
               Start Your Application
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="px-8 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group">
+            </motion.button>
+
+            {/* Book Free Consultation Button */}
+            <motion.button
+              onClick={scrollToPrograms}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group"
+            >
               Book Free Consultation
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        </div>
+            </motion.button>
+          </motion.div>
+        </motion.div>
 
         <div className="grid grid-cols-3 gap-4 mt-20 max-w-2xl mx-auto">
           {[
-            { value: "50+", label: "Active Startups", icon: Users, delay: "0s" },
-            { value: "₹10Cr+", label: "Funding Raised", icon: TrendingUp, delay: "0.1s" },
-            { value: "95%", label: "Growth Rate", icon: Zap, delay: "0.2s" },
+            { value: "50+", label: "Active Startups", icon: Users },
+            { value: "₹10Cr+", label: "Funding Raised", icon: TrendingUp },
+            { value: "95%", label: "Growth Rate", icon: Zap },
           ].map((stat, idx) => (
-            <div
+            <motion.div
               key={idx}
-              className="glass-effect rounded-lg p-4 animate-scale-in hover-glow-interactive interactive-card"
-              style={{ animationDelay: stat.delay }}
+              className="glass-effect rounded-lg p-4 hover-glow-interactive interactive-card"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
+              transition={{ delay: 2 + idx * 0.2, duration: 0.6 }}
             >
               <stat.icon className="w-8 h-8 text-primary mx-auto mb-2" />
               <p className="text-3xl font-bold text-primary">{stat.value}</p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
