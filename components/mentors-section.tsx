@@ -46,7 +46,7 @@ const mentors = [
     role: "Marketing Strategist",
     expertise: "Digital Marketing",
     bio: "Growth hacker with proven track record in scaling startups through innovative marketing strategies and brand building.",
-    image: "/professional-mentor-vikram.jpg",
+    image: "/professional-mentor-amit.jpg",
     icon: Briefcase,
   },
   {
@@ -55,7 +55,7 @@ const mentors = [
     role: "Legal & Compliance",
     expertise: "Startup Law",
     bio: "Corporate lawyer specializing in startup legal matters, contracts, intellectual property, and regulatory compliance.",
-    image: "/professional-mentor-anjali.jpg",
+    image: "/professional-mentor-neha.jpg",
     icon: Award,
   },
 ]
@@ -257,8 +257,8 @@ export default function MentorsSection() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${index === currentIndex
-                    ? 'bg-blue-600 w-8 h-3'
-                    : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
+                  ? 'bg-blue-600 w-8 h-3'
+                  : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
                   }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
