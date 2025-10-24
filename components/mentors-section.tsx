@@ -1,7 +1,7 @@
 "use client"
 
-import { Award, Briefcase, Users } from "lucide-react"
-import { useState } from "react"
+import { Award, Briefcase, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
 
 const mentors = [
   {
@@ -40,13 +40,95 @@ const mentors = [
     image: "/professional-mentor-neha.jpg",
     icon: Award,
   },
+  {
+    id: 5,
+    name: "Vikram Singh",
+    role: "Marketing Strategist",
+    expertise: "Digital Marketing",
+    bio: "Growth hacker with proven track record in scaling startups through innovative marketing strategies and brand building.",
+    image: "/professional-mentor-vikram.jpg",
+    icon: Briefcase,
+  },
+  {
+    id: 6,
+    name: "Anjali Reddy",
+    role: "Legal & Compliance",
+    expertise: "Startup Law",
+    bio: "Corporate lawyer specializing in startup legal matters, contracts, intellectual property, and regulatory compliance.",
+    image: "/professional-mentor-anjali.jpg",
+    icon: Award,
+  },
 ]
 
 export default function MentorsSection() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [slidesPerView, setSlidesPerView] = useState(4)
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Responsive slides per view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSlidesPerView(1)
+      } else if (window.innerWidth < 1024) {
+        setSlidesPerView(2)
+      } else {
+        setSlidesPerView(4)
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (isAutoPlaying) {
+      autoPlayRef.current = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % mentors.length)
+      }, 3000)
+    }
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current)
+      }
+    }
+  }, [isAutoPlaying])
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index)
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 5000)
+  }
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev - 1 + mentors.length) % mentors.length)
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 5000)
+  }
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % mentors.length)
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 5000)
+  }
+
+  const getVisibleMentors = () => {
+    const visible = []
+    for (let i = 0; i < slidesPerView; i++) {
+      visible.push(mentors[(currentIndex + i) % mentors.length])
+    }
+    return visible
+  }
+
+  const visibleMentors = getVisibleMentors()
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-white">
+    <section className="py-20 px-4 md:px-8 bg-white overflow-hidden">
       <style jsx>{`
         @keyframes fadeInUp {
           from {
@@ -63,7 +145,7 @@ export default function MentorsSection() {
         }
       `}</style>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 opacity-0 animate-fade-in-up">
           <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Meet Our Mentors</h2>
           <p className="text-lg text-blue-600 max-w-2xl mx-auto">
@@ -71,74 +153,117 @@ export default function MentorsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mentors.map((mentor, index) => {
-            const IconComponent = mentor.icon
-            const isHovered = hoveredId === mentor.id
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          <button
+            onClick={goToPrevious}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+            aria-label="Previous mentor"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
-            return (
-              <div
-                key={mentor.id}
-                onMouseEnter={() => setHoveredId(mentor.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className="relative group cursor-pointer opacity-0 animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
-              >
+          <button
+            onClick={goToNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+            aria-label="Next mentor"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Cards Grid */}
+          <div
+            className="grid gap-6 transition-all duration-500 ease-in-out"
+            style={{
+              gridTemplateColumns: `repeat(${slidesPerView}, minmax(0, 1fr))`
+            }}
+            onMouseEnter={() => setIsAutoPlaying(false)}
+            onMouseLeave={() => setIsAutoPlaying(true)}
+          >
+            {visibleMentors.map((mentor, index) => {
+              const IconComponent = mentor.icon
+              const isHovered = hoveredId === mentor.id
+
+              return (
                 <div
-                  className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-6 h-full transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'
-                    }`}
+                  key={`${mentor.id}-${currentIndex}-${index}`}
+                  onMouseEnter={() => setHoveredId(mentor.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  className="relative group cursor-pointer opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  {/* Background gradient animation */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+                    className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 h-full transition-all duration-300 ${isHovered ? 'scale-105' : 'scale-100'
                       }`}
-                  />
-
-                  {/* Content */}
-                  <div className="relative z-10">
-                    {/* Image placeholder */}
+                  >
+                    {/* Background gradient animation */}
                     <div
-                      className={`mb-4 overflow-hidden rounded-lg transition-transform duration-300 ${isHovered ? 'scale-110' : 'scale-100'
+                      className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
                         }`}
-                    >
-                      <img
-                        src={mentor.image || "/placeholder.svg"}
-                        alt={mentor.name}
-                        className="w-full h-40 object-cover"
-                      />
-                    </div>
+                    />
 
-                    {/* Info - visible by default */}
-                    <div
-                      className={`transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-3' : 'opacity-100 translate-y-0'
-                        }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <IconComponent className="w-5 h-5 text-blue-600" />
-                        <h3 className="font-bold text-blue-900">{mentor.name}</h3>
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col h-full">
+                      {/* Image - Full height, properly displayed */}
+                      <div className="overflow-hidden flex-shrink-0">
+                        <img
+                          src={mentor.image || "/placeholder.svg"}
+                          alt={mentor.name}
+                          className="w-full h-64 object-cover object-top"
+                        />
                       </div>
-                      <p className="text-sm text-blue-700 font-semibold mb-1">{mentor.role}</p>
-                      <p className="text-xs text-blue-600">{mentor.expertise}</p>
+
+                      {/* Text content container */}
+                      <div className="flex-1 p-6 flex flex-col justify-end min-h-[120px]">
+                        {/* Info - visible by default */}
+                        <div
+                          className={`transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
+                            }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <IconComponent className="w-5 h-5 text-blue-600" />
+                            <h3 className="font-bold text-blue-900">{mentor.name}</h3>
+                          </div>
+                          <p className="text-sm text-blue-700 font-semibold mb-1">{mentor.role}</p>
+                          <p className="text-xs text-blue-600">{mentor.expertise}</p>
+                        </div>
+
+                        {/* Bio - visible on hover at bottom */}
+                        <div
+                          className={`absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                            }`}
+                        >
+                          <p className="text-white text-sm leading-relaxed">{mentor.bio}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Bio - visible on hover */}
+                    {/* Border animation */}
                     <div
-                      className={`absolute inset-0 p-6 flex flex-col justify-center transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                      className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-all duration-300 pointer-events-none ${isHovered ? 'opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'opacity-0'
                         }`}
-                    >
-                      <p className="text-white text-sm leading-relaxed">{mentor.bio}</p>
-                    </div>
+                    />
                   </div>
-
-                  {/* Border animation */}
-                  <div
-                    className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-all duration-300 ${isHovered ? 'opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'opacity-0'
-                      }`}
-                  />
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
+
+          {/* Dot Indicators */}
+          <div className="flex justify-center gap-2 mt-8">
+            {mentors.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${index === currentIndex
+                    ? 'bg-blue-600 w-8 h-3'
+                    : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
+                  }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

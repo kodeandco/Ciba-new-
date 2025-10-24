@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
+import { motion, type Transition } from "framer-motion"
 
 interface AnimatedSectionProps {
   children: React.ReactNode
-  direction?: "left" | "right" | "up" | "down"
+  direction?: "left" | "right" | "up" | "down" | "zoom" | "fade" | "rotate" | "flip" | "blur" | "slide-rotate" | "bounce" | "elastic"
   delay?: number
   className?: string
 }
@@ -24,10 +24,7 @@ export default function AnimatedSection({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.unobserve(entry.target)
-        }
+        setIsInView(entry.isIntersecting)
       },
       { threshold: 0.1 },
     )
@@ -39,31 +36,109 @@ export default function AnimatedSection({
     return () => observer.disconnect()
   }, [])
 
-  const getInitialState = () => {
+  const getAnimation = () => {
     switch (direction) {
       case "left":
-        return { opacity: 0, x: -60, rotateY: 10 }
+        return {
+          initial: { opacity: 0, x: -60, rotateY: 10 },
+          animate: { opacity: 1, x: 0, rotateY: 0 },
+          transition: { duration: 0.8, delay } as Transition
+        }
       case "right":
-        return { opacity: 0, x: 60, rotateY: -10 }
+        return {
+          initial: { opacity: 0, x: 60, rotateY: -10 },
+          animate: { opacity: 1, x: 0, rotateY: 0 },
+          transition: { duration: 0.8, delay } as Transition
+        }
       case "up":
-        return { opacity: 0, y: 60, scale: 0.9 }
+        return {
+          initial: { opacity: 0, y: 60, scale: 0.9 },
+          animate: { opacity: 1, y: 0, scale: 1 },
+          transition: { duration: 0.8, delay } as Transition
+        }
       case "down":
-        return { opacity: 0, y: -60, scale: 0.9 }
+        return {
+          initial: { opacity: 0, y: -60, scale: 0.9 },
+          animate: { opacity: 1, y: 0, scale: 1 },
+          transition: { duration: 0.8, delay } as Transition
+        }
+      case "zoom":
+        return {
+          initial: { opacity: 0, scale: 0.5 },
+          animate: { opacity: 1, scale: 1 },
+          transition: { duration: 0.7, delay } as Transition
+        }
+      case "fade":
+        return {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          transition: { duration: 1, delay } as Transition
+        }
+      case "rotate":
+        return {
+          initial: { opacity: 0, rotate: -180, scale: 0.5 },
+          animate: { opacity: 1, rotate: 0, scale: 1 },
+          transition: { duration: 0.9, delay } as Transition
+        }
+      case "flip":
+        return {
+          initial: { opacity: 0, rotateX: 90, transformPerspective: 1000 },
+          animate: { opacity: 1, rotateX: 0 },
+          transition: { duration: 0.8, delay } as Transition
+        }
+      case "blur":
+        return {
+          initial: { opacity: 0, filter: "blur(20px)", scale: 1.1 },
+          animate: { opacity: 1, filter: "blur(0px)", scale: 1 },
+          transition: { duration: 0.8, delay } as Transition
+        }
+      case "slide-rotate":
+        return {
+          initial: { opacity: 0, x: -100, rotate: -45 },
+          animate: { opacity: 1, x: 0, rotate: 0 },
+          transition: { duration: 0.9, delay } as Transition
+        }
+      case "bounce":
+        return {
+          initial: { opacity: 0, y: -100 },
+          animate: { opacity: 1, y: 0 },
+          transition: {
+            duration: 0.8,
+            delay,
+            type: "spring",
+            stiffness: 200,
+            damping: 15
+          } as Transition
+        }
+      case "elastic":
+        return {
+          initial: { opacity: 0, scale: 0, rotate: -180 },
+          animate: { opacity: 1, scale: 1, rotate: 0 },
+          transition: {
+            duration: 1.2,
+            delay,
+            type: "spring",
+            stiffness: 100,
+            damping: 10
+          } as Transition
+        }
       default:
-        return { opacity: 0, y: 60 }
+        return {
+          initial: { opacity: 0, y: 60 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.8, delay } as Transition
+        }
     }
   }
+
+  const animation = getAnimation()
 
   return (
     <motion.div
       ref={ref}
-      initial={getInitialState()}
-      animate={isInView ? { opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1 } : {}}
-      transition={{
-        duration: 0.8,
-        delay,
-        ease: [0.34, 1.56, 0.64, 1], // Spring easing
-      }}
+      initial={animation.initial}
+      animate={isInView ? animation.animate : {}}
+      transition={animation.transition}
       className={className}
     >
       {children}

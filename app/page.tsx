@@ -14,68 +14,70 @@ import StartupsSection from "@/components/startups-section"
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-subtle scroll-smooth">
+    <main className="min-h-screen bg-gradient-subtle scroll-smooth overflow-x-hidden scrollbar-hide">
       <Navbar />
 
       {/* Video Hero Section */}
       <HeroVideo />
 
-      {/* Animated Sections with Scroll Snapping */}
-      <div className="snap-y snap-mandatory overflow-y-scroll">
-        <section className="snap-start">
-          <AnimatedSection direction="up">
-            <Hero />
-          </AnimatedSection>
-        </section>
+      {/* Animated Sections */}
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="up">
+          <Hero />
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <AnimatedSection direction="left" delay={0.1}>
-            <Testimonials />
-          </AnimatedSection>
-        </section>
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="left" delay={0.1}>
+          <Testimonials />
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <TourSection />
-        </section>
+      <section className="overflow-x-hidden">
+        <TourSection />
+      </section>
 
-        <section className="snap-start">
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="right" delay={0.1}>
           <MentorsSection />
-        </section>
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="up" delay={0.1}>
           <StartupsSection />
-        </section>
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <AnimatedSection direction="right" delay={0.1}>
-            <StartupCards />
-          </AnimatedSection>
-        </section>
+      {/* <section className="overflow-x-hidden">
+        <AnimatedSection direction="right" delay={0.1}>
+          <StartupCards />
+        </AnimatedSection>
+      </section> */}
 
-        <section className="snap-start">
-          <AnimatedSection direction="up" delay={0.1}>
-            <Programs />
-          </AnimatedSection>
-        </section>
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="up" delay={0.1}>
+          <Programs />
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <AnimatedSection direction="left" delay={0.1}>
-            <Gallery />
-          </AnimatedSection>
-        </section>
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="left" delay={0.1}>
+          <Gallery />
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <AnimatedSection direction="right" delay={0.1}>
-            <Newsletter />
-          </AnimatedSection>
-        </section>
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="right" delay={0.1}>
+          <Newsletter />
+        </AnimatedSection>
+      </section>
 
-        <section className="snap-start">
-          <AnimatedSection direction="up" delay={0.1}>
-            <Footer />
-          </AnimatedSection>
-        </section>
-      </div>
+      <section className="overflow-x-hidden">
+        <AnimatedSection direction="up" delay={0.1}>
+          <Footer />
+        </AnimatedSection>
+      </section>
     </main>
   )
 }

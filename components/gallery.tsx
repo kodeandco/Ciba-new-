@@ -81,7 +81,7 @@ export default function Gallery() {
   }
 
   return (
-    <section id="gallery" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" ref={sectionRef}>
+    <section id="gallery" className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50" ref={sectionRef}>
       <div className="text-center mb-16 animate-slide-up">
         <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">Latest Updates</h2>
         <p className="text-lg text-muted-foreground">Follow our journey and stay connected with the CIBA community</p>
@@ -92,9 +92,8 @@ export default function Gallery() {
           <div
             key={post.id}
             data-post={index}
-            className={`transition-all duration-700 ${
-              visiblePosts.includes(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-            }`}
+            className={`transition-all duration-700 ${visiblePosts.includes(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+              }`}
             style={{ transitionDelay: `${index * 150}ms` }}
           >
             <div className="glass-effect rounded-2xl overflow-hidden hover-lift-interactive interactive-card group">
@@ -127,11 +126,10 @@ export default function Gallery() {
                 >
                   <Heart
                     size={18}
-                    className={`transition-all ${
-                      likedPosts.includes(post.id)
+                    className={`transition-all ${likedPosts.includes(post.id)
                         ? "fill-primary text-primary animate-scale-in"
                         : "group-hover/btn:fill-primary"
-                    }`}
+                      }`}
                   />
                   <span className="text-sm">{post.likes + (likedPosts.includes(post.id) ? 1 : 0)}</span>
                 </button>
