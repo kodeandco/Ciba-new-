@@ -243,32 +243,32 @@ export default function MentorsSection() {
 
                         {/* Bio - visible on hover at bottom */}
                         <div
-                          className={`absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                          className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 transition-all duration-300 max-h-[calc(100%-16rem)] overflow-y-auto ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                             }`}
                         >
-                          <p className="text-white text-sm leading-relaxed mb-4">{mentor.bio}</p>
+                          <p className="text-white text-xs md:text-sm leading-relaxed mb-3 md:mb-4">{mentor.bio}</p>
 
                           {/* Social Media Links */}
-                          <div className="flex gap-3 justify-center">
+                          <div className="flex flex-col sm:flex-row gap-2 md:gap-3 justify-center">
                             <a
                               href={mentor.linkedin}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Linkedin className="w-4 h-4" />
-                              <span className="text-sm font-medium">LinkedIn</span>
+                              <span className="text-xs md:text-sm font-medium">LinkedIn</span>
                             </a>
                             <a
                               href={mentor.twitter}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Twitter className="w-4 h-4" />
-                              <span className="text-sm font-medium">Twitter</span>
+                              <span className="text-xs md:text-sm font-medium">Twitter</span>
                             </a>
                           </div>
                         </div>
