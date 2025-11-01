@@ -1,6 +1,6 @@
 "use client"
 
-import { Award, Briefcase, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Award, Briefcase, Users, ChevronLeft, ChevronRight, Linkedin, Twitter } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
 const mentors = [
@@ -12,6 +12,8 @@ const mentors = [
     bio: "I've spent 15+ years building and scaling tech companies, and nothing excites me more than helping early-stage founders avoid the mistakes I made and accelerate their journey to success.",
     image: "/professional-mentor-rajesh.jpg",
     icon: Briefcase,
+    linkedin: "https://linkedin.com/in/rajeshkumar",
+    twitter: "https://twitter.com/rajeshkumar",
   },
   {
     id: 2,
@@ -21,6 +23,8 @@ const mentors = [
     bio: "My experience as VP at a leading tech company taught me that sustainable growth isn't just about moving fast—it's about strategic expansion and building relationships that matter, especially with investors.",
     image: "/professional-mentor-priya.jpg",
     icon: Award,
+    linkedin: "https://linkedin.com/in/priyasharma",
+    twitter: "https://twitter.com/priyasharma",
   },
   {
     id: 3,
@@ -30,6 +34,8 @@ const mentors = [
     bio: "I believe great products solve real problems beautifully. I'm here to help you find that product-market fit and create experiences that users truly love.",
     image: "/professional-mentor-amit.jpg",
     icon: Users,
+    linkedin: "https://linkedin.com/in/amitpatel",
+    twitter: "https://twitter.com/amitpatel",
   },
   {
     id: 4,
@@ -39,6 +45,8 @@ const mentors = [
     bio: "Fundraising can feel overwhelming, but with the right financial planning and a compelling pitch, you can tell a story that investors want to be part of. Let me help you get there.",
     image: "/professional-mentor-neha.jpg",
     icon: Award,
+    linkedin: "https://linkedin.com/in/nehagupta",
+    twitter: "https://twitter.com/nehagupta",
   },
   {
     id: 5,
@@ -48,6 +56,8 @@ const mentors = [
     bio: "Growth isn't magic—it's strategic, creative marketing that connects with people. I've helped multiple startups scale rapidly, and I'm excited to share what works in today's digital landscape.",
     image: "/professional-mentor-amit.jpg",
     icon: Briefcase,
+    linkedin: "https://linkedin.com/in/vikramsingh",
+    twitter: "https://twitter.com/vikramsingh",
   },
   {
     id: 6,
@@ -57,6 +67,8 @@ const mentors = [
     bio: "Legal foundations protect your vision. Whether it's contracts, IP, or compliance, I'll help you build on solid ground so you can focus on growing your startup with confidence.",
     image: "/professional-mentor-neha.jpg",
     icon: Award,
+    linkedin: "https://linkedin.com/in/anjalireddy",
+    twitter: "https://twitter.com/anjalireddy",
   },
 ]
 
@@ -234,7 +246,31 @@ export default function MentorsSection() {
                           className={`absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                             }`}
                         >
-                          <p className="text-white text-sm leading-relaxed">{mentor.bio}</p>
+                          <p className="text-white text-sm leading-relaxed mb-4">{mentor.bio}</p>
+
+                          {/* Social Media Links */}
+                          <div className="flex gap-3 justify-center">
+                            <a
+                              href={mentor.linkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Linkedin className="w-4 h-4" />
+                              <span className="text-sm font-medium">LinkedIn</span>
+                            </a>
+                            <a
+                              href={mentor.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Twitter className="w-4 h-4" />
+                              <span className="text-sm font-medium">Twitter</span>
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
