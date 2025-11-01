@@ -205,16 +205,7 @@ export default function MentorsSection() {
                   className="relative group cursor-pointer opacity-0 animate-fade-in-up"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div
-                    className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 h-full transition-all duration-300 ${isHovered ? 'scale-105' : 'scale-100'
-                      }`}
-                  >
-                    {/* Background gradient animation */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
-                        }`}
-                    />
-
+                  <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 h-full transition-all duration-300">
                     {/* Content */}
                     <div className="relative z-10 flex flex-col h-full">
                       {/* Image - Full height, properly displayed */}
@@ -227,10 +218,16 @@ export default function MentorsSection() {
                       </div>
 
                       {/* Text content container */}
-                      <div className="flex-1 p-6 flex flex-col justify-end min-h-[120px]">
+                      <div className="relative flex-1 p-6 flex flex-col justify-end min-h-[140px]">
+                        {/* Background gradient - only covers text area on hover */}
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+                            }`}
+                        />
+
                         {/* Info - visible by default */}
                         <div
-                          className={`transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
+                          className={`relative z-10 transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
                             }`}
                         >
                           <div className="flex items-center gap-2 mb-2">
@@ -241,15 +238,15 @@ export default function MentorsSection() {
                           <p className="text-xs text-blue-600">{mentor.expertise}</p>
                         </div>
 
-                        {/* Bio - visible on hover at bottom */}
+                        {/* Bio and Social Links - visible on hover */}
                         <div
-                          className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 transition-all duration-300 max-h-[calc(100%-16rem)] overflow-y-auto ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                          className={`relative z-10 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                             }`}
                         >
-                          <p className="text-white text-xs md:text-sm leading-relaxed mb-3 md:mb-4">{mentor.bio}</p>
+                          <p className="text-white text-xs md:text-sm leading-relaxed mb-4">{mentor.bio}</p>
 
                           {/* Social Media Links */}
-                          <div className="flex flex-col sm:flex-row gap-2 md:gap-3 justify-center">
+                          <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                             <a
                               href={mentor.linkedin}
                               target="_blank"
@@ -293,8 +290,8 @@ export default function MentorsSection() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${index === currentIndex
-                  ? 'bg-blue-600 w-8 h-3'
-                  : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
+                    ? 'bg-blue-600 w-8 h-3'
+                    : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
                   }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
