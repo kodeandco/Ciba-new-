@@ -127,7 +127,7 @@ export default function Hero() {
               whileTap={{ scale: 0.95 }}
               className="px-8 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group"
             >
-              Book Free Consultation
+              Contact Us
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </motion.div>
