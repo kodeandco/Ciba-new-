@@ -39,6 +39,12 @@ export default function Navbar() {
               Programs
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
             </button>
+            <button
+              onClick={() => null}
+              className="text-foreground hover:text-primary transition-all font-medium relative group"
+            >
+              Jobs
+            </button>
           </div>
 
           <button
@@ -63,6 +69,14 @@ export default function Navbar() {
             >
               Programs
             </button>
+
+            <button
+              onClick={() => null}
+              className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
+            >
+              Jobs
+            </button>
+
           </div>
         )}
       </div>
