@@ -8,7 +8,7 @@ import AnimatedSection from "./animated-section";
 const programs = [
   {
     id: 1,
-    title: "Seed Program",
+    title: "NIDHI SSP (Seed Program)",
     description: "Perfect for early-stage startups with innovative ideas",
     duration: "6 months",
     benefits: [
