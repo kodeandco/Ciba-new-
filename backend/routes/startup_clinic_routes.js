@@ -4,8 +4,21 @@ const nodemailer = require("nodemailer");
 const StartupClinic = require("../models/startup_clinic_model");
 
 // -------------------------
-// BOOKING API
+// GET ALL BOOKINGS (Admin route)
+// -------------------------
+router.get("/", async (req, res) => {
+  try {
+    const bookings = await StartupClinic.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, bookings });
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
+// -------------------------
+// BOOKING API (Create new booking)
+// -------------------------
 router.post("/", async (req, res) => {
   try {
     const {
@@ -92,6 +105,35 @@ router.post("/", async (req, res) => {
       `,
     });
 
+    // -------------------------
+    // SEND NOTIFICATION EMAIL TO ADMIN
+    // -------------------------
+    await transporter.sendMail({
+      from: `CIBA Startup Clinic System <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+      subject: `New Startup Clinic Booking: ${userName}`,
+      html: `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>📅 New Startup Clinic Booking</h2>
+        
+        <h3>Participant Information:</h3>
+        <p><strong>Name:</strong> ${userName}</p>
+        <p><strong>Email:</strong> ${userEmail}</p>
+        <p><strong>Phone:</strong> ${userPhone}</p>
+        <p><strong>Slot:</strong> ${userSlot}</p>
+        <p><strong>Newsletter Subscription:</strong> ${subscribeNewsletter ? "Yes" : "No"}</p>
+
+        <h3>Questions Submitted:</h3>
+        <p><strong>Question 1:</strong> ${question1}</p>
+        <p><strong>Question 2:</strong> ${question2}</p>
+        <p><strong>Question 3:</strong> ${question3}</p>
+
+        <br/>
+        <p style="color: #666; font-size: 12px;">Booking ID: ${newBooking._id}</p>
+      </div>
+      `,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Slot booked successfully! Confirmation email sent to " + userEmail
@@ -99,6 +141,45 @@ router.post("/", async (req, res) => {
 
   } catch (err) {
     console.error("Booking error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// GET SINGLE BOOKING BY ID
+// -------------------------
+router.get("/:id", async (req, res) => {
+  try {
+    const booking = await StartupClinic.findById(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    res.status(200).json({ success: true, booking });
+  } catch (err) {
+    console.error("Error fetching booking:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// DELETE BOOKING (Optional)
+// -------------------------
+router.delete("/:id", async (req, res) => {
+  try {
+    const booking = await StartupClinic.findByIdAndDelete(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Booking deleted successfully" 
+    });
+  } catch (err) {
+    console.error("Error deleting booking:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
