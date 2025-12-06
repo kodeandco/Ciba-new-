@@ -290,8 +290,8 @@ export default function MentorsSection() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${index === currentIndex
-                    ? 'bg-blue-600 w-8 h-3'
-                    : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
+                  ? 'bg-blue-600 w-8 h-3'
+                  : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
                   }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
