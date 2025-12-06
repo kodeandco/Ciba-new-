@@ -63,6 +63,7 @@ export default function Navbar() {
             >
               Home
             </button>
+
             <button
               onClick={() => scrollToSection("programs")}
               className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
