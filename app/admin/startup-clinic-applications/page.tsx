@@ -23,6 +23,7 @@ interface Booking {
     email: string;
     phone: string;
     slot: string;
+    sessionDate: string;
     question1: string;
     question2: string;
     question3: string;
@@ -195,7 +196,7 @@ export default function StartupClinicDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Mail className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-700 truncate">{booking.email}</span>
@@ -204,9 +205,23 @@ export default function StartupClinicDashboard() {
                                                 <Phone className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-700">{booking.phone}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <Clock className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-700 font-medium">{booking.slot}</span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                            <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-2 rounded-lg">
+                                                <Calendar className="w-4 h-4 text-blue-600" />
+                                                <span className="text-blue-700 font-medium">
+                                                    {booking.sessionDate ? new Date(booking.sessionDate).toLocaleDateString('en-US', {
+                                                        weekday: 'short',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    }) : 'Date not set'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm bg-green-50 px-3 py-2 rounded-lg">
+                                                <Clock className="w-4 h-4 text-green-600" />
+                                                <span className="text-green-700 font-medium">{booking.slot}</span>
                                             </div>
                                         </div>
 
@@ -282,6 +297,21 @@ export default function StartupClinicDashboard() {
                             <div>
                                 <h3 className="text-lg font-semibold mb-3 text-gray-900">Booking Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Session Date</p>
+                                        <p className="font-medium text-gray-900">
+                                            {selectedBooking.sessionDate ? new Date(selectedBooking.sessionDate).toLocaleDateString('en-US', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            }) : 'Not set'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Time Slot</p>
+                                        <p className="font-medium text-gray-900">{selectedBooking.slot}</p>
+                                    </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Booked At</p>
                                         <p className="font-medium text-gray-900">{formatDate(selectedBooking.createdAt)}</p>
