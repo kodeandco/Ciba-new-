@@ -1,34 +1,73 @@
-// server.js
+// // server.js
+// require("dotenv").config();
+// const express = require("express");
+// const jwt = require("jsonwebtoken");
+// const connectDB = require("./db");
+// const cors = require("cors"); // <-- ADD THIS
+// const startupClinicRoutes = require("./routes/startup_clinic_routes");
+
+// const app = express();
+
+// // CORS FOR LOCALHOST 3000
+// app.use(
+//    cors({
+//     origin: "http://localhost:3000",
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     credentials: true,
+//   })
+// );
+// // Handle preflight
+// app.options("*", cors());
+// // Middleware
+// app.use(express.json());
+
+// // Connect Database
+// connectDB();
+
+// // Test Route
+// app.get("/", (req, res) => {
+//   res.send("Server Running...");
+// });
+
+// // Routes
+// app.use("/api/clinic", startupClinicRoutes);
+
+// // Start Server
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`🚀 Server Running on port ${PORT}`));
+// server.js - MINIMAL TEST VERSION
 require("dotenv").config();
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const connectDB = require("./db");
+const cors = require("cors");
 
 const app = express();
+
+// Middleware
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Connect Database
 connectDB();
 
-// Basic test route
+// Test Route
 app.get("/", (req, res) => {
   res.send("Server Running...");
 });
 
-// Example Protected Route
-app.get("/protected", (req, res) => {
-  const token = req.headers["authorization"];
+// START WITH JUST THIS - NO OTHER ROUTES
+console.log("✅ About to load startup clinic routes...");
 
-  if (!token) return res.status(401).json({ message: "No token provided" });
+const startupClinicRoutes = require("./routes/startup_clinic_routes");
+app.use("/api/clinic", startupClinicRoutes);
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ message: "Protected data accessed", user: decoded });
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-});
+console.log("✅ Routes loaded successfully!");
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server Running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

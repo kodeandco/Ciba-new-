@@ -40,30 +40,42 @@ export default function StartupClinicBooking() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!formData.slot) {
             alert("Please select a slot.");
             return;
         }
+
         setIsSubmitting(true);
 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+            const res = await fetch("http://localhost:5000/api/clinic", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
 
-        const whatsappMessage = encodeURIComponent(
-            `📅 Startup Clinic Booking\n\n` +
-            `Name: ${formData.name}\n` +
-            `Email: ${formData.email}\n` +
-            `Phone: ${formData.phone}\n` +
-            `Slot: ${formData.slot}\n` +
-            `Questions:\n1. ${formData.question1}\n2. ${formData.question2}\n3. ${formData.question3}\n` +
-            `Subscribe Newsletter: ${formData.subscribeNewsletter ? "Yes" : "No"}`
-        );
+            const data = await res.json();
 
-        const cibaWhatsApp = "919876543210";
-        window.open(`https://wa.me/${cibaWhatsApp}?text=${whatsappMessage}`, "_blank");
+            if (!res.ok) {
+                alert(data.error || "Something went wrong");
+                setIsSubmitting(false);
+                return;
+            }
 
-        setFormSubmitted(true);
+            // If success
+            setFormSubmitted(true);
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to reach server.");
+        }
+
         setIsSubmitting(false);
     };
+
 
     if (formSubmitted) {
         return (
@@ -179,8 +191,8 @@ export default function StartupClinicBooking() {
                                     key={s}
                                     onClick={() => setFormData({ ...formData, slot: s })}
                                     className={`px-4 py-2 rounded-full border transition-all ${formData.slot === s
-                                            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-700"
-                                            : "bg-white text-blue-700 border-blue-300 hover:bg-blue-100"
+                                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-700"
+                                        : "bg-white text-blue-700 border-blue-300 hover:bg-blue-100"
                                         }`}
                                 >
                                     {s}
