@@ -165,11 +165,11 @@ router.post("/", upload.single("pitchDeck"), async (req, res) => {
         <h3>Description:</h3>
         <p>${description}</p>
 
-        <h3>📎 Pitch Deck:</h3>
-        <p>Pitch deck is attached to this email.</p>
+        <h3>📎 Attached Documents:</h3>
+        <p>Pitch deck is attached to this email for your review.</p>
 
         <br/>
-        <p>Login to admin panel to review the application.</p>
+        <p style="color: #666; font-size: 12px;">Application ID: ${newApplication._id}</p>
       </div>
       `,
       attachments: [

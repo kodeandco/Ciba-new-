@@ -26,12 +26,41 @@ export default function IncubationProgramApplication() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFormData({ ...formData, pitchDeck: e.target.files[0] });
+            const file = e.target.files[0];
+
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("File size must be less than 10MB");
+                return;
+            }
+
+            // Validate file type
+            if (file.type !== "application/pdf") {
+                alert("Only PDF files are allowed");
+                return;
+            }
+
+            setFormData({ ...formData, pitchDeck: file });
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate all required fields
+        if (!formData.founderName || !formData.email || !formData.phone ||
+            !formData.startupName || !formData.industry || !formData.stage ||
+            !formData.teamSize || !formData.fundingRaised || !formData.revenue ||
+            !formData.website || !formData.description) {
+            alert("Please fill all required fields");
+            return;
+        }
+
+        if (!formData.pitchDeck) {
+            alert("Please upload your pitch deck");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -49,28 +78,29 @@ export default function IncubationProgramApplication() {
             formDataToSend.append("fundingRaised", formData.fundingRaised);
             formDataToSend.append("revenue", formData.revenue);
             formDataToSend.append("website", formData.website);
-
-            if (formData.pitchDeck) {
-                formDataToSend.append("pitchDeck", formData.pitchDeck);
-            }
+            formDataToSend.append("pitchDeck", formData.pitchDeck);
 
             const res = await fetch("http://localhost:5000/api/incubation", {
                 method: "POST",
                 body: formDataToSend,
+                // Don't set Content-Type header - let browser set it with boundary
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.error || "Something went wrong");
-                setIsSubmitting(false);
-                return;
+                throw new Error(data.error || "Something went wrong");
             }
 
-            setFormSubmitted(true);
+            if (data.success) {
+                setFormSubmitted(true);
+            } else {
+                throw new Error(data.error || "Failed to submit application");
+            }
         } catch (error) {
             console.error("Error:", error);
-            alert("Failed to submit application. Please try again.");
+            alert(error instanceof Error ? error.message : "Failed to submit application. Please try again.");
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -113,13 +143,13 @@ export default function IncubationProgramApplication() {
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-6 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                            className="px-6 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all"
                         >
                             Submit Another Application
                         </button>
                         <button
                             onClick={() => (window.location.href = "/")}
-                            className="px-6 py-3 rounded-lg text-blue-700 font-medium bg-blue-100 hover:bg-blue-200"
+                            className="px-6 py-3 rounded-lg text-blue-700 font-medium bg-blue-100 hover:bg-blue-200 transition-all"
                         >
                             Back to Home
                         </button>
@@ -154,7 +184,7 @@ export default function IncubationProgramApplication() {
                     <p className="text-gray-600">12 months | Scaling startups with traction</p>
                 </div>
 
-                <div className="bg-white border-2 rounded-xl shadow-xl p-8 space-y-6">
+                <form onSubmit={handleSubmit} className="bg-white border-2 rounded-xl shadow-xl p-8 space-y-6">
                     {/* Founder Information */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-gray-900 border-b-2 border-blue-100 pb-2">
@@ -414,7 +444,7 @@ export default function IncubationProgramApplication() {
                             {formData.pitchDeck && (
                                 <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
                                     <CheckCircle2 className="w-4 h-4" />
-                                    File selected: {formData.pitchDeck.name}
+                                    File selected: {formData.pitchDeck.name} ({(formData.pitchDeck.size / 1024 / 1024).toFixed(2)} MB)
                                 </p>
                             )}
                         </div>
@@ -423,7 +453,7 @@ export default function IncubationProgramApplication() {
                     {/* Submit Button */}
                     <div className="text-center pt-6">
                         <button
-                            onClick={handleSubmit}
+                            type="submit"
                             disabled={isSubmitting}
                             className="px-8 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-all hover:scale-105 shadow-lg"
                         >
@@ -441,7 +471,7 @@ export default function IncubationProgramApplication() {
                             By submitting, you agree to our terms and conditions
                         </p>
                     </div>
-                </div>
+                </form>
             </motion.div>
         </div>
     );
