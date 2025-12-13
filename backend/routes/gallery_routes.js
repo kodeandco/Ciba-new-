@@ -45,6 +45,22 @@ router.post("/", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// PATCH – Edit gallery item
+router.patch("/:id", async (req, res) => {
+  try {
+    const { title, description } = req.body
+    const updated = await Gallery.findByIdAndUpdate(
+      req.params.id,
+      { title, description },
+      { new: true }
+    )
+    if (!updated) return res.status(404).json({ message: "Item not found" })
+    res.json(updated)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 /**
  * GET – Fetch all gallery items (metadata only, no image data)
  */
