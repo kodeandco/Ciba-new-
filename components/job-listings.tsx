@@ -1,9 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import Button from "./Button";
+import ApplicationModal from "./ApplicationModal";
+
+interface Position {
+  id: number;
+  title: string;
+  type?: string;
+  duration?: string;
+  department: string;
+  description: string;
+}
 
 export default function JobListings() {
-  const cibaJobs = [
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
+
+  // Hardcoded CIBA Jobs
+  const cibaJobs: Position[] = [
     {
       id: 1,
       title: "Business Development Manager",
@@ -27,7 +42,8 @@ export default function JobListings() {
     }
   ];
 
-  const cibaInternships = [
+  // Hardcoded CIBA Internships
+  const cibaInternships: Position[] = [
     {
       id: 1,
       title: "Marketing Intern",
@@ -50,6 +66,16 @@ export default function JobListings() {
       description: "Conduct market research and analysis for incubation programs"
     }
   ];
+
+  const handleApplyClick = (position: Position) => {
+    setSelectedPosition(position);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPosition(null);
+  };
 
   return (
     <>
@@ -79,7 +105,11 @@ export default function JobListings() {
                   <p className="text-gray-600 mb-2">{job.description}</p>
                   <span className="text-sm text-gray-500">{job.department}</span>
                 </div>
-                <Button variant="primary" className="whitespace-nowrap">
+                <Button 
+                  variant="primary" 
+                  className="whitespace-nowrap"
+                  onClick={() => handleApplyClick(job)}
+                >
                   Apply Now
                 </Button>
               </div>
@@ -115,7 +145,11 @@ export default function JobListings() {
                     <p className="text-gray-600 mb-2">{internship.description}</p>
                     <span className="text-sm text-gray-500">{internship.department}</span>
                   </div>
-                  <Button variant="primary" className="whitespace-nowrap">
+                  <Button 
+                    variant="primary" 
+                    className="whitespace-nowrap"
+                    onClick={() => handleApplyClick(internship)}
+                  >
                     Apply Now
                   </Button>
                 </div>
@@ -124,6 +158,13 @@ export default function JobListings() {
           </div>
         </div>
       </section>
+
+      {/* Application Modal */}
+      <ApplicationModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        position={selectedPosition}
+      />
     </>
   );
 }
