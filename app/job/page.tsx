@@ -1,3 +1,4 @@
+// app/job/page.tsx
 import JobHero from "@/components/job-hero";
 import JobCategories from "@/components/job-categories";
 import JobStats from "@/components/job-stats";
