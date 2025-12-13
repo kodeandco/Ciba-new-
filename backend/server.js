@@ -1,7 +1,9 @@
+// backend/server.js
 require("dotenv").config();
 const express = require("express");
 const connectDB = require("./db");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
@@ -11,28 +13,47 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true,
 }));
-// Increase payload limit for file uploads
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json());
+
+// Serve uploaded files statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect Database
 connectDB();
-
 
 // Test Route
 app.get("/", (req, res) => {
   res.send("Server Running...");
 });
 
-// START WITH JUST THIS - NO OTHER ROUTES
-console.log("✅ About to load startup clinic routes...");
+// Load routes
+console.log("✅ Loading routes...");
+
+// Existing routes
 const incubationRoutes = require("./routes/incubation_routes");
 const startupClinicRoutes = require("./routes/startup_clinic_routes");
-app.use("/api/clinic", startupClinicRoutes);
+const jobApplicationRoutes = require("./routes/job_application_routes");
+const startupSubmissionRoutes = require("./routes/startup_submission_routes");
 
+// CIBA Jobs route
+const cibaJobsRoutes = require("./routes/ciba_jobs_routes");
+
+// Incubated Startups route
+const incubatedStartupsRoutes = require("./routes/incubated_startups_routes");
+
+// Mount routes
+app.use("/api/clinic", startupClinicRoutes);
 app.use("/api/incubation", incubationRoutes);
-console.log("✅ Routes loaded successfully!");
+app.use("/api/applications", jobApplicationRoutes);
+app.use("/api/startups", startupSubmissionRoutes);
+
+// Register admin routes
+app.use("/api", cibaJobsRoutes);               // /api/admin/ciba-jobs
+app.use("/api", incubatedStartupsRoutes);      // /api/admin/incubated-startups
+
+console.log("✅ All routes mounted successfully!");
 
 // Start Server
 const PORT = process.env.PORT || 5000;
