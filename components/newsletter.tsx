@@ -1,95 +1,79 @@
 "use client"
 
-import { useState } from "react"
-import { X, Mail, ArrowRight } from "lucide-react"
+import { useEffect, useState } from "react"
+import { X, Mail, ArrowRight, FileText } from "lucide-react"
 
-const newsletters = [
-  {
-    id: 1,
-    title: "CIBA Monthly Digest - October 2024",
-    excerpt:
-      "Discover the latest trends in startup ecosystem, funding opportunities, and success stories from our portfolio.",
-    date: "October 15, 2024",
-    content: `
-      Welcome to CIBA Monthly Digest!
-      
-      This month we're excited to share:
-      
-      1. New Funding Opportunities
-      - Series A funding round for 5 portfolio companies
-      - Government grants for deep-tech startups
-      - Angel investor network expansion
-      
-      2. Success Stories
-      - TechStart India raises ₹2 crores in seed funding
-      - EcoVenture achieves 10x growth in 6 months
-      - FinTech Solutions launches in 3 new markets
-      
-      3. Upcoming Events
-      - CIBA Startup Clinic: Every Friday 2-4 PM
-      - Investor Meetup: October 25, 2024
-      - Founder's Roundtable: October 30, 2024
-      
-      4. Resources
-      - New mentorship program launched
-      - Legal compliance guide for startups
-      - Marketing toolkit for early-stage companies
-      
-      Stay tuned for more updates!
-    `,
-  },
-  {
-    id: 2,
-    title: "CIBA Monthly Digest - September 2024",
-    excerpt: "Explore investment trends, mentor spotlights, and how our startups are making an impact.",
-    date: "September 15, 2024",
-    content: `
-      Welcome to CIBA Monthly Digest!
-      
-      This month highlights:
-      
-      1. Investment Trends
-      - B2B SaaS gaining momentum
-      - Climate tech attracting major investors
-      - AI/ML startups leading the pack
-      
-      2. Mentor Spotlight
-      - Interview with industry veteran Rajesh Kumar
-      - His journey from startup to scale-up
-      - Key lessons for aspiring entrepreneurs
-      
-      3. Portfolio Updates
-      - 8 new startups joined our incubation program
-      - 3 companies achieved profitability
-      - 2 successful exits this quarter
-      
-      4. Community News
-      - CIBA now has 200+ active members
-      - New co-working space inaugurated
-      - Expanded mentorship network
-      
-      Thank you for being part of our journey!
-    `,
-  },
-]
+type Newsletter = {
+  _id: string
+  title: string
+  description: string
+  newsletterDate: string
+}
 
 export default function Newsletter() {
-  const [selectedNewsletter, setSelectedNewsletter] = useState<(typeof newsletters)[0] | null>(null)
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([])
+  const [selectedNewsletter, setSelectedNewsletter] = useState<Newsletter | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchNewsletters = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/newsletter", {
+          cache: "no-store",
+        })
+        const data = await res.json()
+        setNewsletters(data)
+      } catch (error) {
+        console.error("Failed to fetch newsletters", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNewsletters()
+  }, [])
+
+  const handleReadNewsletter = (e: React.MouseEvent, newsletter: Newsletter) => {
+    e.stopPropagation() // Prevent card click event
+    if (!newsletter._id) return
+    const fileUrl = `http://localhost:5000/api/newsletter/${newsletter._id}/file`
+    window.open(fileUrl, "_blank")
+  }
 
   return (
     <>
-      <section id="newsletter" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section
+        id="newsletter"
+        className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+      >
         <div className="text-center mb-16 animate-slide-up">
-          <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">CIBA Newsletter</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+            CIBA Newsletter
+          </h2>
           <p className="text-lg text-muted-foreground">
             Stay updated with the latest news, insights, and opportunities
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <p className="text-center text-muted-foreground">
+            Loading newsletters...
+          </p>
+        )}
+
+        {/* Empty State */}
+        {!loading && newsletters.length === 0 && (
+          <p className="text-center text-muted-foreground">
+            No newsletters available.
+          </p>
+        )}
+
+        {/* Newsletter Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {newsletters.map((newsletter, index) => (
             <div
-              key={newsletter.id}
+              key={newsletter._id}
               className="glass-effect rounded-2xl p-6 hover-lift group cursor-pointer animate-scale-in"
               style={{ animationDelay: `${index * 150}ms` }}
               onClick={() => setSelectedNewsletter(newsletter)}
@@ -98,16 +82,37 @@ export default function Newsletter() {
                 <div className="p-3 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-all">
                   <Mail className="w-6 h-6 text-primary" />
                 </div>
+
                 <div className="flex-1">
-                  <p className="text-sm text-primary font-semibold mb-2">{newsletter.date}</p>
+                  <p className="text-sm text-primary font-semibold mb-2">
+                    {new Date(newsletter.newsletterDate).toLocaleDateString(
+                      "en-IN",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
+                  </p>
+
                   <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-all">
                     {newsletter.title}
                   </h3>
-                  <p className="text-muted-foreground mb-4">{newsletter.excerpt}</p>
-                  <button className="flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
-                    Read Full Newsletter
-                    <ArrowRight size={18} />
-                  </button>
+
+                  <p className="text-muted-foreground mb-4 line-clamp-3">
+                    {newsletter.description}
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      className="flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                      onClick={(e) => handleReadNewsletter(e, newsletter)}
+                    >
+                      <FileText size={18} />
+                      Read Full Newsletter
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -117,14 +122,32 @@ export default function Newsletter() {
 
       {/* Newsletter Modal */}
       {selectedNewsletter && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-background rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in">
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setSelectedNewsletter(null)}
+        >
+          <div
+            className="bg-background rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
             <div className="sticky top-0 bg-background border-b border-border p-6 flex items-center justify-between">
               <div>
-                <p className="text-sm text-primary font-semibold mb-1">{selectedNewsletter.date}</p>
-                <h2 className="text-2xl font-bold text-foreground">{selectedNewsletter.title}</h2>
+                <p className="text-sm text-primary font-semibold mb-1">
+                  {new Date(selectedNewsletter.newsletterDate).toLocaleDateString(
+                    "en-IN",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {selectedNewsletter.title}
+                </h2>
               </div>
+
               <button
                 onClick={() => setSelectedNewsletter(null)}
                 className="p-2 hover:bg-muted rounded-lg transition-all"
@@ -135,13 +158,9 @@ export default function Newsletter() {
 
             {/* Modal Content */}
             <div className="p-6">
-              <div className="prose prose-invert max-w-none">
-                {selectedNewsletter.content.split("\n").map((line, idx) => (
-                  <p key={idx} className="text-foreground mb-3 whitespace-pre-wrap">
-                    {line}
-                  </p>
-                ))}
-              </div>
+              <p className="text-foreground whitespace-pre-wrap">
+                {selectedNewsletter.description}
+              </p>
             </div>
 
             {/* Modal Footer */}
@@ -152,8 +171,15 @@ export default function Newsletter() {
               >
                 Close
               </button>
-              <button className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover-lift">
-                Subscribe
+
+              <button
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover-lift"
+                onClick={(e) => handleReadNewsletter(e, selectedNewsletter)}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <FileText size={18} />
+                  Open Newsletter PDF
+                </div>
               </button>
             </div>
           </div>
