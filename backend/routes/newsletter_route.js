@@ -18,7 +18,7 @@ router.get("/all", async (req, res) => {
   try {
     const newsletters = await Newsletter.find({})
       .sort({ newsletterDate: -1 })
-      .select("-file.data"); // exclude binary data for performance
+      .select("-file.data");
     
     console.log(`✅ Found ${newsletters.length} newsletters`);
     res.json(newsletters);
@@ -39,14 +39,12 @@ router.post("/subscribe", async (req, res) => {
       return res.status(400).json({ error: "Valid email is required" });
     }
 
-    // Check if already subscribed
     const existingSubscriber = await Subscriber.findOne({ email: email.toLowerCase() });
     
     if (existingSubscriber) {
       if (existingSubscriber.isActive) {
         return res.status(400).json({ error: "Email already subscribed" });
       } else {
-        // Reactivate subscription
         existingSubscriber.isActive = true;
         await existingSubscriber.save();
         console.log(`✅ Reactivated subscriber: ${email}`);
@@ -55,12 +53,10 @@ router.post("/subscribe", async (req, res) => {
       }
     }
 
-    // Create new subscriber
     const subscriber = new Subscriber({ email: email.toLowerCase() });
     await subscriber.save();
     console.log(`✅ New subscriber: ${email}`);
     
-    // Send welcome email
     await sendWelcomeEmail(email);
 
     res.status(200).json({ 
@@ -105,45 +101,7 @@ router.get("/:id/file", async (req, res) => {
   }
 });
 
-// GET top 2 latest newsletters (root route)
-router.get("/", async (req, res) => {
-  console.log("📋 Getting latest 2 newsletters");
-  
-  try {
-    const newsletters = await Newsletter.find({})
-      .sort({ newsletterDate: -1 })
-      .limit(2)
-      .select("-file.data");
-    
-    console.log(`✅ Found ${newsletters.length} newsletters`);
-    res.json(newsletters);
-  } catch (err) {
-    console.error("❌ Error fetching newsletters:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET single newsletter by ID - MUST BE AFTER specific routes
-router.get("/:id", async (req, res) => {
-  console.log("📄 Getting newsletter by ID:", req.params.id);
-  
-  try {
-    const newsletter = await Newsletter.findById(req.params.id)
-      .select("-file.data");
-    
-    if (!newsletter) {
-      return res.status(404).json({ error: "Newsletter not found" });
-    }
-    
-    console.log("✅ Newsletter found:", newsletter.title);
-    res.json(newsletter);
-  } catch (err) {
-    console.error("❌ Error fetching newsletter:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST new newsletter with file upload
+// POST new newsletter with file upload - MUST BE BEFORE /:id routes
 router.post("/", upload.single("file"), async (req, res) => {
   console.log("📝 Creating new newsletter");
   
@@ -172,17 +130,14 @@ router.post("/", upload.single("file"), async (req, res) => {
     await newsletter.save();
     console.log("✅ Newsletter created:", newsletter._id);
 
-    // Send email to all subscribers if requested
     if (sendEmail === "true" || sendEmail === true) {
       console.log("📧 Sending newsletter to all subscribers...");
       
       const subscribers = await Subscriber.find({ isActive: true });
       
       if (subscribers.length > 0) {
-        // ⚠️ CRITICAL: Fetch newsletter WITH file data for email attachment
         const newsletterWithFile = await Newsletter.findById(newsletter._id);
         
-        // Send emails asynchronously (don't wait for completion)
         sendNewsletterToAllSubscribers(newsletterWithFile, subscribers)
           .then((results) => {
             console.log("✅ Email sending complete:", results);
@@ -214,7 +169,62 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
-// DELETE newsletter by ID
+// PUT update newsletter
+// PUT update newsletter - with proper multer handling
+router.put("/:id", upload.single("file"), async (req, res) => {
+  console.log("✏️ Updating newsletter:", req.params.id);
+  console.log("📦 Request body:", req.body);
+  console.log("📄 Request file:", req.file ? req.file.originalname : 'No file');
+  
+  try {
+    const title = req.body?.title;
+    const description = req.body?.description;
+    const newsletterDate = req.body?.newsletterDate;
+
+    console.log("📝 Parsed data:", { title, description, newsletterDate });
+
+    if (!title || !description || !newsletterDate) {
+      console.log("❌ Missing fields - Body content:", JSON.stringify(req.body));
+      return res.status(400).json({ 
+        error: "Missing required fields: title, description, or newsletterDate",
+        received: { title, description, newsletterDate }
+      });
+    }
+
+    const updateData = {
+      title,
+      description,
+      newsletterDate: new Date(newsletterDate)
+    };
+
+    if (req.file) {
+      updateData.file = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        filename: req.file.originalname
+      };
+      console.log("📄 New file uploaded:", req.file.originalname);
+    }
+
+    const newsletter = await Newsletter.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).select("-file.data");
+
+    if (!newsletter) {
+      return res.status(404).json({ error: "Newsletter not found" });
+    }
+
+    console.log("✅ Newsletter updated:", newsletter.title);
+    res.json(newsletter);
+  } catch (err) {
+    console.error("❌ Error updating newsletter:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE newsletter by ID - MUST BE BEFORE GET /:id
 router.delete("/:id", async (req, res) => {
   console.log("🗑️ Deleting newsletter:", req.params.id);
   
@@ -229,6 +239,44 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Newsletter deleted successfully" });
   } catch (err) {
     console.error("❌ Error deleting newsletter:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET top 2 latest newsletters (root route)
+router.get("/", async (req, res) => {
+  console.log("📋 Getting latest 2 newsletters");
+  
+  try {
+    const newsletters = await Newsletter.find({})
+      .sort({ newsletterDate: -1 })
+      .limit(2)
+      .select("-file.data");
+    
+    console.log(`✅ Found ${newsletters.length} newsletters`);
+    res.json(newsletters);
+  } catch (err) {
+    console.error("❌ Error fetching newsletters:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET single newsletter by ID - MUST BE LAST among /:id routes
+router.get("/:id", async (req, res) => {
+  console.log("📄 Getting newsletter by ID:", req.params.id);
+  
+  try {
+    const newsletter = await Newsletter.findById(req.params.id)
+      .select("-file.data");
+    
+    if (!newsletter) {
+      return res.status(404).json({ error: "Newsletter not found" });
+    }
+    
+    console.log("✅ Newsletter found:", newsletter.title);
+    res.json(newsletter);
+  } catch (err) {
+    console.error("❌ Error fetching newsletter:", err);
     res.status(500).json({ error: err.message });
   }
 });
