@@ -4,9 +4,12 @@ import { useState } from "react";
 import Button from "./Button";
 
 interface Position {
-  id: number;
+  _id: string;  // ✅ Changed from id: number
   title: string;
   department: string;
+  type?: string;
+  duration?: string;
+  description?: string;
 }
 
 interface ApplicationModalProps {
@@ -87,7 +90,7 @@ export default function ApplicationModal({ isOpen, onClose, position }: Applicat
 
     try {
       const data = new FormData();
-      data.append("positionId", position.id.toString());
+      data.append("positionId", position._id);  // ✅ Changed from position.id.toString()
       data.append("positionTitle", position.title);
       data.append("fullName", formData.fullName);
       data.append("email", formData.email);
@@ -97,16 +100,28 @@ export default function ApplicationModal({ isOpen, onClose, position }: Applicat
       data.append("portfolio", formData.portfolio);
       data.append("resume", resume);
 
+      console.log("🚀 Sending application for position:", position._id);
+
       const response = await fetch("http://localhost:5000/api/applications/apply", {
         method: "POST",
         body: data
       });
 
+      console.log("📡 Response Status:", response.status);
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("❌ Got HTML instead of JSON:", text.substring(0, 500));
+        throw new Error("Server returned an error. Please check backend console.");
+      }
+
       const result = await response.json();
       console.log("📦 Response data:", result);
 
-      if (result.message) {
-        setSubmitSuccess(result.message);
+      if (result.success || result.message) {
+        setSubmitSuccess(result.message || "Application submitted successfully!");
         setTimeout(() => {
           resetForm();
           onClose();
@@ -117,7 +132,11 @@ export default function ApplicationModal({ isOpen, onClose, position }: Applicat
 
     } catch (error) {
       console.error("❌ Error:", error);
-      setSubmitError("Network error. Please check if backend is running.");
+      setSubmitError(
+        error instanceof Error 
+          ? error.message 
+          : "Network error. Please check if backend is running."
+      );
     } finally {
       setIsSubmitting(false);
     }

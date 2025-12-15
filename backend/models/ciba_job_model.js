@@ -1,4 +1,3 @@
-// backend/models/ciba_job_model.js
 const mongoose = require("mongoose");
 
 const CIBAJobSchema = new mongoose.Schema({
@@ -9,8 +8,9 @@ const CIBAJobSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    default: "Full-time",
-    enum: ["Full-time", "Part-time", "Internship"],
+    required: true,
+    enum: ["job", "internship"],
+    default: "job"
   },
   department: {
     type: String,
@@ -21,6 +21,31 @@ const CIBAJobSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+  },
+  responsibilities: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  requirements: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  location: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  salary: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  duration: {
+    type: String,
+    trim: true,
+    default: "",
   },
   createdAt: {
     type: Date,
