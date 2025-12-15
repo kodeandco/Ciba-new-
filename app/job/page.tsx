@@ -9,7 +9,7 @@ export default function JobPage() {
   return (
     <div className="min-h-screen bg-white">
       <JobHero />
-      <JobCategories />
+      {/* <JobCategories /> */}
       <JobListings />
       <StartupDirectory />
     </div>
