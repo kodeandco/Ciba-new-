@@ -1,302 +1,289 @@
 "use client"
 
-import { Award, Briefcase, Users, ChevronLeft, ChevronRight, Linkedin, Twitter } from "lucide-react"
+import {
+  Award,
+  Briefcase,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Linkedin,
+  Globe
+} from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
-const mentors = [
-  {
-    id: 1,
-    name: "Rajesh Kumar",
-    role: "Startup Founder & Investor",
-    expertise: "Tech Startups",
-    bio: "I've spent 15+ years building and scaling tech companies, and nothing excites me more than helping early-stage founders avoid the mistakes I made and accelerate their journey to success.",
-    image: "/professional-mentor-rajesh.jpg",
-    icon: Briefcase,
-    linkedin: "https://linkedin.com/in/rajeshkumar",
-    twitter: "https://twitter.com/rajeshkumar",
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    role: "Business Strategy Expert",
-    expertise: "Growth & Scaling",
-    bio: "My experience as VP at a leading tech company taught me that sustainable growth isn't just about moving fast—it's about strategic expansion and building relationships that matter, especially with investors.",
-    image: "/professional-mentor-priya.jpg",
-    icon: Award,
-    linkedin: "https://linkedin.com/in/priyasharma",
-    twitter: "https://twitter.com/priyasharma",
-  },
-  {
-    id: 3,
-    name: "Amit Patel",
-    role: "Product & Innovation Lead",
-    expertise: "Product Development",
-    bio: "I believe great products solve real problems beautifully. I'm here to help you find that product-market fit and create experiences that users truly love.",
-    image: "/professional-mentor-amit.jpg",
-    icon: Users,
-    linkedin: "https://linkedin.com/in/amitpatel",
-    twitter: "https://twitter.com/amitpatel",
-  },
-  {
-    id: 4,
-    name: "Neha Gupta",
-    role: "Finance & Fundraising",
-    expertise: "Funding & Finance",
-    bio: "Fundraising can feel overwhelming, but with the right financial planning and a compelling pitch, you can tell a story that investors want to be part of. Let me help you get there.",
-    image: "/professional-mentor-neha.jpg",
-    icon: Award,
-    linkedin: "https://linkedin.com/in/nehagupta",
-    twitter: "https://twitter.com/nehagupta",
-  },
-  {
-    id: 5,
-    name: "Vikram Singh",
-    role: "Marketing Strategist",
-    expertise: "Digital Marketing",
-    bio: "Growth isn't magic—it's strategic, creative marketing that connects with people. I've helped multiple startups scale rapidly, and I'm excited to share what works in today's digital landscape.",
-    image: "/professional-mentor-amit.jpg",
-    icon: Briefcase,
-    linkedin: "https://linkedin.com/in/vikramsingh",
-    twitter: "https://twitter.com/vikramsingh",
-  },
-  {
-    id: 6,
-    name: "Anjali Reddy",
-    role: "Legal & Compliance",
-    expertise: "Startup Law",
-    bio: "Legal foundations protect your vision. Whether it's contracts, IP, or compliance, I'll help you build on solid ground so you can focus on growing your startup with confidence.",
-    image: "/professional-mentor-neha.jpg",
-    icon: Award,
-    linkedin: "https://linkedin.com/in/anjalireddy",
-    twitter: "https://twitter.com/anjalireddy",
-  },
-]
+/* ----------------------------------
+   Icon mapping based on department
+----------------------------------- */
+const iconMap: Record<string, any> = {
+  "Tech Startups": Briefcase,
+  "Growth & Scaling": Award,
+  "Product Development": Users,
+  "Funding & Finance": Award,
+  "Digital Marketing": Briefcase,
+  "Startup Law": Award
+}
+
+interface Mentor {
+  _id: string
+  name: string
+  designation: string
+  department: string
+  message: string
+  image: string | null
+  socialMedia?: {
+    linkedin?: string
+    website?: string
+  }
+}
 
 export default function MentorsSection() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [mentors, setMentors] = useState<Mentor[]>([])
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [slidesPerView, setSlidesPerView] = useState(4)
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Responsive slides per view
+  /* ----------------------------------
+     Fetch mentors from backend
+  ----------------------------------- */
+  useEffect(() => {
+    const fetchMentors = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/mentors")
+        const data = await res.json()
+        setMentors(data)
+      } catch (err) {
+        console.error("Failed to fetch mentors", err)
+      }
+    }
+
+    fetchMentors()
+  }, [])
+
+  /* ----------------------------------
+     Responsive slides
+  ----------------------------------- */
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSlidesPerView(1)
-      } else if (window.innerWidth < 1024) {
-        setSlidesPerView(2)
-      } else {
-        setSlidesPerView(4)
-      }
+      if (window.innerWidth < 768) setSlidesPerView(1)
+      else if (window.innerWidth < 1024) setSlidesPerView(2)
+      else if (window.innerWidth < 1280) setSlidesPerView(3)
+      else setSlidesPerView(4)
     }
 
     handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Auto-scroll functionality
+  /* ----------------------------------
+     Auto play carousel
+  ----------------------------------- */
   useEffect(() => {
-    if (isAutoPlaying) {
-      autoPlayRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % mentors.length)
-      }, 3000)
-    }
+    if (!isAutoPlaying || mentors.length === 0) return
+
+    autoPlayRef.current = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const maxIndex = Math.max(0, mentors.length - slidesPerView)
+        return prev >= maxIndex ? 0 : prev + 1
+      })
+    }, 3000)
 
     return () => {
-      if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current)
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current)
+    }
+  }, [isAutoPlaying, mentors.length, slidesPerView])
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => {
+      if (prev === 0) {
+        return Math.max(0, mentors.length - slidesPerView)
       }
-    }
-  }, [isAutoPlaying])
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 5000)
+      return prev - 1
+    })
   }
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + mentors.length) % mentors.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 5000)
+  const handleNext = () => {
+    setCurrentIndex((prev) => {
+      const maxIndex = Math.max(0, mentors.length - slidesPerView)
+      return prev >= maxIndex ? 0 : prev + 1
+    })
   }
 
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % mentors.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 5000)
-  }
-
+  // Get the actual visible mentors without duplicates
   const getVisibleMentors = () => {
-    const visible = []
-    for (let i = 0; i < slidesPerView; i++) {
-      visible.push(mentors[(currentIndex + i) % mentors.length])
+    if (mentors.length === 0) return []
+
+    // If we have fewer mentors than slides, just show what we have
+    if (mentors.length <= slidesPerView) {
+      return mentors
     }
-    return visible
+
+    // Otherwise, slice the array to show only the current view
+    return mentors.slice(currentIndex, currentIndex + slidesPerView)
   }
 
   const visibleMentors = getVisibleMentors()
+  const actualSlidesPerView = Math.min(slidesPerView, mentors.length)
+
+  if (!mentors.length) {
+    return (
+      <section className="py-20 text-center text-blue-600">
+        Loading mentors...
+      </section>
+    )
+  }
 
   return (
     <section className="py-20 px-4 md:px-8 bg-white overflow-hidden">
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
-
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 opacity-0 animate-fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Meet Our Mentors</h2>
+
+        {/* Heading */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
+            Meet Our Mentors
+          </h2>
           <p className="text-lg text-blue-600 max-w-2xl mx-auto">
-            Learn from industry experts and experienced entrepreneurs who are committed to your success
+            Learn from industry experts committed to your success
           </p>
         </div>
 
-        {/* Carousel Container */}
         <div className="relative">
-          {/* Navigation Arrows */}
-          <button
-            onClick={goToPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-            aria-label="Previous mentor"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
 
-          <button
-            onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-            aria-label="Next mentor"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+          {/* Navigation - Only show if we have more mentors than visible slots */}
+          {mentors.length > slidesPerView && (
+            <>
+              <button
+                onClick={handlePrevious}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all"
+              >
+                <ChevronLeft />
+              </button>
 
-          {/* Cards Grid */}
+              <button
+                onClick={handleNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all"
+              >
+                <ChevronRight />
+              </button>
+            </>
+          )}
+
+          {/* Cards */}
           <div
-            className="grid gap-6 transition-all duration-500 ease-in-out"
-            style={{
-              gridTemplateColumns: `repeat(${slidesPerView}, minmax(0, 1fr))`
-            }}
+            className="grid gap-6 transition-all duration-500 justify-items-center"
+            style={{ gridTemplateColumns: `repeat(${actualSlidesPerView}, minmax(0, 300px))` }}
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
           >
             {visibleMentors.map((mentor, index) => {
-              const IconComponent = mentor.icon
-              const isHovered = hoveredId === mentor.id
+              const Icon = iconMap[mentor.department] || Users
+              const isHovered = hoveredId === mentor._id
 
               return (
                 <div
-                  key={`${mentor.id}-${currentIndex}-${index}`}
-                  onMouseEnter={() => setHoveredId(mentor.id)}
+                  key={mentor._id}
+                  onMouseEnter={() => setHoveredId(mentor._id)}
                   onMouseLeave={() => setHoveredId(null)}
-                  className="relative group cursor-pointer opacity-0 animate-fade-in-up"
+                  className="relative rounded-xl overflow-hidden bg-blue-50 w-full max-w-[300px] transition-shadow duration-300"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 h-full transition-all duration-300">
-                    {/* Content */}
-                    <div className="relative z-10 flex flex-col h-full">
-                      {/* Image - Full height, properly displayed */}
-                      <div className="overflow-hidden flex-shrink-0">
-                        <img
-                          src={mentor.image || "/placeholder.svg"}
-                          alt={mentor.name}
-                          className="w-full h-64 object-cover object-top"
-                        />
-                      </div>
+                  {/* Image */}
+                  <img
+                    src={mentor.image || "/placeholder.svg"}
+                    alt={mentor.name}
+                    className="w-full h-64 object-cover object-top"
+                  />
 
-                      {/* Text content container */}
-                      <div className="relative flex-1 p-6 flex flex-col justify-end min-h-[140px]">
-                        {/* Background gradient - only covers text area on hover */}
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
-                            }`}
-                        />
+                  {/* Content */}
+                  <div className="relative p-6 min-h-[160px]">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+                        }`}
+                    />
 
-                        {/* Info - visible by default */}
-                        <div
-                          className={`relative z-10 transition-all duration-300 ${isHovered ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
-                            }`}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <IconComponent className="w-5 h-5 text-blue-600" />
-                            <h3 className="font-bold text-blue-900">{mentor.name}</h3>
-                          </div>
-                          <p className="text-sm text-blue-700 font-semibold mb-1">{mentor.role}</p>
-                          <p className="text-xs text-blue-600">{mentor.expertise}</p>
+                    {/* Default Info */}
+                    {!isHovered && (
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon className="w-5 h-5 text-blue-600" />
+                          <h3 className="font-bold text-blue-900">
+                            {mentor.name}
+                          </h3>
                         </div>
+                        <p className="text-sm text-blue-700 font-semibold">
+                          {mentor.designation}
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          {mentor.department}
+                        </p>
+                      </div>
+                    )}
 
-                        {/* Bio and Social Links - visible on hover */}
-                        <div
-                          className={`relative z-10 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                            }`}
-                        >
-                          <p className="text-white text-xs md:text-sm leading-relaxed mb-4">{mentor.bio}</p>
+                    {/* Hover Info */}
+                    {isHovered && (
+                      <div className="relative z-10 text-white">
+                        <p className="text-sm mb-4 leading-relaxed line-clamp-3">
+                          {mentor.message}
+                        </p>
 
-                          {/* Social Media Links */}
-                          <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                        <div className="flex gap-3">
+                          {mentor.socialMedia?.linkedin && (
                             <a
-                              href={mentor.linkedin}
+                              href={mentor.socialMedia.linkedin}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg hover:bg-white/30 transition-all"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Linkedin className="w-4 h-4" />
-                              <span className="text-xs md:text-sm font-medium">LinkedIn</span>
+                              <span className="text-sm">LinkedIn</span>
                             </a>
+                          )}
+
+                          {mentor.socialMedia?.website && (
                             <a
-                              href={mentor.twitter}
+                              href={mentor.socialMedia.website}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+                              className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg hover:bg-white/30 transition-all"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <Twitter className="w-4 h-4" />
-                              <span className="text-xs md:text-sm font-medium">Twitter</span>
+                              <Globe className="w-4 h-4" />
+                              <span className="text-sm">Website</span>
                             </a>
-                          </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Border animation */}
-                    <div
-                      className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-all duration-300 pointer-events-none ${isHovered ? 'opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'opacity-0'
-                        }`}
-                    />
+                    )}
                   </div>
+
+                  {/* Border glow */}
+                  <div
+                    className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-opacity pointer-events-none ${isHovered ? "opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]" : "opacity-0"
+                      }`}
+                  />
                 </div>
               )
             })}
           </div>
 
-          {/* Dot Indicators */}
-          <div className="flex justify-center gap-2 mt-8">
-            {mentors.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`transition-all duration-300 rounded-full ${index === currentIndex
-                  ? 'bg-blue-600 w-8 h-3'
-                  : 'bg-blue-300 w-3 h-3 hover:bg-blue-400'
-                  }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
+          {/* Dots - Only show if we have more mentors than visible slots */}
+          {mentors.length > slidesPerView && (
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: mentors.length - slidesPerView + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`rounded-full transition-all ${index === currentIndex
+                      ? "bg-blue-600 w-8 h-3"
+                      : "bg-blue-300 w-3 h-3 hover:bg-blue-400"
+                    }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
