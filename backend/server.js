@@ -54,6 +54,7 @@ const incubatedStartupsRoutes = require("./routes/incubated_startups_routes");
 const graduatedStartupsRoutes = require("./routes/graduated_startups_route");
 const galleryRoutes = require("./routes/gallery_routes");
 const mentorsRoutes = require("./routes/mentors_route");
+const partnersRoutes = require("./routes/partners_routes");
 // Mount routes
 app.use("/api/clinic", startupClinicRoutes);
 app.use("/api/incubation", incubationRoutes);
@@ -65,6 +66,7 @@ app.use("/api", incubatedStartupsRoutes);
 app.use("/api", graduatedStartupsRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/mentors", mentorsRoutes);
+app.use("/api/partners", partnersRoutes);
 console.log("✅ All routes mounted successfully!");
 
 // Route verification
