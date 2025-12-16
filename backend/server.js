@@ -51,6 +51,7 @@ const jobApplicationRoutes = require("./routes/job_application_routes");
 const startupSubmissionRoutes = require("./routes/startup_submission_routes");
 const cibaJobsRoutes = require("./routes/ciba_jobs_routes");
 const incubatedStartupsRoutes = require("./routes/incubated_startups_routes");
+const graduatedStartupsRoutes = require("./routes/graduated_startups_route");
 const galleryRoutes = require("./routes/gallery_routes");
 const mentorsRoutes = require("./routes/mentors_route");
 // Mount routes
@@ -61,6 +62,7 @@ app.use("/api/applications", jobApplicationRoutes);
 app.use("/api/startups", startupSubmissionRoutes);
 app.use("/api", cibaJobsRoutes);
 app.use("/api", incubatedStartupsRoutes);
+app.use("/api", graduatedStartupsRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/mentors", mentorsRoutes);
 console.log("✅ All routes mounted successfully!");

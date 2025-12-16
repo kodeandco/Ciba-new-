@@ -17,6 +17,16 @@ const IncubatedStartupSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  image: {
+    data: {
+      type: Buffer,
+      required: false,
+    },
+    contentType: {
+      type: String,
+      required: false,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
