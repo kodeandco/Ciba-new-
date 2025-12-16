@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const JobApplication = require("../models/job_application_model");
+const CIBAJob = require("../models/ciba_job_model");
+const IncubatedStartup = require("../models/incubated_startup_model");
 
 // Memory storage - no folder
 const storage = multer.memoryStorage();
@@ -47,9 +49,24 @@ router.post("/apply", (req, res) => {
         return res.status(400).json({ error: "Resume file is required" });
       }
 
+      // Determine positionType
+      let positionType = "";
+      const cibaJob = await CIBAJob.findById(req.body.positionId);
+      if (cibaJob) {
+        positionType = `ciba-${cibaJob.type}`;
+      } else {
+        const startup = await IncubatedStartup.findById(req.body.positionId);
+        if (startup) {
+          positionType = "startup";
+        } else {
+          positionType = "unknown";
+        }
+      }
+
       const applicationData = {
         positionId: req.body.positionId,
         positionTitle: req.body.positionTitle,
+        positionType: positionType,
         fullName: req.body.fullName,
         email: req.body.email,
         phone: req.body.phone,
