@@ -5,16 +5,19 @@ import Button from "./Button";
 import StartupSubmissionModal from "./StartupSubmissionModal";
 
 interface Startup {
-    _id: string;
-    companyName: string;
-    tagline: string;
-    careerUrl: string;
-    createdAt?: string;
+
+  _id: string;
+  companyName: string;
+  tagline: string;
+  careerUrl: string;
+  createdAt?: string;
+
 }
 
 const BACKEND_URL = "http://localhost:5000";
 
 export default function StartupDirectory() {
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [startups, setStartups] = useState<Startup[]>([]);
     const [loading, setLoading] = useState(true);
