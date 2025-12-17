@@ -16,11 +16,8 @@ export default function ApplicationCard({ app, onUpdate, onDelete }: { app: any;
         body: JSON.stringify({ status }),
       });
       if (res.ok) {
-        toast.success(status === "shortlisted" ? "Shortlisted!" : "Rejected");
-        await fetch(`${BACKEND_URL}/api/applications/${app._id}/send-email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
+        toast.success(status === "shortlisted" ? "Shortlisted!" : "Rejected!", {
+          style: { background: "#1e40af", color: "white", borderRadius: "12px" }
         });
         onUpdate();
       } else {
@@ -38,7 +35,7 @@ export default function ApplicationCard({ app, onUpdate, onDelete }: { app: any;
     try {
       const res = await fetch(`${BACKEND_URL}/api/applications/${app._id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Application Deleted");
+        toast.success("Deleted", { style: { background: "#1e40af", color: "white" } });
         onDelete();
       } else {
         toast.error("Delete failed");
@@ -51,14 +48,14 @@ export default function ApplicationCard({ app, onUpdate, onDelete }: { app: any;
   const getStatusBadge = (status?: string) => {
     const s = status || "pending";
     const config = {
-      pending: { bg: "bg-yellow-100", text: "text-yellow-800", icon: Clock },
-      shortlisted: { bg: "bg-green-100", text: "text-green-800", icon: CheckCircle },
-      rejected: { bg: "bg-red-100", text: "text-red-800", icon: XCircle },
+      pending: { bg: "bg-blue-50", text: "text-blue-800", icon: Clock },
+      shortlisted: { bg: "bg-green-50", text: "text-green-800", icon: CheckCircle },
+      rejected: { bg: "bg-red-50", text: "text-red-800", icon: XCircle },
     };
     const { bg, text, icon: Icon } = config[s as keyof typeof config];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${bg} ${text}`}>
-        <Icon className="w-3 h-3" />
+      <span className={`px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 ${bg} ${text} border border-blue-200`}>
+        <Icon className="w-4 h-4" />
         {s.toUpperCase()}
       </span>
     );
@@ -67,76 +64,83 @@ export default function ApplicationCard({ app, onUpdate, onDelete }: { app: any;
   const getTypeBadge = (type: string) => {
     const config = {
       "ciba-job": { bg: "bg-blue-100", text: "text-blue-800", label: "CIBA Job" },
-      "ciba-internship": { bg: "bg-cyan-100", text: "text-cyan-800", label: "CIBA Internship" },
+      "ciba-internship": { bg: "bg-indigo-100", text: "text-indigo-800", label: "CIBA Internship" },
       startup: { bg: "bg-purple-100", text: "text-purple-800", label: "Startup" },
     };
     const { bg, text, label } = config[type as keyof typeof config] || config["ciba-job"];
-    return <span className={`px-2 py-1 rounded-full text-xs font-bold ${bg} ${text}`}>{label}</span>;
+    return <span className={`px-3 py-1 rounded-full text-sm font-bold ${bg} ${text}`}>{label}</span>;
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-shadow">
-      <div className="flex justify-between items-start gap-6">
+    <div className="bg-white rounded-3xl shadow-lg p-8 border border-blue-100 
+                    hover:shadow-2xl hover:border-blue-300 transition-all duration-300 group">
+      <div className="flex justify-between items-start gap-8">
         <div className="flex-1">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Users className="w-6 h-6 text-white" />
+          <div className="flex items-start gap-5 mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
+              <Users className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-1">{app.fullName}</h3>
-              <p className="text-base text-green-600 font-semibold mb-2">Applied for: {app.positionTitle}</p>
-              <div className="flex items-center gap-3">
+              <h3 className="text-2xl font-bold text-blue-900 mb-2">{app.fullName}</h3>
+              <p className="text-lg text-blue-700 font-semibold mb-3">Applied for: {app.positionTitle}</p>
+              <div className="flex items-center gap-4 flex-wrap">
                 {getTypeBadge(app.positionType)}
-                <span className="text-xs text-gray-600">
-                  <Calendar className="w-3 h-3 inline mr-1" />
+                <span className="text-sm text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                  <Calendar className="w-4 h-4" />
                   {new Date(app.createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-gray-600" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-3 text-blue-800 bg-blue-50/50 p-4 rounded-2xl hover:bg-blue-100 transition-colors">
+              <Mail className="w-5 h-5 text-blue-600" />
               {app.email}
             </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-gray-600" />
+            <div className="flex items-center gap-3 text-blue-800 bg-blue-50/50 p-4 rounded-2xl hover:bg-blue-100 transition-colors">
+              <Phone className="w-5 h-5 text-blue-600" />
               {app.phone}
             </div>
           </div>
-          <p className="mt-4 text-sm text-gray-800 bg-gray-50 p-3 rounded-xl leading-relaxed line-clamp-3">{app.coverLetter}</p>
+
+          <p className="text-base text-blue-800 bg-blue-50/30 p-5 rounded-2xl leading-relaxed line-clamp-3 mb-6">
+            {app.coverLetter}
+          </p>
+
           <a
-            href={`${BACKEND_URL}/uploads/resumes/${app.resumeFilename}`}
+            href={`${BACKEND_URL}/api/applications/${app._id}/resume`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-bold text-sm hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl transition-all duration-300"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-5 h-5" />
             Download Resume
           </a>
         </div>
-        <div className="flex flex-col items-end gap-3">
+
+        <div className="flex flex-col items-end gap-4">
           {getStatusBadge(app.status)}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3 w-44">
             <button
               onClick={() => updateStatus("shortlisted")}
               disabled={updating}
-              className="px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-xs hover:bg-green-700 transition-all disabled:opacity-50"
+              className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all disabled:opacity-60 shadow-md hover:shadow-lg"
             >
               Shortlist
             </button>
             <button
               onClick={() => updateStatus("rejected")}
               disabled={updating}
-              className="px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-xs hover:bg-red-700 transition-all disabled:opacity-50"
+              className="px-6 py-3 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all disabled:opacity-60 shadow-md hover:shadow-lg"
             >
               Reject
             </button>
             <button
               onClick={handleDelete}
-              className="p-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-all shadow-md hover:shadow-lg"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-5 h-5" />
             </button>
           </div>
         </div>
