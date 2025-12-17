@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const JobApplicationSchema = new mongoose.Schema({
   positionId: { type: String, required: true },
   positionTitle: { type: String, required: true },
+  positionType: { type: String },
   fullName: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
@@ -14,10 +15,10 @@ const JobApplicationSchema = new mongoose.Schema({
   coverLetter: { type: String, required: true },
   linkedIn: { type: String },
   portfolio: { type: String },
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['pending', 'reviewing', 'accepted', 'rejected'],
-    default: 'pending' 
+    default: 'pending'
   },
   createdAt: { type: Date, default: Date.now }
 });
