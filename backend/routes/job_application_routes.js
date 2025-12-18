@@ -5,7 +5,6 @@ const JobApplication = require("../models/job_application_model");
 const CIBAJob = require("../models/ciba_job_model");
 const IncubatedStartup = require("../models/incubated_startup_model");
 
-// Memory storage - no folder
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -25,12 +24,10 @@ const upload = multer({
   }
 });
 
-// Test route
 router.get("/test", (req, res) => {
   res.json({ message: "Job application route is working!" });
 });
 
-// ✅ IMPORTANT: /apply must come BEFORE /:id
 router.post("/apply", (req, res) => {
   upload.single("resume")(req, res, async function(err) {
     if (err instanceof multer.MulterError) {
@@ -49,7 +46,6 @@ router.post("/apply", (req, res) => {
         return res.status(400).json({ error: "Resume file is required" });
       }
 
-      // Determine positionType
       let positionType = "";
       const cibaJob = await CIBAJob.findById(req.body.positionId);
       if (cibaJob) {
@@ -102,7 +98,6 @@ router.post("/apply", (req, res) => {
   });
 });
 
-// Get all applications
 router.get("/all", async (req, res) => {
   try {
     const applications = await JobApplication.find()
@@ -114,23 +109,10 @@ router.get("/all", async (req, res) => {
   }
 });
 
-// ✅ /:id routes must come AFTER specific routes like /apply
-router.get("/:id", async (req, res) => {
-  try {
-    const application = await JobApplication.findById(req.params.id)
-      .select("-resume.data");
-    if (!application) {
-      return res.status(404).json({ error: "Application not found" });
-    }
-    res.status(200).json(application);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Download resume
+// IMPORTANT: Specific routes BEFORE generic /:id
 router.get("/:id/resume", async (req, res) => {
   try {
+    console.log("📥 Resume download:", req.params.id);
     const application = await JobApplication.findById(req.params.id);
     if (!application || !application.resume) {
       return res.status(404).json({ error: "Resume not found" });
@@ -146,10 +128,11 @@ router.get("/:id/resume", async (req, res) => {
   }
 });
 
-// Update status
 router.patch("/:id/status", async (req, res) => {
   try {
+    console.log("📝 Status update:", req.params.id, "to:", req.body.status);
     const { status } = req.body;
+    
     const application = await JobApplication.findByIdAndUpdate(
       req.params.id,
       { status },
@@ -157,13 +140,48 @@ router.patch("/:id/status", async (req, res) => {
     ).select("-resume.data");
 
     if (!application) {
-      return res.status(404).json({ error: "Application not found" });
+      return res.status(404).json({ success: false, error: "Application not found" });
     }
 
+    console.log("✅ Status updated!");
     res.status(200).json({
+      success: true,
       message: "Status updated successfully",
       data: application
     });
+  } catch (err) {
+    console.error("❌ Status error:", err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE route MUST be before GET /:id
+router.delete("/:id", async (req, res) => {
+  try {
+    console.log("🗑️ DELETE:", req.params.id);
+    
+    const application = await JobApplication.findByIdAndDelete(req.params.id);
+    
+    if (!application) {
+      return res.status(404).json({ success: false, error: "Not found" });
+    }
+
+    console.log("✅ DELETED:", application.fullName);
+    res.status(200).json({ success: true, message: "Deleted successfully" });
+  } catch (err) {
+    console.error("❌ Delete error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /:id MUST be LAST
+router.get("/:id", async (req, res) => {
+  try {
+    const application = await JobApplication.findById(req.params.id).select("-resume.data");
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.status(200).json(application);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
