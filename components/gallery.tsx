@@ -71,7 +71,7 @@ export default function Gallery() {
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   controls
                   className="w-full object-cover max-h-72"
-                  loading="lazy"
+
                 />
               ) : (
                 <img
@@ -93,8 +93,8 @@ export default function Gallery() {
               <button onClick={() => toggleLike(item._id)}>
                 <Heart
                   className={`w-5 h-5 ${liked.includes(item._id)
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-500"
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-500"
                     }`}
                 />
               </button>
