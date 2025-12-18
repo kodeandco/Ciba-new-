@@ -2,24 +2,26 @@
 
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { useRouter } from "next/navigation"; // import useRouter
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter(); // initialize router
+  const router = useRouter();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     element?.scrollIntoView({ behavior: "smooth" });
     setIsOpen(false);
   };
+
   const navigateToStartups = () => {
-    router.push("/startups"); // navigate to the /startups page
-    setIsOpen(false);    // close mobile menu if open
+    router.push("/startups");
+    setIsOpen(false);
   }
+
   const navigateToJob = () => {
-    router.push("/job"); // navigate to the /job page
-    setIsOpen(false);    // close mobile menu if open
+    router.push("/job");
+    setIsOpen(false);
   };
 
   return (
@@ -48,7 +50,6 @@ export default function Navbar() {
               onClick={() => scrollToSection("programs")}
               className="text-foreground hover:text-primary transition-all font-medium relative group"
             >
-
               Programs
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
             </button>
@@ -64,6 +65,13 @@ export default function Navbar() {
               className="text-foreground hover:text-primary transition-all font-medium relative group"
             >
               Jobs
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
+            </button>
+            <button
+              onClick={() => scrollToSection("contact")}
+              className="text-foreground hover:text-primary transition-all font-medium relative group"
+            >
+              Contact Us
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
             </button>
           </div>
@@ -87,21 +95,28 @@ export default function Navbar() {
               Home
             </button>
             <button
-              onClick={navigateToStartups}
-              className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
-            >
-              Startups            </button>
-            <button
               onClick={() => scrollToSection("programs")}
               className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
             >
               Programs
             </button>
             <button
+              onClick={navigateToStartups}
+              className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
+            >
+              Startups
+            </button>
+            <button
               onClick={navigateToJob}
               className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
             >
               Jobs
+            </button>
+            <button
+              onClick={() => scrollToSection("contact")}
+              className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
+            >
+              Contact Us
             </button>
           </div>
         )}
