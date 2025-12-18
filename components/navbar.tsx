@@ -13,7 +13,10 @@ export default function Navbar() {
     element?.scrollIntoView({ behavior: "smooth" });
     setIsOpen(false);
   };
-
+  const navigateToStartups = () => {
+    router.push("/startups"); // navigate to the /startups page
+    setIsOpen(false);    // close mobile menu if open
+  }
   const navigateToJob = () => {
     router.push("/job"); // navigate to the /job page
     setIsOpen(false);    // close mobile menu if open
@@ -45,7 +48,15 @@ export default function Navbar() {
               onClick={() => scrollToSection("programs")}
               className="text-foreground hover:text-primary transition-all font-medium relative group"
             >
+
               Programs
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
+            </button>
+            <button
+              onClick={navigateToStartups}
+              className="text-foreground hover:text-primary transition-all font-medium relative group"
+            >
+              Startups
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
             </button>
             <button
@@ -75,6 +86,11 @@ export default function Navbar() {
             >
               Home
             </button>
+            <button
+              onClick={navigateToStartups}
+              className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
+            >
+              Startups            </button>
             <button
               onClick={() => scrollToSection("programs")}
               className="block w-full text-left px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-all"
