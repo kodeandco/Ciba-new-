@@ -2,7 +2,7 @@ import Navbar from "@/components/navbar"
 import HeroVideo from "@/components/hero-video"
 import Hero from "@/components/hero"
 import Testimonials from "@/components/testimonials"
-import StartupCards from "@/components/startup-cards"
+
 import Programs from "@/components/programs"
 import Gallery from "@/components/gallery"
 import Newsletter from "@/components/newsletter"
