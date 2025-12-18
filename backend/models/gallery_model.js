@@ -7,21 +7,28 @@ const GallerySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     description: {
       type: String,
       trim: true,
     },
-
     image: {
-      data: Buffer,              // Binary image data
-      contentType: String,       // image/jpeg, image/png, etc.
+      data: Buffer,
+      contentType: String,
       filename: String,
     },
-
+    aspectRatio: {
+      type: String,
+      enum: ["9:16", "16:9"],
+      default: "16:9",
+    },
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
     createdAt: {
       type: Date,
-      default: Date.now,         // current date & time
+      default: Date.now,
     },
   },
   { versionKey: false }
