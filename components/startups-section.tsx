@@ -103,7 +103,7 @@ export default function StartupsSection() {
 
   return (
     <AnimatedSection direction="right">
-      <section className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50">
+      <section id="startups" className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
