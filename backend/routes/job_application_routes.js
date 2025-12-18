@@ -157,9 +157,14 @@ router.patch("/:id/status", async (req, res) => {
 
 // DELETE route MUST be before GET /:id
 router.delete("/:id", async (req, res) => {
+  console.log("=================================");
+  console.log("🗑️ DELETE ROUTE MATCHED!");
+  console.log("ID:", req.params.id);
+  console.log("Method:", req.method);
+  console.log("Full URL:", req.originalUrl);
+  console.log("=================================");
+  
   try {
-    console.log("🗑️ DELETE:", req.params.id);
-    
     const application = await JobApplication.findByIdAndDelete(req.params.id);
     
     if (!application) {
