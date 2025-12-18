@@ -38,12 +38,12 @@ export default function Gallery() {
         </p>
       </div>
 
-      {/* Masonry-style grid */}
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 max-w-6xl mx-auto space-y-6">
+      {/* Uniform grid - all items same visual weight */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {gallery.map((item) => (
           <div
             key={item._id}
-            className="bg-background border rounded-xl shadow-sm overflow-hidden break-inside-avoid"
+            className="bg-background border rounded-xl shadow-sm overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center gap-3 p-3">
@@ -70,21 +70,20 @@ export default function Gallery() {
                 <video
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   controls
-                  className={`w-full object-cover ${item.aspectRatio === "9:16" ? "aspect-[9/16]" : "aspect-video"
-                    }`}
+                  className="w-full object-cover max-h-72"
+                  loading="lazy"
                 />
               ) : (
                 <img
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   alt={item.title}
-                  className={`w-full object-cover ${item.aspectRatio === "9:16" ? "aspect-[9/16]" : "aspect-video"
-                    }`}
+                  className="w-full object-cover max-h-72"
                   loading="lazy"
                 />
               )}
               {item.mediaType === "video" && (
-                <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1">
-                  <Play className="w-4 h-4 text-white" />
+                <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5">
+                  <Play className="w-4 h-4 text-white fill-white" />
                 </div>
               )}
             </div>
@@ -94,8 +93,8 @@ export default function Gallery() {
               <button onClick={() => toggleLike(item._id)}>
                 <Heart
                   className={`w-5 h-5 ${liked.includes(item._id)
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-500"
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-500"
                     }`}
                 />
               </button>
@@ -106,7 +105,7 @@ export default function Gallery() {
             {/* Content */}
             <div className="px-3 pb-3 text-sm">
               <p className="font-semibold mb-1">cibamumbai</p>
-              <p>{item.description}</p>
+              <p className="line-clamp-2">{item.description}</p>
             </div>
           </div>
         ))}
