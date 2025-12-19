@@ -511,7 +511,7 @@ export default function JobListings() {
       description: "Explore career opportunities at innovative startups incubated by CIBA",
       id: "startup-opportunities",
       icon: Rocket,
-      count: "Coming Soon"
+      count: "Explore Openings"
     }
   ];
 
@@ -591,46 +591,6 @@ export default function JobListings() {
         </div>
       </section>
 
-      {/* CIBA Jobs */}
-      <section id="ciba-jobs" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-8">
-        <h2 className="text-3xl font-bold mb-8">Current Openings at CIBA</h2>
-
-        {cibaJobs.length === 0 ? (
-          <p className="text-gray-600">No job openings available.</p>
-        ) : (
-          <>
-            <div className="space-y-4">
-              {cibaJobs.slice(0, 3).map((job) => (
-                <div
-                  key={job._id}
-                  className="border rounded-lg p-6 flex justify-between items-center"
-                >
-                  <div>
-                    <h3 className="text-xl font-semibold">{job.title}</h3>
-                    <p className="text-gray-600">{job.department}</p>
-                  </div>
-                  <Button onClick={() => handleApplyClick(job)}>
-                    Apply Now
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            {cibaJobs.length > 3 && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => setShowAllJobsModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 hover:shadow-lg"
-                >
-                  View All {cibaJobs.length} Jobs
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-
       {/* CIBA Internships */}
       <section id="ciba-internships" className="bg-gray-50 px-4 py-20 scroll-mt-8">
         <div className="max-w-6xl mx-auto">
@@ -677,6 +637,45 @@ export default function JobListings() {
         </div>
       </section>
 
+      {/* CIBA Jobs */}
+      <section id="ciba-jobs" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-8">
+        <h2 className="text-3xl font-bold mb-8">Current Openings at CIBA</h2>
+
+        {cibaJobs.length === 0 ? (
+          <p className="text-gray-600">No job openings available.</p>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {cibaJobs.slice(0, 3).map((job) => (
+                <div
+                  key={job._id}
+                  className="border rounded-lg p-6 flex justify-between items-center"
+                >
+                  <div>
+                    <h3 className="text-xl font-semibold">{job.title}</h3>
+                    <p className="text-gray-600">{job.department}</p>
+                  </div>
+                  <Button onClick={() => handleApplyClick(job)}>
+                    Apply Now
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {cibaJobs.length > 3 && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => setShowAllJobsModal(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 hover:shadow-lg"
+                >
+                  View All {cibaJobs.length} Jobs
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
 
       <ApplicationModal
         isOpen={isModalOpen}
@@ -697,8 +696,6 @@ export default function JobListings() {
         internships={cibaInternships}
         onApply={handleApplyClick}
       />
-
-
     </>
   );
 }
