@@ -5,19 +5,16 @@ import Button from "./Button";
 import StartupSubmissionModal from "./StartupSubmissionModal";
 
 interface Startup {
-
   _id: string;
   companyName: string;
   tagline: string;
   careerUrl: string;
   createdAt?: string;
-
 }
 
 const BACKEND_URL = "http://localhost:5000";
 
 export default function StartupDirectory() {
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [startups, setStartups] = useState<Startup[]>([]);
     const [loading, setLoading] = useState(true);
@@ -71,7 +68,7 @@ export default function StartupDirectory() {
 
     return (
         <>
-            <section className="max-w-6xl mx-auto px-4 py-20">
+            <section id="startup-opportunities" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-8">
                 <div className="mb-12 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">
                         Opportunities at Our Incubated Startups
