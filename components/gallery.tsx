@@ -30,7 +30,11 @@ export default function Gallery() {
   }
 
   return (
-    <section id="gallery" className="py-16 px-4 bg-muted">
+    <section 
+      id="gallery" 
+      className="py-16 px-4"
+      style={{ background: "oklch(97.923% 0.01042 220.071)" }} // Soft, premium light blue-gray background
+    >
       <div className="text-center max-w-2xl mx-auto mb-10">
         <h2 className="text-4xl font-bold mb-3">Gallery</h2>
         <p className="text-lg text-muted-foreground">
@@ -71,7 +75,6 @@ export default function Gallery() {
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   controls
                   className="w-full object-cover max-h-72"
-
                 />
               ) : (
                 <img
