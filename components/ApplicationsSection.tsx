@@ -1,8 +1,22 @@
-"use client"
+"use client";
 
-
-import { useState } from "react";
-import { Search, Mail, Building2, GraduationCap, Rocket, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Mail,
+  Building2,
+  GraduationCap,
+  Rocket,
+  AlertCircle,
+  Phone,
+  Calendar,
+  Download,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Trash2,
+  Briefcase,
+} from "lucide-react";
 
 const BACKEND_URL = "http://localhost:5000";
 
@@ -16,31 +30,88 @@ interface Application {
   coverLetter?: string;
   status?: "pending" | "shortlisted" | "rejected";
   createdAt?: string;
+  isJobPosting?: boolean;
+  jobDetails?: {
+    companyName?: string;
+    jobType?: string;
+    department?: string;
+    location?: string;
+    salary?: string;
+  };
 }
 
-interface ApplicationsSectionProps {
-  applications: Application[];
-  onRefetch: () => void;
+interface StartupSubmission {
+  _id: string;
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  website?: string;
+  jobTitle: string;
+  jobType: string;
+  department: string;
+  location: string;
+  salary?: string;
+  jobDescription: string;
+  requirements: string;
+  benefits?: string;
+  status: string;
+  createdAt: string;
 }
 
-// ApplicationCard component (embedded)
-function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpdate: () => void; onDelete: () => void }) {
+function convertStartupToApplication(startup: StartupSubmission): Application {
+  return {
+    _id: startup._id,
+    fullName: startup.contactPerson,
+    email: startup.email,
+    phone: startup.phone,
+    positionTitle: `${startup.jobTitle} at ${startup.companyName}`,
+    positionType: "startup",
+    coverLetter: startup.jobDescription,
+    status: startup.status === "approved" ? "shortlisted" : startup.status === "rejected" ? "rejected" : "pending",
+    createdAt: startup.createdAt,
+    isJobPosting: true,
+    jobDetails: {
+      companyName: startup.companyName,
+      jobType: startup.jobType,
+      department: startup.department,
+      location: startup.location,
+      salary: startup.salary,
+    },
+  };
+}
+
+// ApplicationCard Component
+function ApplicationCard({
+  app,
+  onUpdate,
+  onDelete,
+}: {
+  app: Application;
+  onUpdate: () => void;
+  onDelete: () => void;
+}) {
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const updateStatus = async (status: "shortlisted" | "rejected") => {
     setUpdating(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/applications/${app._id}/status`, {
+      const endpoint =
+        app.positionType === "startup"
+          ? `${BACKEND_URL}/api/startups/${app._id}/status`
+          : `${BACKEND_URL}/api/applications/${app._id}/status`;
+
+      const res = await fetch(endpoint, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok && data.success) {
-        alert(status === "shortlisted" ? "Application Shortlisted!" : "Application Rejected");
+        alert(status === "shortlisted" ? "✅ Approved!" : "❌ Rejected");
         onUpdate();
       } else {
         alert(data.error || "Failed to update status");
@@ -54,24 +125,26 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete application from ${app.fullName}?`)) return;
-    
+    if (!confirm(`Delete ${app.isJobPosting ? "job posting" : "application"} from ${app.fullName}?`)) return;
+
     setDeleting(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/applications/${app._id}`, { 
-        method: "DELETE"
-      });
-      
+      const endpoint =
+        app.positionType === "startup"
+          ? `${BACKEND_URL}/api/startups/${app._id}`
+          : `${BACKEND_URL}/api/applications/${app._id}`;
+
+      const res = await fetch(endpoint, { method: "DELETE" });
       const data = await res.json();
-      
+
       if (res.ok && data.success) {
-        alert("Application deleted!");
+        alert("✅ Deleted successfully!");
         onDelete();
       } else {
         alert(data.error || "Failed to delete");
       }
     } catch (error) {
-      alert("Error deleting application");
+      alert("Error deleting");
       console.error("Delete error:", error);
     } finally {
       setDeleting(false);
@@ -79,6 +152,11 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
   };
 
   const handleDownload = async () => {
+    if (app.isJobPosting) {
+      alert("This is a job posting, not an application. No resume available.");
+      return;
+    }
+
     try {
       const res = await fetch(`${BACKEND_URL}/api/applications/${app._id}/resume`);
       if (!res.ok) {
@@ -87,14 +165,14 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
       }
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `${app.fullName.replace(/\s+/g, '_')}_resume.pdf`;
+      a.download = `${app.fullName.replace(/\s+/g, "_")}_resume.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      alert("Resume downloaded!");
+      alert("✅ Resume downloaded!");
     } catch (error) {
       alert("Error downloading resume");
       console.error("Download error:", error);
@@ -105,20 +183,23 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
     const s = status || "pending";
     if (s === "pending") {
       return (
-        <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1 whitespace-nowrap">
+        <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1">
+          <Clock className="w-3 h-3" />
           PENDING
         </span>
       );
     }
     if (s === "shortlisted") {
       return (
-        <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-green-100 text-green-800 border border-green-300 flex items-center gap-1 whitespace-nowrap">
-          SHORTLISTED
+        <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
+          <CheckCircle className="w-3 h-3" />
+          APPROVED
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-800 border border-red-300 flex items-center gap-1 whitespace-nowrap">
+      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-800 border border-red-300 flex items-center gap-1">
+        <XCircle className="w-3 h-3" />
         REJECTED
       </span>
     );
@@ -139,80 +220,114 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="flex flex-col lg:flex-row justify-between gap-6">
-        <div className="flex-1 min-w-0">
+    <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition-all">
+      <div className="flex flex-col lg:flex-row justify-between gap-8">
+        <div className="flex-1">
           <div className="flex items-start gap-4 mb-4">
-            <div className={`w-12 h-12 ${getTypeBgColor(app.positionType)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+            <div className={`w-12 h-12 ${getTypeBgColor(app.positionType)} rounded-lg flex items-center justify-center`}>
               {getTypeIcon(app.positionType)}
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-gray-900 truncate">{app.fullName || "No Name"}</h3>
-              <p className="text-sm text-blue-600 font-medium truncate">
-                Applied for: {app.positionTitle || "Position Not Specified"}
+            <div className="flex-1">
+              {app.isJobPosting && (
+                <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded mb-2">
+                  JOB POSTING
+                </span>
+              )}
+              <h3 className="text-xl font-bold text-gray-900">{app.fullName}</h3>
+              <p className="text-base text-blue-600 font-medium mt-1">
+                {app.isJobPosting ? "Job: " : "Applied for: "}
+                {app.positionTitle}
               </p>
-              <span className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                {app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                }) : 'No Date'}
-              </span>
+              <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                <Calendar className="w-4 h-4" />
+                {app.createdAt
+                  ? new Date(app.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "No Date"}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-sm">
-            <div className="flex items-center gap-2 text-gray-700 min-w-0">
-              <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <span className="truncate">{app.email || "No Email"}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-blue-600" />
+              <span className="font-medium">{app.email}</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-700">
-              <span>📞</span>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-blue-600" />
               <span>{app.phone || "Not provided"}</span>
             </div>
           </div>
 
-          {app.coverLetter && (
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 line-clamp-3">{app.coverLetter}</p>
+          {app.jobDetails && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><strong>Company:</strong> {app.jobDetails.companyName}</div>
+                <div><strong>Type:</strong> {app.jobDetails.jobType}</div>
+                <div><strong>Department:</strong> {app.jobDetails.department}</div>
+                <div><strong>Location:</strong> {app.jobDetails.location}</div>
+                {app.jobDetails.salary && (
+                  <div className="col-span-2"><strong>Salary:</strong> {app.jobDetails.salary}</div>
+                )}
+              </div>
             </div>
           )}
 
-          <button
-            onClick={handleDownload}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            Download Resume
-          </button>
+          {app.coverLetter && (
+            <div className="mt-4">
+              <p className="font-semibold text-gray-700">Description:</p>
+              <p className="text-gray-600 mt-1 line-clamp-3">{app.coverLetter}</p>
+            </div>
+          )}
+
+          <div className="mt-6">
+            {!app.isJobPosting ? (
+              <button
+                onClick={handleDownload}
+                className="px-5 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Download Resume
+              </button>
+            ) : (
+              <div className="text-gray-500 italic flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                Job Posting — No resume attached
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3 lg:min-w-[140px]">
+        <div className="flex flex-col items-end gap-4 min-w-[160px]">
           {getStatusBadge(app.status)}
-          
-          <div className="flex flex-col gap-2 w-full lg:w-36">
+
+          <div className="flex flex-col gap-3 w-full">
             <button
               onClick={() => updateStatus("shortlisted")}
               disabled={updating || deleting || app.status === "shortlisted"}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full px-5 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {updating ? "Updating..." : "Shortlist"}
+              {updating ? "Updating..." : app.isJobPosting ? "Approve" : "Shortlist"}
             </button>
-            
+
             <button
               onClick={() => updateStatus("rejected")}
               disabled={updating || deleting || app.status === "rejected"}
-              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full px-5 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {updating ? "Updating..." : "Reject"}
             </button>
-            
+
             <button
               onClick={handleDelete}
               disabled={deleting || updating}
-              className="w-full p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-              title="Delete application"
+              className="w-full p-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center"
+              title="Delete"
             >
-              {deleting ? "Deleting..." : "🗑️"}
+              {deleting ? "Deleting..." : <Trash2 className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -221,41 +336,68 @@ function ApplicationCard({ app, onUpdate, onDelete }: { app: Application; onUpda
   );
 }
 
-export default function ApplicationsSection({ applications = [], onRefetch }: ApplicationsSectionProps) {
+// Main Component
+interface ApplicationsSectionProps {
+  applications: Application[];
+  onRefetch: () => void;
+}
+
+export default function ApplicationsSection({ applications, onRefetch }: ApplicationsSectionProps) {
+  const [allApplications, setAllApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  // Safe filtering with proper null/undefined checks
-  const filteredApps = applications.filter((app) => {
-    if (!app) return false;
-    
-    const fullName = (app.fullName || '').toLowerCase();
-    const positionTitle = (app.positionTitle || '').toLowerCase();
-    const email = (app.email || '').toLowerCase();
-    const status = app.status || 'pending';
-    const positionType = app.positionType || '';
+  useEffect(() => {
+    fetchAllApplications();
+  }, [applications]);
 
+  const fetchAllApplications = async () => {
+    setLoading(true);
+    try {
+      const startupsResponse = await fetch(`${BACKEND_URL}/api/startups`);
+      const startupsData = await startupsResponse.json();
+
+      const startupSubmissions = Array.isArray(startupsData.submissions)
+        ? startupsData.submissions.map(convertStartupToApplication)
+        : Array.isArray(startupsData)
+        ? startupsData.map(convertStartupToApplication)
+        : [];
+
+      const combined = [...applications, ...startupSubmissions];
+      setAllApplications(combined);
+    } catch (err) {
+      console.error("Error fetching startup data:", err);
+      setAllApplications(applications);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredApps = allApplications.filter((app) => {
+    if (!app) return false;
+
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      fullName.includes(searchTerm.toLowerCase()) ||
-      positionTitle.includes(searchTerm.toLowerCase()) ||
-      email.includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || status === statusFilter;
-    const matchesType = typeFilter === "all" || positionType === typeFilter;
-    
+      (app.fullName || "").toLowerCase().includes(searchLower) ||
+      (app.positionTitle || "").toLowerCase().includes(searchLower) ||
+      app.email.toLowerCase().includes(searchLower);
+
+    const matchesStatus = statusFilter === "all" || (app.status || "pending") === statusFilter;
+    const matchesType = typeFilter === "all" || app.positionType === typeFilter;
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  // Categorize applications - handle missing positionType
   const jobApps = filteredApps.filter((a) => a.positionType === "ciba-job");
   const internshipApps = filteredApps.filter((a) => a.positionType === "ciba-internship");
   const startupApps = filteredApps.filter((a) => a.positionType === "startup");
-  const unknownApps = filteredApps.filter((a) => !a.positionType || (
-    a.positionType !== "ciba-job" && 
-    a.positionType !== "ciba-internship" && 
-    a.positionType !== "startup"
-  ));
+  const unknownApps = filteredApps.filter(
+    (a) =>
+      !a.positionType ||
+      !["ciba-job", "ciba-internship", "startup"].includes(a.positionType)
+  );
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -263,164 +405,139 @@ export default function ApplicationsSection({ applications = [], onRefetch }: Ap
     setTypeFilter("all");
   };
 
-  // Debug logging
-  console.log("Total applications:", applications.length);
-  console.log("Filtered applications:", filteredApps.length);
-  console.log("Jobs:", jobApps.length, "Internships:", internshipApps.length, "Startups:", startupApps.length, "Unknown:", unknownApps.length);
-  console.log("Type Filter:", typeFilter);
-
   return (
-    <div className="space-y-6">
-      {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <div className="flex flex-col lg:flex-row gap-4">
+    <div className="space-y-10">
+      {/* Search & Filters */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
             <input
               type="text"
-              placeholder="Search by name, position, email..."
+              placeholder="Search by name, job title, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full pl-14 pr-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none"
             />
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
+
+          <div className="flex gap-4">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              className="px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 bg-white"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
-              <option value="shortlisted">Shortlisted</option>
+              <option value="shortlisted">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
-            
+
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              className="px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 bg-white"
             >
               <option value="all">All Types</option>
-              <option value="ciba-job">CIBA Job</option>
-              <option value="ciba-internship">CIBA Internship</option>
-              <option value="startup">Startup</option>
+              <option value="ciba-job">CIBA Jobs</option>
+              <option value="ciba-internship">CIBA Internships</option>
+              <option value="startup">Startup Postings</option>
             </select>
           </div>
         </div>
-        
-        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-          <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold text-blue-600">{filteredApps.length}</span> of {applications.length} applications
+
+        <div className="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
+          <p className="text-gray-700 font-medium">
+            Showing <span className="text-blue-600 font-bold text-xl">{filteredApps.length}</span> items
           </p>
           {(searchTerm || statusFilter !== "all" || typeFilter !== "all") && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Clear Filters
+            <button onClick={clearFilters} className="text-blue-600 hover:underline font-medium">
+              Clear filters
             </button>
           )}
         </div>
       </div>
 
-      {/* Warning if no applications loaded */}
-      {applications.length === 0 && (
-        <div className="bg-orange-50 border-2 border-orange-400 rounded-lg p-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-orange-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="font-bold text-orange-900 mb-2">No Applications Loaded</h3>
-              <p className="text-sm text-orange-800 mb-2">
-                Check your backend API and ensure applications are being fetched correctly.
-              </p>
-              <p className="text-sm text-orange-800">
-                Backend URL: <code className="bg-orange-100 px-1 rounded">http://localhost:5000</code>
-              </p>
-            </div>
-          </div>
+      {/* No Data */}
+      {allApplications.length === 0 && !loading && (
+        <div className="text-center py-20">
+          <AlertCircle className="w-20 h-20 text-orange-400 mx-auto mb-6" />
+          <h3 className="text-2xl font-bold text-gray-800 mb-3">No Applications Found</h3>
+          <p className="text-gray-600">Check your backend or wait for submissions.</p>
         </div>
       )}
 
-      {/* Application Lists */}
-      {applications.length > 0 && (
-        <>
-          {/* CIBA Job Applications */}
-          {jobApps.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-blue-600" />
-                CIBA Job Applications ({jobApps.length})
-              </h2>
-              <div className="space-y-4">
-                {jobApps.map((app) => (
-                  <ApplicationCard key={app._id} app={app} onUpdate={onRefetch} onDelete={onRefetch} />
-                ))}
-              </div>
+      {/* Sections */}
+      <div className="space-y-16">
+        {jobApps.length > 0 && (
+          <section>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-4">
+              <Building2 className="w-10 h-10 text-blue-600" />
+              CIBA Job Applications ({jobApps.length})
+            </h2>
+            <div className="space-y-8">
+              {jobApps.map((app) => (
+                <ApplicationCard key={app._id} app={app} onUpdate={fetchAllApplications} onDelete={fetchAllApplications} />
+              ))}
             </div>
-          )}
-          
-          {/* CIBA Internship Applications */}
-          {internshipApps.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-purple-600" />
-                CIBA Internship Applications ({internshipApps.length})
-              </h2>
-              <div className="space-y-4">
-                {internshipApps.map((app) => (
-                  <ApplicationCard key={app._id} app={app} onUpdate={onRefetch} onDelete={onRefetch} />
-                ))}
-              </div>
+          </section>
+        )}
+
+        {internshipApps.length > 0 && (
+          <section>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-4">
+              <GraduationCap className="w-10 h-10 text-purple-600" />
+              CIBA Internship Applications ({internshipApps.length})
+            </h2>
+            <div className="space-y-8">
+              {internshipApps.map((app) => (
+                <ApplicationCard key={app._id} app={app} onUpdate={fetchAllApplications} onDelete={fetchAllApplications} />
+              ))}
             </div>
-          )}
-          
-          {/* Startup Applications */}
-          {startupApps.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-orange-600" />
-                Startup Applications ({startupApps.length})
-              </h2>
-              <div className="space-y-4">
-                {startupApps.map((app) => (
-                  <ApplicationCard key={app._id} app={app} onUpdate={onRefetch} onDelete={onRefetch} />
-                ))}
-              </div>
+          </section>
+        )}
+
+        {startupApps.length > 0 && (
+          <section>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-4">
+              <Rocket className="w-10 h-10 text-orange-600" />
+              Startup Job Postings ({startupApps.length})
+            </h2>
+            <div className="space-y-8">
+              {startupApps.map((app) => (
+                <ApplicationCard key={app._id} app={app} onUpdate={fetchAllApplications} onDelete={fetchAllApplications} />
+              ))}
             </div>
-          )}
-          
-          {/* Other/Unknown Applications */}
-          {unknownApps.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Mail className="w-5 h-5 text-gray-600" />
-                Other Applications ({unknownApps.length})
-              </h2>
-              <div className="space-y-4">
-                {unknownApps.map((app) => (
-                  <ApplicationCard key={app._id} app={app} onUpdate={onRefetch} onDelete={onRefetch} />
-                ))}
-              </div>
+          </section>
+        )}
+
+        {unknownApps.length > 0 && (
+          <section>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-4">
+              <Mail className="w-10 h-10 text-gray-600" />
+              Other Applications ({unknownApps.length})
+            </h2>
+            <div className="space-y-8">
+              {unknownApps.map((app) => (
+                <ApplicationCard key={app._id} app={app} onUpdate={fetchAllApplications} onDelete={fetchAllApplications} />
+              ))}
             </div>
-          )}
-          
-          {/* No results after filtering */}
-          {filteredApps.length === 0 && applications.length > 0 && (
-            <div className="bg-white rounded-lg p-12 text-center border-2 border-dashed border-gray-300">
-              <Mail className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-lg text-gray-500 mb-2">No applications match your filters</p>
-              <button
-                onClick={clearFilters}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          )}
-        </>
-      )}
+          </section>
+        )}
+
+        {filteredApps.length === 0 && allApplications.length > 0 && (
+          <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+            <Mail className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-gray-600 mb-4">No matching results</h3>
+            <button
+              onClick={clearFilters}
+              className="px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
