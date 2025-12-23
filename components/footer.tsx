@@ -1,154 +1,108 @@
 "use client"
 
-import { Mail, Phone, MapPin, Linkedin, Twitter, Instagram } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Mail, Phone, MapPin, Linkedin, Instagram, MessageCircle } from "lucide-react"
 
 export default function Footer() {
-  const router = useRouter()
-
-  const scrollToSection = (id: string) => {
-    // Check if we're on the home page
-    if (window.location.pathname === "/") {
-      const element = document.getElementById(id)
-      element?.scrollIntoView({ behavior: "smooth" })
-    } else {
-      // Navigate to home page with hash
-      router.push(`/#${id}`)
-    }
-  }
-
-  const navigateTo = (path: string) => {
-    router.push(path)
-  }
-
-  const quickLinks = [
-    { name: "Home", action: () => scrollToSection("home") },
-    { name: "Programs", action: () => scrollToSection("programs") },
-    { name: "Gallery", action: () => scrollToSection("gallery") },
-    { name: "Startups", action: () => navigateTo("/startups") },
-    { name: "Jobs", action: () => navigateTo("/job") },
-  ]
-
   return (
-    <footer id="contact" className="bg-foreground text-background py-16 px-4 sm:px-6 lg:px-8 animate-fade-in">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* About */}
-          <div className="animate-slide-in-left">
-            <div className="flex items-center gap-2 mb-4 group cursor-pointer">
-              <div className="w-8 h-8 rounded-lg gradient-sunrise flex items-center justify-center text-white font-bold hover-glow">
-                C
-              </div>
-              <h3 className="text-lg font-bold">CIBA Mumbai</h3>
+    <footer id="contact" className="bg-gradient-to-br from-slate-900 to-slate-800 text-white py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,250px] gap-6 mb-4 items-center">
+
+          {/* Left Side - Contact & Social */}
+          <div className="flex flex-col justify-center items-center lg:items-start gap-4">
+
+            {/* Contact Info */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap items-center justify-center lg:justify-start">
+              <a
+                href="https://maps.google.com/?q=Vashi,Navi+Mumbai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+              >
+                <MapPin size={16} className="group-hover:scale-110 transition-transform" />
+                <span className="text-m">Vashi, Navi Mumbai</span>
+              </a>
+
+              <a
+                href="tel:+919876543210"
+                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+              >
+                <Phone size={16} className="group-hover:scale-110 transition-transform" />
+                <span className="text-m">+91 98765 43210</span>
+              </a>
+
+              <a
+                href="mailto:info@cibamumbai.com"
+                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+              >
+                <Mail size={16} className="group-hover:scale-110 transition-transform" />
+                <span className="text-m">info@cibamumbai.com</span>
+              </a>
             </div>
-            <p className="text-background/80 text-sm leading-relaxed">
-              Empowering entrepreneurs and fostering innovation in Navi Mumbai.
-            </p>
-          </div>
 
-          {/* Quick Links */}
-          <div className="animate-slide-in-left" style={{ animationDelay: "0.1s" }}>
-            <h4 className="font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              {quickLinks.map((link, idx) => (
-                <li key={idx}>
-                  <button
-                    onClick={link.action}
-                    className="text-background/80 hover:text-background transition-all text-left"
-                  >
-                    {link.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="animate-slide-in-right" style={{ animationDelay: "0.1s" }}>
-            <h4 className="font-bold mb-4">Contact</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 hover:translate-x-1 transition-all">
-                <MapPin size={16} />
-                <span className="text-background/80">Vashi, Navi Mumbai</span>
-              </li>
-              <li className="flex items-center gap-2 hover:translate-x-1 transition-all">
-                <Phone size={16} />
-                <a href="tel:+919876543210" className="text-background/80 hover:text-background transition-all">
-                  +91 98765 43210
-                </a>
-              </li>
-              <li className="flex items-center gap-2 hover:translate-x-1 transition-all">
-                <Mail size={16} />
-                <a href="mailto:info@cibamumbai.com" className="text-background/80 hover:text-background transition-all">
-                  info@cibamumbai.com
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Social Links */}
-          <div className="animate-slide-in-right">
-            <h4 className="font-bold mb-4">Follow Us</h4>
-            <div className="flex gap-4">
+            {/* Social Links */}
+            <div className="flex gap-2.5 justify-center lg:justify-start">
               <a
                 href="https://www.linkedin.com/company/centre-for-incubation-&-business-acceleration/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center hover:bg-background/30 transition-all hover:scale-110 hover-glow"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-500 transition-all hover:scale-110"
                 aria-label="LinkedIn"
               >
-                <Linkedin size={18} />
-              </a>
-
-              <a
-                href="https://x.com/CibaMumbai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center hover:bg-background/30 transition-all hover:scale-110 hover-glow"
-                aria-label="Twitter"
-              >
-                <Twitter size={18} />
+                <Linkedin size={16} />
               </a>
 
               <a
                 href="https://www.instagram.com/cibaindia/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center hover:bg-background/30 transition-all hover:scale-110 hover-glow"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-pink-500 transition-all hover:scale-110"
                 aria-label="Instagram"
               >
-                <Instagram size={18} />
+                <Instagram size={16} />
+              </a>
+
+              <a
+                href="https://wa.me/918850283239"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-green-500 transition-all hover:scale-110"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle size={16} />
               </a>
             </div>
           </div>
-        </div >
 
-        {/* Map Section */}
-        <div className="mb-12 rounded-xl overflow-hidden h-64 bg-background/20 hover-glow" >
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3768.7547849999997!2d72.99!3d19.08!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c8f8f8f8f8f9%3A0x0!2sVashi%2C%20Navi%20Mumbai!5e0!3m2!1sen!2sin!4v1234567890"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+          {/* Right Side - Map */}
+          <div className="rounded-xl overflow-hidden h-32 lg:h-32 bg-white/10 ring-1 ring-white/20 hover:ring-white/40 transition-all mx-auto lg:mx-0 w-full max-w-md lg:max-w-none">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3768.7547849999997!2d72.99!3d19.08!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c8f8f8f8f8f9%3A0x0!2sVashi%2C%20Navi%20Mumbai!5e0!3m2!1sen!2sin!4v1234567890"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-background/20 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-background/80" >
+        <div className="border-t border-white/10 pt-3 flex flex-col sm:flex-row justify-between items-center gap-3 text-m text-white/60">
           <p>&copy; 2025 CIBA Mumbai. All rights reserved.</p>
-          <div className="flex gap-6 mt-4 sm:mt-0">
-            <a href="#" className="hover:text-background transition-all">
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-white transition-colors">
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-background transition-all">
+            <a href="#" className="hover:text-white transition-colors">
               Terms of Service
             </a>
           </div>
         </div>
-      </div >
-    </footer >
+      </div>
+    </footer>
   )
 }
