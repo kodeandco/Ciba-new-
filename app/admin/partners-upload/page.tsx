@@ -30,12 +30,29 @@ const toBase64 = (file: File): Promise<string> =>
     })
 
 /* ===============================
+   HELPER: Validate 4:3 Aspect Ratio
+================================ */
+const validateAspectRatio = (file: File): Promise<boolean> =>
+    new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+            const ratio = img.width / img.height
+            const expectedRatio = 4 / 3
+            const tolerance = 0.01
+            resolve(Math.abs(ratio - expectedRatio) < tolerance)
+        }
+        img.onerror = () => resolve(false)
+        img.src = URL.createObjectURL(file)
+    })
+
+/* ===============================
    PAGE
 ================================ */
 export default function PartnersAdminPage() {
     const [partners, setPartners] = useState<Partner[]>([])
     const [editingId, setEditingId] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [imageError, setImageError] = useState<string | null>(null)
 
     const [formData, setFormData] = useState({
         name: "",
@@ -49,8 +66,6 @@ export default function PartnersAdminPage() {
     const fetchPartners = async () => {
         const res = await fetch(API_URL)
         const data = await res.json()
-
-        // SAFETY: ensure array
         setPartners(Array.isArray(data) ? data : [])
     }
 
@@ -68,9 +83,17 @@ export default function PartnersAdminPage() {
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files?.[0]) {
-            setFormData(prev => ({ ...prev, image: e.target.files![0] }))
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const isValid = await validateAspectRatio(file)
+            if (isValid) {
+                setFormData(prev => ({ ...prev, image: file }))
+                setImageError(null)
+            } else {
+                setImageError("Please upload an image with 4:3 aspect ratio (e.g., 800x600, 1200x900)")
+                e.target.value = ""
+            }
         }
     }
 
@@ -81,6 +104,7 @@ export default function PartnersAdminPage() {
             description: "",
             image: null
         })
+        setImageError(null)
     }
 
     /* ===============================
@@ -148,13 +172,8 @@ export default function PartnersAdminPage() {
                     Partners Management
                 </h1>
 
-                {/* ===============================
-            FORM
-        ================================ */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100"
-                >
+                {/* FORM */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
                     <h2 className="text-xl font-semibold text-blue-800 mb-6">
                         {editingId ? "Edit Partner" : "Add Partner"}
                     </h2>
@@ -178,16 +197,27 @@ export default function PartnersAdminPage() {
                             className="border border-blue-200 p-3 rounded-lg min-h-[120px] focus:ring-2 focus:ring-blue-400 outline-none"
                         />
 
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="text-blue-700"
-                        />
+                        <div>
+                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                                Upload Image (4:3 aspect ratio required)
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="text-blue-700 w-full"
+                            />
+                            {imageError && (
+                                <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                            )}
+                            <p className="text-gray-500 text-xs mt-1">
+                                Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
+                            </p>
+                        </div>
 
                         <div className="flex gap-4">
                             <button
-                                type="submit"
+                                onClick={handleSubmit}
                                 disabled={loading}
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition"
                             >
@@ -209,22 +239,23 @@ export default function PartnersAdminPage() {
                             )}
                         </div>
                     </div>
-                </form>
+                </div>
 
-                {/* ===============================
-            LIST
-        ================================ */}
+                {/* LIST */}
                 <div className="grid md:grid-cols-3 gap-8">
                     {partners.map(partner => (
                         <div
                             key={partner._id}
                             className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden hover:shadow-xl transition"
                         >
-                            <img
-                                src={partner.image || "/placeholder.svg"}
-                                alt={partner.name}
-                                className="h-48 w-full object-cover"
-                            />
+                            {/* 4:3 Aspect Ratio Container */}
+                            <div className="relative w-full" style={{ paddingBottom: '75%' }}>
+                                <img
+                                    src={partner.image || "/placeholder.svg"}
+                                    alt={partner.name}
+                                    className="absolute top-0 left-0 w-full h-full object-cover"
+                                />
+                            </div>
 
                             <div className="p-4">
                                 <h3 className="font-bold text-lg text-blue-900">

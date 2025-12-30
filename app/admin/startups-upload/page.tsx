@@ -8,14 +8,6 @@ interface Startup {
     companyName: string;
     tagline: string;
     careerUrl: string;
-    createdAt: string;
-}
-
-interface Startup {
-    _id: string;
-    companyName: string;
-    tagline: string;
-    careerUrl: string;
     hasImage?: boolean;
     createdAt: string;
 }
@@ -29,6 +21,22 @@ interface FormData {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+/* ===============================
+   HELPER: Validate 4:3 Aspect Ratio
+================================ */
+const validateAspectRatio = (file: File): Promise<boolean> =>
+    new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+            const ratio = img.width / img.height
+            const expectedRatio = 4 / 3
+            const tolerance = 0.01
+            resolve(Math.abs(ratio - expectedRatio) < tolerance)
+        }
+        img.onerror = () => resolve(false)
+        img.src = URL.createObjectURL(file)
+    })
+
 export default function StartupAdminPage() {
     const [activeTab, setActiveTab] = useState<'incubated' | 'graduated'>('incubated');
     const [incubatedStartups, setIncubatedStartups] = useState<Startup[]>([]);
@@ -36,6 +44,7 @@ export default function StartupAdminPage() {
     const [loading, setLoading] = useState<boolean>(false);
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [imageError, setImageError] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormData>({
         companyName: '',
         tagline: '',
@@ -68,6 +77,20 @@ export default function StartupAdminPage() {
         }
     };
 
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const isValid = await validateAspectRatio(file);
+            if (isValid) {
+                setFormData({ ...formData, image: file });
+                setImageError(null);
+            } else {
+                setImageError("Please upload an image with 4:3 aspect ratio (e.g., 800x600, 1200x900)");
+                e.target.value = "";
+            }
+        }
+    };
+
     const handleAdd = async () => {
         if (!formData.companyName || !formData.tagline || !formData.careerUrl) {
             alert('All fields are required');
@@ -87,17 +110,9 @@ export default function StartupAdminPage() {
                 formDataToSend.append('image', formData.image);
             }
 
-            console.log('Sending data:', {
-                companyName: formData.companyName,
-                tagline: formData.tagline,
-                careerUrl: formData.careerUrl,
-                hasImage: !!formData.image
-            });
-
             const res = await fetch(endpoint, {
                 method: 'POST',
                 body: formDataToSend
-                // DO NOT set Content-Type header - let browser set it with boundary
             });
 
             const data = await res.json();
@@ -106,6 +121,7 @@ export default function StartupAdminPage() {
                 alert(data.message);
                 setFormData({ companyName: '', tagline: '', careerUrl: '', image: null });
                 setShowAddForm(false);
+                setImageError(null);
                 fetchStartups();
             } else {
                 alert(data.error || 'Failed to add startup');
@@ -146,6 +162,7 @@ export default function StartupAdminPage() {
                 alert('Startup updated successfully');
                 setEditingId(null);
                 setFormData({ companyName: '', tagline: '', careerUrl: '', image: null });
+                setImageError(null);
                 fetchStartups();
             } else {
                 alert(data.error || 'Failed to update startup');
@@ -188,11 +205,13 @@ export default function StartupAdminPage() {
             image: null
         });
         setShowAddForm(false);
+        setImageError(null);
     };
 
     const cancelEdit = () => {
         setEditingId(null);
         setFormData({ companyName: '', tagline: '', careerUrl: '', image: null });
+        setImageError(null);
     };
 
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
@@ -264,14 +283,20 @@ export default function StartupAdminPage() {
                                 </div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Logo Image (Optional)
+                                        Logo Image - 4:3 Aspect Ratio Required
                                     </label>
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
+                                        onChange={handleFileChange}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
+                                    {imageError && (
+                                        <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                    )}
+                                    <p className="text-gray-500 text-xs mt-1">
+                                        Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
+                                    </p>
                                     {formData.image && (
                                         <p className="mt-2 text-sm text-gray-600">Selected: {formData.image.name}</p>
                                     )}
@@ -284,7 +309,7 @@ export default function StartupAdminPage() {
                                         Add Startup
                                     </button>
                                     <button
-                                        onClick={() => { setShowAddForm(false); setFormData({ companyName: '', tagline: '', careerUrl: '', image: null }); }}
+                                        onClick={() => { setShowAddForm(false); setFormData({ companyName: '', tagline: '', careerUrl: '', image: null }); setImageError(null); }}
                                         className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                                     >
                                         Cancel
@@ -326,14 +351,20 @@ export default function StartupAdminPage() {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                        Update Logo Image (Optional)
+                                                        Update Logo Image - 4:3 Aspect Ratio Required
                                                     </label>
                                                     <input
                                                         type="file"
                                                         accept="image/*"
-                                                        onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
+                                                        onChange={handleFileChange}
                                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                     />
+                                                    {imageError && (
+                                                        <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                                    )}
+                                                    <p className="text-gray-500 text-xs mt-1">
+                                                        Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
+                                                    </p>
                                                     {formData.image && (
                                                         <p className="mt-2 text-sm text-gray-600">Selected: {formData.image.name}</p>
                                                     )}
@@ -359,11 +390,13 @@ export default function StartupAdminPage() {
                                             <div className="flex items-start justify-between">
                                                 <div className="flex gap-4 flex-1">
                                                     {startup.hasImage && (
-                                                        <img
-                                                            src={`${API_BASE}/admin/${activeTab}-startups/${startup._id}/image`}
-                                                            alt={startup.companyName}
-                                                            className="w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                                        />
+                                                        <div className="relative w-24 flex-shrink-0" style={{ paddingBottom: '18%' }}>
+                                                            <img
+                                                                src={`${API_BASE}/admin/${activeTab}-startups/${startup._id}/image`}
+                                                                alt={startup.companyName}
+                                                                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg border border-gray-200"
+                                                            />
+                                                        </div>
                                                     )}
                                                     <div className="flex-1">
                                                         <h3 className="text-lg font-semibold text-gray-900 mb-1">{startup.companyName}</h3>

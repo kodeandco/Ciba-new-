@@ -17,10 +17,27 @@ interface Mentor {
 
 const API_URL = "http://localhost:5000/api/mentors"
 
+/* ===============================
+   HELPER: Validate 4:3 Aspect Ratio
+================================ */
+const validateAspectRatio = (file: File): Promise<boolean> =>
+    new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+            const ratio = img.width / img.height
+            const expectedRatio = 4 / 3
+            const tolerance = 0.01
+            resolve(Math.abs(ratio - expectedRatio) < tolerance)
+        }
+        img.onerror = () => resolve(false)
+        img.src = URL.createObjectURL(file)
+    })
+
 export default function MentorsAdminPage() {
     const [mentors, setMentors] = useState<Mentor[]>([])
     const [editingId, setEditingId] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [imageError, setImageError] = useState<string | null>(null)
     const [formData, setFormData] = useState<any>({
         name: "",
         designation: "",
@@ -52,9 +69,22 @@ export default function MentorsAdminPage() {
        FORM HANDLING
     =============================== */
     const handleChange = (e: any) => {
-        const { name, value, files } = e.target
-        if (files) setFormData({ ...formData, image: files[0] })
-        else setFormData({ ...formData, [name]: value })
+        const { name, value } = e.target
+        setFormData({ ...formData, [name]: value })
+    }
+
+    const handleFileChange = async (e: any) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const isValid = await validateAspectRatio(file)
+            if (isValid) {
+                setFormData({ ...formData, image: file })
+                setImageError(null)
+            } else {
+                setImageError("Please upload an image with 4:3 aspect ratio (e.g., 800x600, 1200x900)")
+                e.target.value = ""
+            }
+        }
     }
 
     const resetForm = () => {
@@ -68,6 +98,7 @@ export default function MentorsAdminPage() {
             website: "",
             image: null
         })
+        setImageError(null)
     }
 
     /* ===============================
@@ -76,13 +107,11 @@ export default function MentorsAdminPage() {
     const handleSubmit = async (e: any) => {
         e.preventDefault()
 
-        // Prevent double submission
         if (isSubmitting) return
         setIsSubmitting(true)
 
         const payload = new FormData()
 
-        // Add all fields to FormData
         payload.append("name", formData.name)
         payload.append("designation", formData.designation)
         payload.append("department", formData.department)
@@ -91,7 +120,6 @@ export default function MentorsAdminPage() {
         if (formData.linkedin) payload.append("linkedin", formData.linkedin)
         if (formData.website) payload.append("website", formData.website)
 
-        // Add image if present
         if (formData.image) {
             payload.append("image", formData.image)
         }
@@ -150,13 +178,8 @@ export default function MentorsAdminPage() {
                     Mentor Management
                 </h1>
 
-                {/* ===============================
-            FORM
-        =============================== */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100"
-                >
+                {/* FORM */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
                     <h2 className="text-xl font-semibold text-blue-800 mb-6">
                         {editingId ? "Edit Mentor" : "Add New Mentor"}
                     </h2>
@@ -210,17 +233,28 @@ export default function MentorsAdminPage() {
                             required
                         />
 
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleChange}
-                            required={!editingId}
-                            className="col-span-full text-blue-700"
-                        />
+                        <div className="col-span-full">
+                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                                Upload Image (4:3 aspect ratio required)
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                required={!editingId}
+                                className="text-blue-700 w-full"
+                            />
+                            {imageError && (
+                                <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                            )}
+                            <p className="text-gray-500 text-xs mt-1">
+                                Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
+                            </p>
+                        </div>
 
                         <div className="col-span-full flex gap-4">
                             <button
-                                type="submit"
+                                onClick={handleSubmit}
                                 disabled={isSubmitting}
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -238,22 +272,23 @@ export default function MentorsAdminPage() {
                             )}
                         </div>
                     </div>
-                </form>
+                </div>
 
-                {/* ===============================
-            LIST
-        =============================== */}
+                {/* LIST */}
                 <div className="grid md:grid-cols-3 gap-8">
                     {mentors.map((mentor) => (
                         <div
                             key={mentor._id}
                             className="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 hover:shadow-xl transition"
                         >
-                            <img
-                                src={mentor.image || "/placeholder.svg"}
-                                alt={mentor.name}
-                                className="h-48 w-full object-cover"
-                            />
+                            {/* 4:3 Aspect Ratio Container */}
+                            <div className="relative w-full" style={{ paddingBottom: '75%' }}>
+                                <img
+                                    src={mentor.image || "/placeholder.svg"}
+                                    alt={mentor.name}
+                                    className="absolute top-0 left-0 w-full h-full object-cover"
+                                />
+                            </div>
 
                             <div className="p-4">
                                 <h3 className="font-bold text-lg text-blue-900">

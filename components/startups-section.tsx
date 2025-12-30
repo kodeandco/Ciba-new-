@@ -144,12 +144,13 @@ export default function StartupsSection() {
                     className="group relative overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all cursor-pointer"
                     onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                   >
-                    <div className="relative h-40 overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600">
+                    {/* 4:3 Aspect Ratio Container */}
+                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600" style={{ paddingBottom: '75%' }}>
                       {startup.hasImage ? (
                         <img
                           src={`${BACKEND_URL}/api/admin/incubated-startups/${startup._id}/image`}
                           alt={startup.companyName}
-                          className="w-full h-full object-cover"
+                          className="absolute top-0 left-0 w-full h-full object-cover"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -202,12 +203,13 @@ export default function StartupsSection() {
                     className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-blue-50 shadow-lg hover:shadow-2xl transition-all border border-green-200 cursor-pointer"
                     onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                   >
-                    <div className="relative h-40 overflow-hidden bg-gradient-to-br from-green-400 to-emerald-600">
+                    {/* 4:3 Aspect Ratio Container */}
+                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-600" style={{ paddingBottom: '75%' }}>
                       {startup.hasImage ? (
                         <img
                           src={`${BACKEND_URL}/api/admin/graduated-startups/${startup._id}/image`}
                           alt={startup.companyName}
-                          className="w-full h-full object-cover"
+                          className="absolute top-0 left-0 w-full h-full object-cover"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">

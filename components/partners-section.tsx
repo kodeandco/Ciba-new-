@@ -236,12 +236,15 @@ export default function PartnersSection() {
                     cursor: 'pointer',
                   }}
                 >
-                  <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden', background: '#f1f5f9' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '75%', overflow: 'hidden', background: '#f1f5f9' }}>
                     {partner.image ? (
                       <img
                         src={partner.image}
                         alt={partner.name}
                         style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
@@ -250,6 +253,9 @@ export default function PartnersSection() {
                       />
                     ) : (
                       <div style={{
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
                         width: '100%',
                         height: '100%',
                         display: 'flex',
@@ -318,12 +324,15 @@ export default function PartnersSection() {
                     cursor: 'pointer',
                   }}
                 >
-                  <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden', background: '#f1f5f9' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '75%', overflow: 'hidden', background: '#f1f5f9' }}>
                     {partner.image ? (
                       <img
                         src={partner.image}
                         alt={partner.name}
                         style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
@@ -332,6 +341,9 @@ export default function PartnersSection() {
                       />
                     ) : (
                       <div style={{
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
                         width: '100%',
                         height: '100%',
                         display: 'flex',
