@@ -189,12 +189,14 @@ export default function MentorsSection() {
                   className="relative rounded-xl overflow-hidden bg-blue-50 w-full max-w-[300px] transition-shadow duration-300"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  {/* Image */}
-                  <img
-                    src={mentor.image || "/placeholder.svg"}
-                    alt={mentor.name}
-                    className="w-full h-64 object-cover object-top"
-                  />
+                  {/* 4:3 Aspect Ratio Image Container */}
+                  <div className="relative w-full" style={{ paddingBottom: '75%' }}>
+                    <img
+                      src={mentor.image || "/placeholder.svg"}
+                      alt={mentor.name}
+                      className="absolute top-0 left-0 w-full h-full object-cover object-top"
+                    />
+                  </div>
 
                   {/* Content */}
                   <div className="relative p-6 min-h-[160px]">
@@ -277,8 +279,8 @@ export default function MentorsSection() {
                   key={index}
                   onClick={() => setCurrentIndex(index)}
                   className={`rounded-full transition-all ${index === currentIndex
-                      ? "bg-blue-600 w-8 h-3"
-                      : "bg-blue-300 w-3 h-3 hover:bg-blue-400"
+                    ? "bg-blue-600 w-8 h-3"
+                    : "bg-blue-300 w-3 h-3 hover:bg-blue-400"
                     }`}
                 />
               ))}

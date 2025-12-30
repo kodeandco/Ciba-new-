@@ -11,7 +11,8 @@ import TourSection from "@/components/tour-section"
 import MentorsSection from "@/components/mentors-section"
 import StartupsSection from "@/components/startups-section"
 import PartnersSection from "@/components/partners-section"
-import FAQChatbot from "@/components/faq_chatbot"
+import FAQChatbot from "@/components/FloatingWhatsapp"
+import FloatingWhatsApp from "@/components/FloatingWhatsapp"
 
 export default function Home() {
   return (
@@ -82,7 +83,7 @@ export default function Home() {
       </main>
 
       {/* FAQ Chatbot - Floats on top of everything */}
-      <FAQChatbot />
+      <FloatingWhatsApp />
     </>
   )
 }

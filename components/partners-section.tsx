@@ -1,78 +1,94 @@
 "use client";
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
-const partners = [
-  { 
-    id: 1, 
-    name: 'InnoVentures', 
-    img: 'https://picsum.photos/seed/tech1/600/400', 
-    website: 'https://innoventures.example.com' 
-  },
-  { 
-    id: 2, 
-    name: 'TechNova Labs', 
-    img: 'https://picsum.photos/seed/startup2/600/400', 
-    website: 'https://technovalabs.example.com' 
-  },
-  { 
-    id: 3, 
-    name: 'FutureScale', 
-    img: 'https://picsum.photos/seed/software3/600/400', 
-    website: 'https://futurescale.example.com' 
-  },
-  { 
-    id: 4, 
-    name: 'NextGen Capital', 
-    img: 'https://picsum.photos/seed/finance4/600/400', 
-    website: 'https://nextgencapital.example.com' 
-  },
-  { 
-    id: 5, 
-    name: 'Quantum Ventures', 
-    img: 'https://picsum.photos/seed/innovation5/600/400', 
-    website: 'https://quantumventures.example.com' 
-  },
-  { 
-    id: 6, 
-    name: 'BlueHorizon Fund', 
-    img: 'https://picsum.photos/seed/investment6/600/400', 
-    website: 'https://bluehorizon.example.com' 
-  },
-  { 
-    id: 7, 
-    name: 'PrimeInvest Group', 
-    img: 'https://picsum.photos/seed/corporate7/600/400', 
-    website: 'https://primeinvest.example.com' 
-  },
-  { 
-    id: 8, 
-    name: 'Stellar Partners', 
-    img: 'https://picsum.photos/seed/business8/600/400', 
-    website: 'https://stellarpartners.example.com' 
-  },
-];
+interface Partner {
+  _id: string;
+  name: string;
+  description: string;
+  image: string | null;
+}
 
-const marqueePartners = [...partners, ...partners];
+const API_URL = "http://localhost:5000/api/partners";
 
 export default function PartnersSection() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, -40]);
-
   const [isPaused, setIsPaused] = useState(false);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch partners from API
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Failed to fetch partners');
+        const data = await res.json();
+        setPartners(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching partners:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
+  }, []);
+
+  // For top row: use original partners without duplication
+  // For bottom row: duplicate for seamless marquee effect
+  const topRowPartners = partners;
+  const bottomRowPartners = partners.length > 0 ? [...partners, ...partners] : [];
+
+  if (loading) {
+    return (
+      <section
+        style={{
+          padding: '6rem 1rem',
+          background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: '1.25rem', color: '#64748B' }}>Loading partners...</div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section
+        style={{
+          padding: '6rem 1rem',
+          background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: '1.25rem', color: '#EF4444' }}>Error: {error}</div>
+      </section>
+    );
+  }
+
+  if (partners.length === 0) {
+    return (
+      <section
+        style={{
+          padding: '6rem 1rem',
+          background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: '1.25rem', color: '#64748B' }}>No partners available</div>
+      </section>
+    );
+  }
 
   return (
     <section
-      ref={ref}
       style={{
         position: 'relative',
-        padding: '6rem 1rem', // Reduced vertical padding a bit
+        padding: '6rem 1rem',
         background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
         overflow: 'hidden',
       }}
@@ -103,7 +119,7 @@ export default function PartnersSection() {
         }}
       />
 
-      <motion.div style={{ y, maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <motion.div
@@ -120,7 +136,7 @@ export default function PartnersSection() {
               borderRadius: '50px',
               border: '1px solid rgba(59, 130, 246, 0.2)',
               marginBottom: '1.5rem',
-              fontSize: '0.8rem', // Slightly smaller badge
+              fontSize: '0.8rem',
               fontWeight: '600',
               color: '#1E40AF',
               letterSpacing: '0.5px',
@@ -144,7 +160,7 @@ export default function PartnersSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)', // Slightly smaller heading
+              fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)',
               fontWeight: '800',
               background: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
               WebkitBackgroundClip: 'text',
@@ -172,7 +188,7 @@ export default function PartnersSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
             style={{
-              fontSize: '1rem', // Smaller description
+              fontSize: '1rem',
               color: '#64748B',
               maxWidth: '600px',
               margin: '0 auto',
@@ -184,7 +200,7 @@ export default function PartnersSection() {
         </div>
 
         {/* Marquee Section */}
-        <div 
+        <div
           style={{ position: 'relative' }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -199,21 +215,18 @@ export default function PartnersSection() {
             }}
           >
             <motion.div
-              animate={{ x: isPaused ? '0%' : ['0%', '-50%'] }}
+              animate={{ x: isPaused ? '0%' : ['0%', '-100%'] }}
               transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
               style={{ display: 'flex', gap: '1.5rem', width: 'fit-content' }}
             >
-              {marqueePartners.map((partner, i) => (
-                <motion.a
-                  key={`top-${i}`}
-                  href={partner.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {topRowPartners.map((partner) => (
+                <motion.div
+                  key={`top-${partner._id}`}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   style={{
                     flexShrink: 0,
-                    width: '280px', // Reduced from 320px
+                    width: '280px',
                     background: '#ffffff',
                     borderRadius: '20px',
                     overflow: 'hidden',
@@ -221,33 +234,62 @@ export default function PartnersSection() {
                     display: 'flex',
                     flexDirection: 'column',
                     cursor: 'pointer',
-                    textDecoration: 'none',
                   }}
                 >
-                  <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden' }}>
-                    <img
-                      src={partner.img}
-                      alt={partner.name}
-                      style={{
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '75%', overflow: 'hidden', background: '#f1f5f9' }}>
+                    {partner.image ? (
+                      <img
+                        src={partner.image}
+                        alt={partner.name}
+                        style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.4s ease',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.4s ease',
-                      }}
-                    />
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3rem',
+                        color: '#cbd5e1',
+                      }}>
+                        {partner.name.charAt(0)}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ padding: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ padding: '1.25rem' }}>
                     <h3
                       style={{
                         fontWeight: '600',
-                        fontSize: '1.125rem', // Reduced from 1.25rem
+                        fontSize: '1.125rem',
                         color: '#1e293b',
+                        marginBottom: '0.5rem',
                       }}
                     >
                       {partner.name}
                     </h3>
+                    <p
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#64748B',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      {partner.description}
+                    </p>
                   </div>
-                </motion.a>
+                </motion.div>
               ))}
             </motion.div>
           </div>
@@ -265,12 +307,9 @@ export default function PartnersSection() {
               transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
               style={{ display: 'flex', gap: '1.5rem', width: 'fit-content' }}
             >
-              {[...marqueePartners].reverse().map((partner, i) => (
-                <motion.a
-                  key={`bottom-${i}`}
-                  href={partner.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {bottomRowPartners.map((partner, i) => (
+                <motion.div
+                  key={`bottom-${partner._id}-${i}`}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   style={{
@@ -283,38 +322,67 @@ export default function PartnersSection() {
                     display: 'flex',
                     flexDirection: 'column',
                     cursor: 'pointer',
-                    textDecoration: 'none',
                   }}
                 >
-                  <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden' }}>
-                    <img
-                      src={partner.img}
-                      alt={partner.name}
-                      style={{
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '75%', overflow: 'hidden', background: '#f1f5f9' }}>
+                    {partner.image ? (
+                      <img
+                        src={partner.image}
+                        alt={partner.name}
+                        style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.4s ease',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.4s ease',
-                      }}
-                    />
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3rem',
+                        color: '#cbd5e1',
+                      }}>
+                        {partner.name.charAt(0)}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ padding: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ padding: '1.25rem' }}>
                     <h3
                       style={{
                         fontWeight: '600',
                         fontSize: '1.125rem',
                         color: '#1e293b',
+                        marginBottom: '0.5rem',
                       }}
                     >
                       {partner.name}
                     </h3>
+                    <p
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#64748B',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      {partner.description}
+                    </p>
                   </div>
-                </motion.a>
+                </motion.div>
               ))}
             </motion.div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <style jsx>{`
         @keyframes pulse {
@@ -322,25 +390,21 @@ export default function PartnersSection() {
           50% { opacity: 0.6; transform: scale(1.1); }
         }
 
-        a:hover img {
-          transform: scale(1.08);
-        }
-
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-          motion.a {
+          div[style*="width: 280px"] {
             width: 260px !important;
           }
         }
 
         @media (max-width: 768px) {
-          motion.a {
+          div[style*="width: 280px"] {
             width: 240px !important;
           }
         }
 
         @media (max-width: 640px) {
-          motion.a {
+          div[style*="width: 280px"] {
             width: 220px !important;
           }
         }

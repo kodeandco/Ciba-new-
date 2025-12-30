@@ -55,6 +55,7 @@ const graduatedStartupsRoutes = require("./routes/graduated_startups_route");
 const galleryRoutes = require("./routes/gallery_routes");
 const mentorsRoutes = require("./routes/mentors_route");
 const partnersRoutes = require("./routes/partners_routes");
+const testimonialsRoutes = require("./routes/testimonials_routes");
 // Mount routes
 app.use("/api/clinic", startupClinicRoutes);
 app.use("/api/incubation", incubationRoutes);
@@ -67,6 +68,7 @@ app.use("/api", graduatedStartupsRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/mentors", mentorsRoutes);
 app.use("/api/partners", partnersRoutes);
+app.use("/api/testimonials", testimonialsRoutes);
 console.log("✅ All routes mounted successfully!");
 
 // Route verification
@@ -95,6 +97,7 @@ console.log("    GET    /api/startups");
 console.log("  Admin:");
 console.log("    GET    /api/admin/ciba-jobs");
 console.log("    GET    /api/admin/incubated-startups\n");
+
 
 // Error Handler - MUST be after routes
 app.use((err, req, res, next) => {
