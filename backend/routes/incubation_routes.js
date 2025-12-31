@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 const Incubation = require("../models/incubation_models");
+const { sendIncubationStatusEmail } = require("../utils/emailService");
 
 // Configure multer to store in memory (as Buffer)
 const storage = multer.memoryStorage();
@@ -294,19 +295,104 @@ router.patch("/:id/status", async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
+    // Find and update the application
     const application = await Incubation.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
-    ).select("-pitchDeck.data"); // Don't send buffer in response
+    );
 
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    res.status(200).json({ success: true, application });
+    // Return success
+    res.status(200).json({ 
+      success: true, 
+      application: {
+        ...application.toObject(),
+        pitchDeck: {
+          filename: application.pitchDeck.filename,
+          size: application.pitchDeck.size,
+          contentType: application.pitchDeck.contentType,
+        }
+      },
+      message: "Status updated successfully"
+    });
   } catch (err) {
     console.error("Error updating status:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// SEND STATUS EMAIL (Admin route)
+// -------------------------
+
+router.post("/:id/send-email", async (req, res) => {
+  try {
+    const application = await Incubation.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    // Send email with current status
+    const emailResult = await sendIncubationStatusEmail(application, application.status);
+    
+    if (emailResult.success) {
+      console.log(`✅ Status email sent successfully to ${application.email}`);
+      return res.status(200).json({ 
+        success: true, 
+        message: "Email sent successfully",
+        emailSent: true
+      });
+    } else {
+      console.error(`⚠️ Email failed: ${emailResult.error}`);
+      return res.status(500).json({ 
+        success: false, 
+        error: "Failed to send email",
+        details: emailResult.error
+      });
+    }
+  } catch (err) {
+    console.error("Error sending email:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// SEND STATUS EMAIL (Admin route)
+// -------------------------
+
+router.post("/:id/send-email", async (req, res) => {
+  try {
+    const application = await Incubation.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    // Send email with current status
+    const emailResult = await sendIncubationStatusEmail(application, application.status);
+    
+    if (emailResult.success) {
+      console.log(`✅ Status email sent successfully to ${application.email}`);
+      return res.status(200).json({ 
+        success: true, 
+        message: "Email sent successfully",
+        emailSent: true
+      });
+    } else {
+      console.error(`⚠️ Email failed: ${emailResult.error}`);
+      return res.status(500).json({ 
+        success: false, 
+        error: "Failed to send email",
+        details: emailResult.error
+      });
+    }
+  } catch (err) {
+    console.error("Error sending email:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
