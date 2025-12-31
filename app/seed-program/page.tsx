@@ -231,7 +231,8 @@ export default function NidhiSSPPage() {
                         NIDHI Seed Support Program
                     </h1>
                     <p className="text-lg md:text-xl mb-8 text-blue-100">
-                        Empowering Student Innovators & Early-Stage Startups
+                        CIBA provides funding support to early-stage startups through National Initiative for Developing and Harnessing (NIDHI) Seed Support Program. Supported by TTI – Department of Science and Technology, GoI.
+
                     </p>
                     <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-base md:text-lg">
                         <div className="flex items-center gap-2">
