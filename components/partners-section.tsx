@@ -399,7 +399,7 @@ export default function PartnersSection() {
             whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(59, 130, 246, 0.4)' }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            onClick={() => window.location.href = '/contact'}
+            onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSerMZNaiiyCLAEPX-E1sWhT4cvQL7TXTUMpBemHmuY60Tw8nw/viewform', '_blank')}
             style={{
               padding: '16px 40px',
               fontSize: '1.125rem',
