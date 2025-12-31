@@ -48,7 +48,7 @@ export default function Navbar() {
             onClick={navigateHome}
           >
             <img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-cag4bDIMFGmh8LtfD2mQmy1l7r0nsD.png"
+              src="/dst-ciba-logo.png"
               alt="CIBA Logo"
               className="h-10 w-auto"
             />
