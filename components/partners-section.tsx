@@ -382,12 +382,83 @@ export default function PartnersSection() {
             </motion.div>
           </div>
         </div>
+
+        {/* Apply to be a Partner Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '4rem',
+          }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(59, 130, 246, 0.4)' }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            onClick={() => window.location.href = '/contact'}
+            style={{
+              padding: '16px 40px',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#ffffff',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #0EA5E9 100%)',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              boxShadow: '0 10px 30px -10px rgba(59, 130, 246, 0.3)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <span style={{ position: 'relative', zIndex: 1 }}>Apply to be a Partner</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              <path
+                d="M4.167 10h11.666M10 4.167L15.833 10 10 15.833"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              }}
+              className="button-overlay"
+            />
+          </motion.button>
+        </motion.div>
       </div>
 
       <style jsx>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        button:hover .button-overlay {
+          opacity: 1;
         }
 
         /* Responsive adjustments */
@@ -401,11 +472,19 @@ export default function PartnersSection() {
           div[style*="width: 280px"] {
             width: 240px !important;
           }
+          button {
+            padding: 14px 32px !important;
+            font-size: 1rem !important;
+          }
         }
 
         @media (max-width: 640px) {
           div[style*="width: 280px"] {
             width: 220px !important;
+          }
+          button {
+            padding: 12px 28px !important;
+            font-size: 0.95rem !important;
           }
         }
       `}</style>

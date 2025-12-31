@@ -24,7 +24,7 @@ const programs = [
     id: 2,
     title: "Incubation Program",
     description: "Comprehensive support for scaling your startup",
-    duration: "12 months",
+    duration: "24 months",
     benefits: [
       "Dedicated mentor",
       "Pitch deck preparation",
