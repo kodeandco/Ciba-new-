@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { X, Volume2, VolumeX } from "lucide-react"
+import { X, Volume2, VolumeX, ArrowRight, Mail } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function HeroVideo() {
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -9,6 +10,7 @@ export default function HeroVideo() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const timer = setTimeout(() => setShowScrollIndicator(false), 4000)
@@ -47,6 +49,11 @@ export default function HeroVideo() {
     }
   }
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id)
+    element?.scrollIntoView({ behavior: "smooth" })
+  }
+
   return (
     <>
       {/* Background Video Section - Full Screen */}
@@ -82,17 +89,37 @@ export default function HeroVideo() {
               </span>
             </h1>
 
-
-            <p className="text-xl md:text-2xl text-gray-200 mb-8 opacity-0 animate-[fadeIn_1s_ease-out_0.6s_forwards]">
+            <p className="text-xl md:text-2xl text-gray-200 mb-12 opacity-0 animate-[fadeIn_1s_ease-out_0.6s_forwards]">
               Where Innovation Meets <span className="text-blue-400">Opportunity</span>
             </p>
 
-            <button
-              onClick={handleVideoClick}
-              className="text-sm text-gray-300 hover:text-white transition-colors opacity-0 animate-[fadeIn_1s_ease-out_0.9s_forwards]"
-            >
-              Click to play video
-            </button>
+            {/* Floating Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center opacity-0 animate-[fadeInBounce_1.2s_ease-out_0.9s_forwards]">
+              {/* Apply Now Button */}
+              <button
+                onClick={() => scrollToSection("programs")}
+                className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-full shadow-[0_10px_40px_-10px_rgba(59,130,246,0.6)] hover:shadow-[0_20px_60px_-10px_rgba(59,130,246,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 flex items-center gap-3 min-w-[200px] justify-center animate-[float_3s_ease-in-out_infinite] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-blue-400 before:to-blue-500 before:blur-xl before:opacity-50 before:-z-10 hover:before:opacity-75"
+              >
+                <span className="relative z-10 drop-shadow-lg">Apply Now</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10 drop-shadow-lg" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Shine effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+              </button>
+
+              {/* Contact Us Button */}
+              <button
+                onClick={() => scrollToSection("contact")}
+                className="group relative px-8 py-4 bg-white/10 backdrop-blur-md text-white font-semibold rounded-full border-2 border-blue-400 shadow-[0_10px_40px_-10px_rgba(96,165,250,0.5),inset_0_1px_0_0_rgba(255,255,255,0.2)] hover:shadow-[0_20px_60px_-10px_rgba(96,165,250,0.7),inset_0_1px_0_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-white/20 hover:border-blue-300 flex items-center gap-3 min-w-[200px] justify-center animate-[float_3s_ease-in-out_0.5s_infinite] before:absolute before:inset-0 before:rounded-full before:bg-blue-400/30 before:blur-xl before:opacity-40 before:-z-10 hover:before:opacity-60"
+              >
+                <Mail className="w-5 h-5 drop-shadow-lg" />
+                <span className="drop-shadow-lg">Contact Us</span>
+                {/* Glow ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-blue-300/50 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                {/* Inner highlight */}
+                <div className="absolute top-1 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -150,6 +177,45 @@ export default function HeroVideo() {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInBounce {
+          0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(-10px) scale(1.05);
+          }
+          70% {
+            transform: translateY(5px) scale(0.98);
+          }
+          85% {
+            transform: translateY(-3px) scale(1.02);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%) skewX(-15deg);
+          }
+          100% {
+            transform: translateX(200%) skewX(-15deg);
           }
         }
       `}</style>
