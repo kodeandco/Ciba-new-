@@ -14,10 +14,42 @@ import {
     Play,
     Building2,
     Lock,
-    Check
+    Check,
+    Mail,
+    Phone,
+    Linkedin
 } from "lucide-react";
 
-const fundedStartups = [
+interface Startup {
+    name: string;
+    founder: string;
+    description: string;
+    funding: string;
+    year: string;
+    stage: string;
+}
+
+interface VideoItem {
+    id: number;
+    title: string;
+    duration: string;
+    thumbnail: string;
+    description: string;
+    videoUrl: string;
+}
+
+interface TeamMember {
+    id: number;
+    name: string;
+    role: string;
+    image: string;
+    bio: string;
+    email: string;
+    phone: string;
+    linkedin: string;
+}
+
+const fundedStartups: Startup[] = [
     {
         name: "TechVenture AI",
         founder: "Rahul Sharma",
@@ -52,14 +84,14 @@ const fundedStartups = [
     }
 ];
 
-const videoLibrary = [
+const videoLibrary: VideoItem[] = [
     {
         id: 1,
         title: "Introduction to NIDHI SSP",
         duration: "8:45",
         thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
         description: "Overview of the NIDHI Seed Support Program and eligibility criteria",
-        videoUrl: "/videos/nidhi-intro.mp4" // Replace with your actual video path
+        videoUrl: "/videos/nidhi-intro.mp4"
     },
     {
         id: 2,
@@ -67,7 +99,7 @@ const videoLibrary = [
         duration: "12:30",
         thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
         description: "Step-by-step guide to completing your NIDHI SSP application",
-        videoUrl: "/videos/application-guide.mp4" // Replace with your actual video path
+        videoUrl: "/videos/application-guide.mp4"
     },
     {
         id: 3,
@@ -75,7 +107,7 @@ const videoLibrary = [
         duration: "15:20",
         thumbnail: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80",
         description: "Hear from founders who successfully raised funding through NIDHI SSP",
-        videoUrl: "/videos/success-stories.mp4" // Replace with your actual video path
+        videoUrl: "/videos/success-stories.mp4"
     },
     {
         id: 4,
@@ -83,12 +115,75 @@ const videoLibrary = [
         duration: "10:15",
         thumbnail: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
         description: "Expert tips on preparing your pitch deck and presentation",
-        videoUrl: "/videos/pitch-tips.mp4" // Replace with your actual video path
+        videoUrl: "/videos/pitch-tips.mp4"
+    }
+];
+
+const teamMembers: TeamMember[] = [
+    {
+        id: 1,
+        name: "Dr. Rajesh Kumar",
+        role: "Program Director",
+        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+        bio: "Leading innovation in student entrepreneurship with 15+ years of experience",
+        email: "rajesh.kumar@ciba.in",
+        phone: "+91 98765 43210",
+        linkedin: "https://linkedin.com/in/rajeshkumar"
+    },
+    {
+        id: 2,
+        name: "Priya Sharma",
+        role: "Mentorship Coordinator",
+        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
+        bio: "Connecting startups with industry experts and mentors",
+        email: "priya.sharma@ciba.in",
+        phone: "+91 98765 43211",
+        linkedin: "https://linkedin.com/in/priyasharma"
+    },
+    {
+        id: 3,
+        name: "Amit Patel",
+        role: "Technology Advisor",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+        bio: "Helping startups build scalable technology solutions",
+        email: "amit.patel@ciba.in",
+        phone: "+91 98765 43212",
+        linkedin: "https://linkedin.com/in/amitpatel"
+    },
+    {
+        id: 4,
+        name: "Sneha Reddy",
+        role: "Finance & Operations Head",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+        bio: "Managing funding disbursement and operational excellence",
+        email: "sneha.reddy@ciba.in",
+        phone: "+91 98765 43213",
+        linkedin: "https://linkedin.com/in/snehareddy"
+    },
+    {
+        id: 5,
+        name: "Vikram Singh",
+        role: "Marketing & Outreach Lead",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+        bio: "Building awareness and community engagement for NIDHI SSP",
+        email: "vikram.singh@ciba.in",
+        phone: "+91 98765 43214",
+        linkedin: "https://linkedin.com/in/vikramsingh"
+    },
+    {
+        id: 6,
+        name: "Ananya Gupta",
+        role: "Legal & Compliance Advisor",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
+        bio: "Ensuring regulatory compliance and legal support for startups",
+        email: "ananya.gupta@ciba.in",
+        phone: "+91 98765 43215",
+        linkedin: "https://linkedin.com/in/ananyagupta"
     }
 ];
 
 export default function NidhiSSPPage() {
-    const [activeTab, setActiveTab] = useState<"overview" | "funded" | "videos">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "funded" | "videos" | "team">("overview");
     const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
     const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
     const [videoProgress, setVideoProgress] = useState<{ [key: number]: number }>({});
@@ -105,11 +200,11 @@ export default function NidhiSSPPage() {
         const progress = (currentTime / duration) * 100;
         setVideoProgress(prev => ({ ...prev, [videoId]: progress }));
 
-        // Auto-mark as watched when 95% complete
         if (progress >= 95 && !watchedVideos.includes(videoId)) {
             setWatchedVideos([...watchedVideos, videoId]);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -158,25 +253,24 @@ export default function NidhiSSPPage() {
             {/* Navigation Tabs */}
             <div className="bg-white border-b-2 border-blue-200 shadow-md">
                 <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex justify-center gap-2">
+                    <div className="flex justify-center gap-2 overflow-x-auto">
                         <button
                             onClick={() => setActiveTab("overview")}
-                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base ${activeTab === "overview"
-                                    ? "text-blue-600 border-b-4 border-blue-600"
-                                    : "text-gray-600 hover:text-blue-600"
+                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === "overview"
+                                ? "text-blue-600 border-b-4 border-blue-600"
+                                : "text-gray-600 hover:text-blue-600"
                                 }`}
                         >
                             <div className="flex items-center gap-2">
                                 <Rocket className="w-4 h-4 md:w-5 md:h-5" />
-                                <span className="hidden sm:inline">Overview & Apply</span>
-                                <span className="sm:hidden">Overview</span>
+                                <span>Overview</span>
                             </div>
                         </button>
                         <button
                             onClick={() => setActiveTab("funded")}
-                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base ${activeTab === "funded"
-                                    ? "text-blue-600 border-b-4 border-blue-600"
-                                    : "text-gray-600 hover:text-blue-600"
+                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === "funded"
+                                ? "text-blue-600 border-b-4 border-blue-600"
+                                : "text-gray-600 hover:text-blue-600"
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -186,9 +280,9 @@ export default function NidhiSSPPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab("videos")}
-                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base relative ${activeTab === "videos"
-                                    ? "text-blue-600 border-b-4 border-blue-600"
-                                    : "text-gray-600 hover:text-blue-600"
+                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base relative whitespace-nowrap ${activeTab === "videos"
+                                ? "text-blue-600 border-b-4 border-blue-600"
+                                : "text-gray-600 hover:text-blue-600"
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -197,6 +291,18 @@ export default function NidhiSSPPage() {
                                 {!allVideosWatched && (
                                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                                 )}
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("team")}
+                            className={`px-4 md:px-6 py-3 md:py-4 font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === "team"
+                                ? "text-blue-600 border-b-4 border-blue-600"
+                                : "text-gray-600 hover:text-blue-600"
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4 md:w-5 md:h-5" />
+                                <span>Team</span>
                             </div>
                         </button>
                     </div>
@@ -213,7 +319,6 @@ export default function NidhiSSPPage() {
                         transition={{ duration: 0.5 }}
                         className="space-y-6 md:space-y-8"
                     >
-                        {/* Watch Videos Warning */}
                         {!allVideosWatched && (
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
@@ -232,13 +337,12 @@ export default function NidhiSSPPage() {
                             </motion.div>
                         )}
 
-                        {/* Program Details */}
                         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border-2 border-blue-200">
                             <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-4 md:mb-6">
                                 About NIDHI SSP
                             </h2>
                             <p className="text-gray-700 text-base md:text-lg mb-6 leading-relaxed">
-                                The NIDHI Seed Support Program (SSP) is a flagship initiative by the Department of Science and Technology (DST), Government of India, designed to provide financial and mentorship support to student innovators and early-stage startups. The program aims to bridge the gap between ideation and commercialization.
+                                The NIDHI Seed Support Program (SSP) is a flagship initiative by the Department of Science and Technology (DST), Government of India, designed to provide financial and mentorship support to student innovators and early-stage startups.
                             </p>
 
                             <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
@@ -269,7 +373,6 @@ export default function NidhiSSPPage() {
                                 </div>
                             </div>
 
-                            {/* Apply Now Button */}
                             <div className="text-center">
                                 <a
                                     href={allVideosWatched ? "https://tripetto.app/run/2AIHZRI343" : "#"}
@@ -283,8 +386,8 @@ export default function NidhiSSPPage() {
                                         }
                                     }}
                                     className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-bold shadow-xl transition-all ${allVideosWatched
-                                            ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:scale-105 hover:shadow-2xl"
-                                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:scale-105 hover:shadow-2xl"
+                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                         }`}
                                 >
                                     {allVideosWatched ? (
@@ -426,7 +529,7 @@ export default function NidhiSSPPage() {
                                                 alt={video.title}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                             />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-all">
+                                            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center group-hover:bg-opacity-50 transition-all">
                                                 <motion.div
                                                     whileHover={{ scale: 1.1 }}
                                                     className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-lg"
@@ -434,7 +537,7 @@ export default function NidhiSSPPage() {
                                                     <Play className="w-6 h-6 md:w-8 md:h-8 text-blue-600 ml-1" />
                                                 </motion.div>
                                             </div>
-                                            <div className="absolute top-2 md:top-3 right-2 md:right-3 bg-black/70 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
+                                            <div className="absolute top-2 md:top-3 right-2 md:right-3 bg-black bg-opacity-70 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
                                                 {video.duration}
                                             </div>
                                             {isWatched && (
@@ -455,8 +558,8 @@ export default function NidhiSSPPage() {
                                             <button
                                                 onClick={() => setSelectedVideo(video.id)}
                                                 className={`w-full py-2 rounded-lg font-semibold transition-all ${isWatched
-                                                        ? "bg-green-100 text-green-700 border-2 border-green-300"
-                                                        : "bg-blue-600 text-white hover:bg-blue-700"
+                                                    ? "bg-green-100 text-green-700 border-2 border-green-300"
+                                                    : "bg-blue-600 text-white hover:bg-blue-700"
                                                     }`}
                                             >
                                                 {isWatched ? "Watch Again" : "Watch Video"}
@@ -465,6 +568,83 @@ export default function NidhiSSPPage() {
                                     </motion.div>
                                 );
                             })}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Team Tab */}
+                {activeTab === "team" && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div className="mb-6 md:mb-8">
+                            <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-2">
+                                Our NIDHI SSP Team
+                            </h2>
+                            <p className="text-gray-600 text-base md:text-lg">
+                                Meet the dedicated professionals supporting your startup journey
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {teamMembers.map((member, index) => (
+                                <motion.div
+                                    key={member.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl transition-all"
+                                >
+                                    <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200">
+                                        <img
+                                            src={member.image}
+                                            alt={member.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                                        <div className="absolute bottom-4 left-4 right-4">
+                                            <h3 className="text-xl font-bold text-white mb-1">
+                                                {member.name}
+                                            </h3>
+                                            <p className="text-blue-100 text-sm font-semibold">
+                                                {member.role}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="p-6">
+                                        <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                                            {member.bio}
+                                        </p>
+
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                                <Mail className="w-4 h-4 text-blue-600" />
+                                                <a href={`mailto:${member.email}`} className="hover:text-blue-600 transition-colors">
+                                                    {member.email}
+                                                </a>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                                <Phone className="w-4 h-4 text-blue-600" />
+                                                <a href={`tel:${member.phone}`} className="hover:text-blue-600 transition-colors">
+                                                    {member.phone}
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <a
+                                            href={member.linkedin}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                                        >
+                                            <Linkedin className="w-4 h-4" />
+                                            Connect on LinkedIn
+                                        </a>
+                                    </div>
+                                </motion.div>
+                            ))}
                         </div>
                     </motion.div>
                 )}
@@ -477,11 +657,8 @@ export default function NidhiSSPPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-                        onClick={(e) => {
-                            // Prevent closing by clicking backdrop
-                            e.stopPropagation();
-                        }}
+                        className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
