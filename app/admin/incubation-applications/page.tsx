@@ -21,6 +21,8 @@ import {
     XCircle,
     AlertCircle,
     Send,
+    StickyNote,
+    Save,
 } from "lucide-react";
 
 interface Application {
@@ -38,6 +40,7 @@ interface Application {
     website: string;
     description: string;
     status: "pending" | "under_review" | "accepted" | "rejected";
+    notes?: string;
     createdAt: string;
     pitchDeck?: {
         filename: string;
@@ -56,6 +59,9 @@ export default function IncubationApplicationsDashboard() {
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
     const [sendingEmail, setSendingEmail] = useState<string | null>(null);
+    const [showNotesModal, setShowNotesModal] = useState(false);
+    const [currentNotes, setCurrentNotes] = useState("");
+    const [savingNotes, setSavingNotes] = useState(false);
 
     useEffect(() => {
         fetchApplications();
@@ -160,6 +166,41 @@ export default function IncubationApplicationsDashboard() {
         }
     };
 
+    const saveNotes = async () => {
+        if (!selectedApp) return;
+
+        setSavingNotes(true);
+        try {
+            const res = await fetch(`http://localhost:5000/api/incubation/${selectedApp._id}/notes`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ notes: currentNotes }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setApplications(applications.map(app =>
+                    app._id === selectedApp._id ? { ...app, notes: currentNotes } : app
+                ));
+                setSelectedApp({ ...selectedApp, notes: currentNotes });
+                alert("Notes saved successfully!");
+                setShowNotesModal(false);
+            }
+        } catch (error) {
+            console.error("Error saving notes:", error);
+            alert("Failed to save notes");
+        } finally {
+            setSavingNotes(false);
+        }
+    };
+
+    const openNotesModal = (app: Application) => {
+        setSelectedApp(app);
+        setCurrentNotes(app.notes || "");
+        setShowNotesModal(true);
+    };
+
     const viewPitchDeck = (id: string) => {
         window.open(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, "_blank");
     };
@@ -187,7 +228,6 @@ export default function IncubationApplicationsDashboard() {
         );
     };
 
-    // Get unique months from applications
     const getAvailableMonths = () => {
         const months = new Set<string>();
         applications.forEach(app => {
@@ -324,10 +364,18 @@ export default function IncubationApplicationsDashboard() {
                                             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                                 <Building2 className="w-6 h-6 text-blue-600" />
                                             </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                                                    {app.startupName}
-                                                </h3>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h3 className="text-xl font-bold text-gray-900">
+                                                        {app.startupName}
+                                                    </h3>
+                                                    {app.notes && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                                                            <StickyNote className="w-3 h-3" />
+                                                            Has Notes
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="text-sm text-gray-600">
                                                     Founded by <span className="font-medium">{app.founderName}</span>
                                                     {app.coFounders && ` & ${app.coFounders}`}
@@ -381,12 +429,18 @@ export default function IncubationApplicationsDashboard() {
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col gap-2">
                                         <button
                                             onClick={() => viewPitchDeck(app._id)}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium justify-center"
                                         >
                                             <Eye className="w-4 h-4" /> View Deck
+                                        </button>
+                                        <button
+                                            onClick={() => openNotesModal(app)}
+                                            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2 text-sm font-medium justify-center"
+                                        >
+                                            <StickyNote className="w-4 h-4" /> Quick Notes
                                         </button>
                                         <button
                                             onClick={() => setSelectedApp(app)}
@@ -402,8 +456,82 @@ export default function IncubationApplicationsDashboard() {
                 </div>
             </div>
 
+            {/* Quick Notes Modal */}
+            {showNotesModal && selectedApp && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowNotesModal(false)}>
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full"
+                    >
+                        <div className="p-6 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                        <StickyNote className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-900">Quick Notes</h2>
+                                        <p className="text-sm text-gray-600">{selectedApp.startupName}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowNotesModal(false)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Notes for this application
+                                </label>
+                                <textarea
+                                    value={currentNotes}
+                                    onChange={(e) => setCurrentNotes(e.target.value)}
+                                    placeholder="Add notes about the team, product, concerns, follow-up items, etc..."
+                                    rows={8}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none"
+                                />
+                                <p className="text-xs text-gray-500 mt-2">
+                                    These notes are private and only visible to admins
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={saveNotes}
+                                    disabled={savingNotes}
+                                    className="flex-1 px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+                                >
+                                    {savingNotes ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-5 h-5" />
+                                            Save Notes
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setShowNotesModal(false)}
+                                    className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Status Update Modal */}
-            {selectedApp && (
+            {selectedApp && !showNotesModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedApp(null)}>
                     <div
                         onClick={(e) => e.stopPropagation()}
