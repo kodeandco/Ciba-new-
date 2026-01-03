@@ -349,105 +349,38 @@ export default function PanoramaTour() {
   }, [currentScene, isMobile]);
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      overflow: 'hidden',
-      touchAction: 'none',
-      userSelect: 'none',
-      backgroundColor: 'transparent'
-    }}>
-      <div ref={containerRef} style={{ width: '100%', height: '100%', cursor: 'grab', backgroundColor: 'transparent' }} />
+    <div className="w-full h-full absolute top-0 left-0 overflow-hidden touch-none select-none">
+      <div ref={containerRef} className="w-full h-full cursor-grab" />
 
       {isLoading && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          zIndex: 50
-        }}>
-          <div style={{ color: 'white', fontSize: '20px' }}>
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+          <div className="text-foreground text-xl font-medium">
             Loading {scenes[currentScene].name}...
           </div>
         </div>
       )}
 
       {/* UI Overlay */}
-      <div style={{
-        position: 'absolute',
-        top: isMobile ? '8px' : '16px',
-        left: isMobile ? '8px' : '16px',
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        color: 'white',
-        padding: isMobile ? '8px 12px' : '8px 16px',
-        borderRadius: '8px',
-        maxWidth: '320px',
-        zIndex: 10
-      }}>
-        <h2 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold', margin: '0 0 4px 0' }}>
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-card/90 backdrop-blur-md text-card-foreground ${isMobile ? 'p-2 px-3' : 'p-2 px-4'} rounded-lg border border-border max-w-xs z-10 shadow-lg`}>
+        <h2 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold mb-1`}>
           {scenes[currentScene].name}
         </h2>
-        <p style={{ fontSize: isMobile ? '12px' : '14px', opacity: 0.8, margin: 0 }}>
+        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
           {isMobile ? 'Swipe to look • Tap cyan spheres' : 'Drag to look around • Click cyan spheres to move'}
         </p>
       </div>
 
       {/* Navigation buttons */}
-      <div style={{
-        position: 'absolute',
-        bottom: isMobile ? '80px' : '16px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: isMobile ? '8px' : '12px',
-        zIndex: 10
-      }}>
+      <div className={`absolute ${isMobile ? 'bottom-20' : 'bottom-4'} left-1/2 -translate-x-1/2 flex ${isMobile ? 'gap-2' : 'gap-3'} z-10`}>
         <button
           onClick={() => setCurrentScene((prev) => (prev - 1 + scenes.length) % scenes.length)}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            color: 'white',
-            padding: isMobile ? '8px' : '12px',
-            borderRadius: '50%',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(4px)',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')}
-          onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}
+          className={`bg-card/80 backdrop-blur-md text-card-foreground ${isMobile ? 'p-2' : 'p-3'} rounded-full border border-border hover:bg-card transition-all shadow-lg hover:scale-110 flex items-center justify-center cursor-pointer`}
         >
           <ChevronLeft size={isMobile ? 20 : 24} />
         </button>
         <button
           onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            color: 'white',
-            padding: isMobile ? '8px' : '12px',
-            borderRadius: '50%',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(4px)',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')}
-          onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}
+          className={`bg-card/80 backdrop-blur-md text-card-foreground ${isMobile ? 'p-2' : 'p-3'} rounded-full border border-border hover:bg-card transition-all shadow-lg hover:scale-110 flex items-center justify-center cursor-pointer`}
         >
           <ChevronRight size={isMobile ? 20 : 24} />
         </button>
@@ -455,20 +388,7 @@ export default function PanoramaTour() {
 
       {/* Instructions */}
       {!isMobile && (
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          right: '16px',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '14px',
-          zIndex: 10
-        }}>
+        <div className="absolute bottom-4 right-4 bg-card/90 backdrop-blur-md text-card-foreground p-2 px-3 rounded-lg border border-border flex items-center gap-2 text-sm z-10 shadow-lg">
           <Info size={16} />
           <span>Look for glowing cyan spheres to navigate</span>
         </div>
@@ -476,21 +396,7 @@ export default function PanoramaTour() {
 
       {/* Mobile hint */}
       {isMobile && (
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          padding: '4px 12px',
-          borderRadius: '20px',
-          fontSize: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          zIndex: 10
-        }}>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-md text-card-foreground py-1 px-3 rounded-full text-xs flex items-center gap-1 z-10 shadow-lg border border-border">
           <Maximize size={12} />
           <span>Rotate device for better view</span>
         </div>

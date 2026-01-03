@@ -79,10 +79,10 @@ export default function StartupsSection() {
   if (loading) {
     return (
       <AnimatedSection direction="right">
-        <section className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50">
+        <section className="py-20 px-4 md:px-8 bg-gradient-subtle">
           <div className="max-w-6xl mx-auto text-center">
-            <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-            <p className="mt-4 text-blue-600">Loading startups...</p>
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+            <p className="mt-4 text-primary">Loading startups...</p>
           </div>
         </section>
       </AnimatedSection>
@@ -92,9 +92,9 @@ export default function StartupsSection() {
   if (error) {
     return (
       <AnimatedSection direction="right">
-        <section className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50">
+        <section className="py-20 px-4 md:px-8 bg-gradient-subtle">
           <div className="max-w-6xl mx-auto text-center">
-            <p className="text-red-600">{error}</p>
+            <p className="text-destructive">{error}</p>
           </div>
         </section>
       </AnimatedSection>
@@ -103,7 +103,7 @@ export default function StartupsSection() {
 
   return (
     <AnimatedSection direction="right">
-      <section id="startups" className="py-20 px-4 md:px-8 bg-gradient-to-b from-white to-blue-50">
+      <section id="startups" className="py-20 px-4 md:px-8 bg-gradient-subtle">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -111,8 +111,8 @@ export default function StartupsSection() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Our Startup Ecosystem</h2>
-            <p className="text-lg text-blue-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Our Startup Ecosystem</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Discover the innovative startups we're incubating and the success stories of our graduated companies
             </p>
           </motion.div>
@@ -126,8 +126,8 @@ export default function StartupsSection() {
                 transition={{ duration: 0.6 }}
                 className="flex items-center gap-3 mb-8"
               >
-                <Zap className="w-6 h-6 text-blue-600" />
-                <h3 className="text-2xl font-bold text-blue-900">Currently Incubating</h3>
+                <Zap className="w-6 h-6 text-primary" />
+                <h3 className="text-2xl font-bold text-foreground">Currently Incubating</h3>
               </motion.div>
 
               <motion.div
@@ -141,11 +141,11 @@ export default function StartupsSection() {
                     key={startup._id}
                     variants={itemVariants}
                     whileHover={{ y: -8 }}
-                    className="group relative overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all cursor-pointer"
+                    className="group relative overflow-hidden rounded-xl bg-card shadow-lg hover:shadow-2xl transition-all cursor-pointer border border-border"
                     onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                   >
                     {/* 4:3 Aspect Ratio Container */}
-                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600" style={{ paddingBottom: '75%' }}>
+                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-primary to-accent" style={{ paddingBottom: '75%' }}>
                       {startup.hasImage ? (
                         <img
                           src={`${BACKEND_URL}/api/admin/incubated-startups/${startup._id}/image`}
@@ -157,14 +157,14 @@ export default function StartupsSection() {
                           <Zap className="w-16 h-16 text-white/30" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
                     </div>
 
                     <div className="p-6">
-                      <h4 className="font-bold text-lg text-blue-900 mb-2">{startup.companyName}</h4>
-                      <p className="text-sm text-blue-600 mb-4 line-clamp-2">{startup.tagline}</p>
+                      <h4 className="font-bold text-lg text-card-foreground mb-2">{startup.companyName}</h4>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{startup.tagline}</p>
                       <motion.span
-                        className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full"
+                        className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full"
                         whileHover={{ scale: 1.05 }}
                       >
                         Incubating
@@ -185,8 +185,8 @@ export default function StartupsSection() {
                 transition={{ duration: 0.6 }}
                 className="flex items-center gap-3 mb-8"
               >
-                <CheckCircle className="w-6 h-6 text-green-600" />
-                <h3 className="text-2xl font-bold text-blue-900">Graduated Success Stories</h3>
+                <CheckCircle className="w-6 h-6 text-accent" />
+                <h3 className="text-2xl font-bold text-foreground">Graduated Success Stories</h3>
               </motion.div>
 
               <motion.div
@@ -200,11 +200,11 @@ export default function StartupsSection() {
                     key={startup._id}
                     variants={itemVariants}
                     whileHover={{ y: -8 }}
-                    className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-blue-50 shadow-lg hover:shadow-2xl transition-all border border-green-200 cursor-pointer"
+                    className="group relative overflow-hidden rounded-xl bg-card shadow-lg hover:shadow-2xl transition-all border border-accent/30 cursor-pointer"
                     onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                   >
                     {/* 4:3 Aspect Ratio Container */}
-                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-600" style={{ paddingBottom: '75%' }}>
+                    <div className="relative w-full overflow-hidden bg-gradient-to-br from-accent to-secondary" style={{ paddingBottom: '75%' }}>
                       {startup.hasImage ? (
                         <img
                           src={`${BACKEND_URL}/api/admin/graduated-startups/${startup._id}/image`}
@@ -216,14 +216,14 @@ export default function StartupsSection() {
                           <CheckCircle className="w-16 h-16 text-white/30" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-accent/80 to-transparent" />
                     </div>
 
                     <div className="p-6">
-                      <h4 className="font-bold text-lg text-blue-900 mb-2">{startup.companyName}</h4>
-                      <p className="text-sm text-blue-600 mb-4 line-clamp-2">{startup.tagline}</p>
+                      <h4 className="font-bold text-lg text-card-foreground mb-2">{startup.companyName}</h4>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{startup.tagline}</p>
                       <motion.span
-                        className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full"
+                        className="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full"
                         whileHover={{ scale: 1.05 }}
                       >
                         Graduated
@@ -237,8 +237,8 @@ export default function StartupsSection() {
 
           {/* Empty State */}
           {incubatedStartups.length === 0 && graduatedStartups.length === 0 && (
-            <div className="text-center py-12 bg-blue-50 rounded-lg">
-              <p className="text-blue-600">No startups listed yet. Check back soon!</p>
+            <div className="text-center py-12 bg-muted rounded-lg">
+              <p className="text-muted-foreground">No startups listed yet. Check back soon!</p>
             </div>
           )}
 
@@ -254,7 +254,7 @@ export default function StartupsSection() {
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(59, 130, 246, 0.3)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg flex items-center gap-2 hover:shadow-xl transition-all"
+                  className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold rounded-lg flex items-center gap-2 hover:shadow-xl transition-all"
                 >
                   View All Startups
                   <ArrowRight className="w-5 h-5" />
