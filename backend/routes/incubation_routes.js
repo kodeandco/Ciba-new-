@@ -396,5 +396,36 @@ router.post("/:id/send-email", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+// -------------------------
+// UPDATE APPLICATION NOTES (Admin route)
+// -------------------------
 
+router.patch("/:id/notes", async (req, res) => {
+  try {
+    const { notes } = req.body;
+    
+    // Find and update the application notes
+    const application = await Incubation.findByIdAndUpdate(
+      req.params.id,
+      { notes },
+      { new: true }
+    ).select("-pitchDeck.data"); // Exclude buffer data for performance
+
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    // Return success
+    res.status(200).json({ 
+      success: true, 
+      application,
+      message: "Notes updated successfully"
+    });
+  } catch (err) {
+    console.error("Error updating notes:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Add this route BEFORE your module.exports line
 module.exports = router;

@@ -23,7 +23,10 @@ const IncubationSchema = new mongoose.Schema(
       filename: { type: String, required: true },
       size: { type: Number, required: true },
     },
-    
+      notes: {           // ← ADD THIS FIELD
+    type: String,
+    default: ""
+  },
     status: { 
       type: String, 
       enum: ['pending', 'under_review', 'accepted', 'rejected'],
