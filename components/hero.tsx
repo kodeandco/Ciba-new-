@@ -32,9 +32,7 @@ export default function Hero() {
       setTypedText(fullText.slice(0, i + 1))
       i++
       if (i === Math.floor(fullText.length * 0.65)) setShowSubtitle(true)
-      if (i === fullText.length) {
-        clearInterval(interval)
-      }
+      if (i === fullText.length) clearInterval(interval)
     }, 60)
     return () => clearInterval(interval)
   }, [inView])
@@ -80,7 +78,7 @@ export default function Hero() {
     return (
       <>
         {parts[0]}
-        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-black">
+        <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-black">
           Startup Journey
         </span>
         {parts[1]}
@@ -92,20 +90,22 @@ export default function Hero() {
     <section
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24 bg-white"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24 bg-background"
     >
       {/* Subtle Cursor Glow */}
       <motion.div
-        className="pointer-events-none fixed inset-0 z-0"
+        className="pointer-events-none fixed inset-0 z-0 opacity-60 dark:opacity-40"
         animate={{
-          background: `radial-gradient(900px at ${mouse.x}px ${mouse.y}px, rgba(59,130,246,0.10), transparent 70%)`,
+          background: `radial-gradient(900px at ${mouse.x}px ${mouse.y}px, var(--orb-1), transparent 70%)`,
         }}
         transition={{ type: "spring", damping: 40, stiffness: 100 }}
       />
 
-      {/* Very Subtle Orbs for Depth */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-300/4 to-indigo-300/3 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-tl from-purple-300/4 to-blue-300/3 rounded-full blur-3xl" />
+      {/* Orbs for Depth */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl" 
+           style={{ background: 'var(--orb-1)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl"
+           style={{ background: 'var(--orb-2)' }} />
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 text-center">
@@ -120,14 +120,14 @@ export default function Hero() {
             initial={{ opacity: 0, y: -30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.4 }}
-            className="inline-flex items-center gap-2 text-blue-700 font-semibold text-sm mb-8 px-6 py-3 bg-blue-50/70 backdrop-blur rounded-full border border-blue-100/50"
+            className="inline-flex items-center gap-2 text-primary font-semibold text-sm mb-8 px-6 py-3 bg-primary/10 backdrop-blur rounded-full border border-primary/20"
           >
             <Sparkles className="w-4 h-4" />
             Your Growth Partner in Navi Mumbai
           </motion.div>
 
           {/* Title */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight tracking-tighter text-slate-900 mb-10">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight tracking-tighter text-foreground mb-10">
             <motion.div className="inline-block">
               {getStyledTitle()}
             </motion.div>
@@ -138,9 +138,9 @@ export default function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={showSubtitle ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto mb-16 leading-relaxed font-light"
+            className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-16 leading-relaxed font-light"
           >
-            Join India’s leading incubation center. Access elite mentorship,
+            Join India's leading incubation center. Access elite mentorship,
             strategic funding, and a refined ecosystem designed for sustainable,
             high-impact growth.
           </motion.p>
@@ -156,11 +156,11 @@ export default function Hero() {
                   transition={{ delay: 0.8 + index * 0.1, duration: 0.8, ease: "easeOut" }}
                   className="flex flex-col items-center"
                 >
-                  <stat.icon className="w-10 h-10 text-blue-600 mb-4" />
-                  <div className="text-4xl lg:text-5xl font-black text-slate-900 mb-1">
+                  <stat.icon className="w-10 h-10 text-primary mb-4" />
+                  <div className="text-4xl lg:text-5xl font-black text-foreground mb-1">
                     {counters[index]}{stat.suffix}
                   </div>
-                  <p className="text-slate-600 font-medium text-sm">
+                  <p className="text-muted-foreground font-medium text-sm">
                     {stat.label}
                   </p>
                 </motion.div>
@@ -171,7 +171,7 @@ export default function Hero() {
       </div>
 
       {/* Seamless Blend to Next Section */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-slate-50 to-slate-100" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-background/50 to-background" />
     </section>
   )
 }

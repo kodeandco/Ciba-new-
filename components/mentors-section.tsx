@@ -11,9 +11,6 @@ import {
 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
-/* ----------------------------------
-   Icon mapping based on department
------------------------------------ */
 const iconMap: Record<string, any> = {
   "Tech Startups": Briefcase,
   "Growth & Scaling": Award,
@@ -44,9 +41,6 @@ export default function MentorsSection() {
   const [slidesPerView, setSlidesPerView] = useState(4)
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
 
-  /* ----------------------------------
-     Fetch mentors from backend
-  ----------------------------------- */
   useEffect(() => {
     const fetchMentors = async () => {
       try {
@@ -57,13 +51,9 @@ export default function MentorsSection() {
         console.error("Failed to fetch mentors", err)
       }
     }
-
     fetchMentors()
   }, [])
 
-  /* ----------------------------------
-     Responsive slides
-  ----------------------------------- */
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) setSlidesPerView(1)
@@ -71,25 +61,19 @@ export default function MentorsSection() {
       else if (window.innerWidth < 1280) setSlidesPerView(3)
       else setSlidesPerView(4)
     }
-
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  /* ----------------------------------
-     Auto play carousel
-  ----------------------------------- */
   useEffect(() => {
     if (!isAutoPlaying || mentors.length === 0) return
-
     autoPlayRef.current = setInterval(() => {
       setCurrentIndex((prev) => {
         const maxIndex = Math.max(0, mentors.length - slidesPerView)
         return prev >= maxIndex ? 0 : prev + 1
       })
     }, 3000)
-
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current)
     }
@@ -111,16 +95,9 @@ export default function MentorsSection() {
     })
   }
 
-  // Get the actual visible mentors without duplicates
   const getVisibleMentors = () => {
     if (mentors.length === 0) return []
-
-    // If we have fewer mentors than slides, just show what we have
-    if (mentors.length <= slidesPerView) {
-      return mentors
-    }
-
-    // Otherwise, slice the array to show only the current view
+    if (mentors.length <= slidesPerView) return mentors
     return mentors.slice(currentIndex, currentIndex + slidesPerView)
   }
 
@@ -129,48 +106,43 @@ export default function MentorsSection() {
 
   if (!mentors.length) {
     return (
-      <section className="py-20 text-center text-blue-600">
+      <section className="py-20 text-center text-primary">
         Loading mentors...
       </section>
     )
   }
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-white overflow-hidden">
+    <section className="py-20 px-4 md:px-8 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto">
-
-        {/* Heading */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Meet Our Mentors
           </h2>
-          <p className="text-lg text-blue-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Learn from industry experts committed to your success
           </p>
         </div>
 
         <div className="relative">
-
-          {/* Navigation - Only show if we have more mentors than visible slots */}
           {mentors.length > slidesPerView && (
             <>
               <button
                 onClick={handlePrevious}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-full shadow-lg transition-all"
               >
                 <ChevronLeft />
               </button>
 
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-full shadow-lg transition-all"
               >
                 <ChevronRight />
               </button>
             </>
           )}
 
-          {/* Cards */}
           <div
             className="grid gap-6 transition-all duration-500 justify-items-center"
             style={{ gridTemplateColumns: `repeat(${actualSlidesPerView}, minmax(0, 300px))` }}
@@ -186,10 +158,9 @@ export default function MentorsSection() {
                   key={mentor._id}
                   onMouseEnter={() => setHoveredId(mentor._id)}
                   onMouseLeave={() => setHoveredId(null)}
-                  className="relative rounded-xl overflow-hidden bg-blue-50 w-full max-w-[300px] transition-shadow duration-300"
+                  className="relative rounded-xl overflow-hidden bg-card border border-border w-full max-w-[300px] transition-shadow duration-300 hover:shadow-xl"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  {/* 4:3 Aspect Ratio Image Container */}
                   <div className="relative w-full" style={{ paddingBottom: '75%' }}>
                     <img
                       src={mentor.image || "/placeholder.svg"}
@@ -198,34 +169,30 @@ export default function MentorsSection() {
                     />
                   </div>
 
-                  {/* Content */}
                   <div className="relative p-6 min-h-[160px]">
                     <div
-                      className={`absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-900 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
-                        }`}
+                      className={`absolute inset-0 bg-gradient-to-br from-primary to-accent transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
                     />
 
-                    {/* Default Info */}
                     {!isHovered && (
                       <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
-                          <Icon className="w-5 h-5 text-blue-600" />
-                          <h3 className="font-bold text-blue-900">
+                          <Icon className="w-5 h-5 text-primary" />
+                          <h3 className="font-bold text-card-foreground">
                             {mentor.name}
                           </h3>
                         </div>
-                        <p className="text-sm text-blue-700 font-semibold">
+                        <p className="text-sm text-muted-foreground font-semibold">
                           {mentor.designation}
                         </p>
-                        <p className="text-xs text-blue-600">
+                        <p className="text-xs text-muted-foreground">
                           {mentor.department}
                         </p>
                       </div>
                     )}
 
-                    {/* Hover Info */}
                     {isHovered && (
-                      <div className="relative z-10 text-white">
+                      <div className="relative z-10 text-primary-foreground">
                         <p className="text-sm mb-4 leading-relaxed line-clamp-3">
                           {mentor.message}
                         </p>
@@ -261,17 +228,14 @@ export default function MentorsSection() {
                     )}
                   </div>
 
-                  {/* Border glow */}
                   <div
-                    className={`absolute inset-0 rounded-xl border-2 border-blue-400 transition-opacity pointer-events-none ${isHovered ? "opacity-100 shadow-[0_0_20px_rgba(59,130,246,0.5)]" : "opacity-0"
-                      }`}
+                    className={`absolute inset-0 rounded-xl border-2 border-primary transition-opacity pointer-events-none ${isHovered ? "opacity-100 shadow-[0_0_20px_rgba(var(--primary),0.5)]" : "opacity-0"}`}
                   />
                 </div>
               )
             })}
           </div>
 
-          {/* Dots - Only show if we have more mentors than visible slots */}
           {mentors.length > slidesPerView && (
             <div className="flex justify-center gap-2 mt-8">
               {Array.from({ length: mentors.length - slidesPerView + 1 }).map((_, index) => (
@@ -279,9 +243,8 @@ export default function MentorsSection() {
                   key={index}
                   onClick={() => setCurrentIndex(index)}
                   className={`rounded-full transition-all ${index === currentIndex
-                    ? "bg-blue-600 w-8 h-3"
-                    : "bg-blue-300 w-3 h-3 hover:bg-blue-400"
-                    }`}
+                    ? "bg-primary w-8 h-3"
+                    : "bg-muted w-3 h-3 hover:bg-muted-foreground"}`}
                 />
               ))}
             </div>
