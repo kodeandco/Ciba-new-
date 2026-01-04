@@ -2,6 +2,83 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 const StartupClinic = require("../models/startup_clinic_model");
+const { createCalendarEvent } = require("../utils/googleCalendar");
+
+// -------------------------
+// CHECK SLOT AVAILABILITY FOR A DATE (MUST BE BEFORE /:id ROUTE)
+// -------------------------
+router.get("/availability/:date", async (req, res) => {
+  try {
+    const { date } = req.params;
+    
+    // Parse the date and normalize to midnight
+    const dateObj = new Date(date);
+    dateObj.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(dateObj);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    // Find all bookings for this date
+    const bookings = await StartupClinic.find({
+      sessionDate: {
+        $gte: dateObj,
+        $lte: endOfDay
+      }
+    }).select('slot');
+    
+    // Extract booked slots
+    const bookedSlots = bookings.map(b => b.slot);
+    
+    res.status(200).json({ 
+      success: true, 
+      bookedSlots,
+      availableCount: 5 - bookedSlots.length // Assuming 5 total slots
+    });
+  } catch (err) {
+    console.error("Error checking availability:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// GET DATES WITH BOOKING COUNTS (for disabling fully booked dates)
+// -------------------------
+router.post("/dates-availability", async (req, res) => {
+  try {
+    const { dates } = req.body; // Array of date strings
+    
+    if (!dates || !Array.isArray(dates)) {
+      return res.status(400).json({ error: "dates array is required" });
+    }
+    
+    const availability = {};
+    
+    for (const date of dates) {
+      const dateObj = new Date(date);
+      dateObj.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(dateObj);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const count = await StartupClinic.countDocuments({
+        sessionDate: {
+          $gte: dateObj,
+          $lte: endOfDay
+        }
+      });
+      
+      availability[date] = {
+        bookedCount: count,
+        isFullyBooked: count >= 5 // 5 slots available per day
+      };
+    }
+    
+    res.status(200).json({ success: true, availability });
+  } catch (err) {
+    console.error("Error checking dates availability:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // -------------------------
 // GET ALL BOOKINGS (Admin route)
@@ -85,7 +162,7 @@ router.post("/", async (req, res) => {
       email: userEmail,
       phone: userPhone,
       slot: userSlot,
-      sessionDate: normalizedDate, // Store as Date object (midnight)
+      sessionDate: normalizedDate,
       question1,
       question2,
       question3,
@@ -95,8 +172,25 @@ router.post("/", async (req, res) => {
     await newBooking.save();
 
     // -------------------------
+    // ADD TO GOOGLE CALENDAR AUTOMATICALLY
+    // -------------------------
+    try {
+      console.log('🔄 Automatically adding booking to Google Calendar...');
+      const calendarEvent = await createCalendarEvent(newBooking);
+      newBooking.calendarEventId = calendarEvent.id;
+      await newBooking.save();
+      console.log('✅ Successfully added to Google Calendar automatically');
+      console.log('📅 Calendar Event ID:', calendarEvent.id);
+      console.log('🔗 Event Link:', calendarEvent.htmlLink);
+    } catch (calendarError) {
+      console.error('⚠️ Failed to add to Google Calendar:', calendarError.message);
+      // Continue anyway - booking is saved even if calendar fails
+      // This ensures users still get their confirmation even if calendar API fails
+    }
+
+    // -------------------------
     // SEND CONFIRMATION EMAIL TO THE USER
-   
+    // -------------------------
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -182,6 +276,65 @@ router.post("/", async (req, res) => {
     }
     
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// ADD TO GOOGLE CALENDAR (Manual - Admin Dashboard)
+// -------------------------
+router.post("/:id/add-to-calendar", async (req, res) => {
+  try {
+    console.log('📥 Received request to add booking to calendar:', req.params.id);
+    
+    const booking = await StartupClinic.findById(req.params.id);
+    
+    if (!booking) {
+      console.log('❌ Booking not found');
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    console.log('✅ Booking found:', {
+      name: booking.name,
+      email: booking.email,
+      slot: booking.slot,
+      sessionDate: booking.sessionDate
+    });
+
+    if (booking.calendarEventId) {
+      console.log('⚠️ Booking already has calendar event ID');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'This booking is already in Google Calendar' 
+      });
+    }
+
+    console.log('🔄 Attempting to create calendar event...');
+    const calendarEvent = await createCalendarEvent(booking);
+    
+    booking.calendarEventId = calendarEvent.id;
+    await booking.save();
+
+    console.log('✅ Calendar event created and booking updated');
+    
+    res.json({ 
+      success: true, 
+      message: 'Successfully added to Google Calendar',
+      eventId: calendarEvent.id,
+      eventLink: calendarEvent.htmlLink
+    });
+  } catch (error) {
+    console.error('❌ Error adding to calendar:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code
+    });
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to add to calendar: ' + error.message,
+      error: error.message 
+    });
   }
 });
 
