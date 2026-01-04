@@ -5,9 +5,12 @@ const StartupClinicSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    
-    sessionDate: { type: Date, required: true }, // Add session date
-    slot: { type: String, required: true }, // Remove unique: true from here
+    calendarEventId: {
+      type: String,
+      default: null
+    },
+    sessionDate: { type: Date, required: true },
+    slot: { type: String, required: true },
     
     question1: { type: String, required: true },
     question2: { type: String, required: true },
