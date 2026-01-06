@@ -5,7 +5,7 @@ import MentorsSection from './mentors-section'
 import StartupsSection from './startups-section'
 import AssetsSection from './assets-section'
 import PartnersSection from './partners-section'
-import CoworkingSection from './360 Panorama/coworking-section'
+import CoworkingSection from './360 Panorama/PanoramaTour'
 
 export default function SectionTabs() {
   const [activeTab, setActiveTab] = useState('mentors')
@@ -57,8 +57,15 @@ export default function SectionTabs() {
           ))}
         </div>
 
-        {/* Content */}
-        <div className="animate-fade-in">
+        {/* Content - KEY FIX: Added height constraint for Panorama */}
+        <div 
+          className="animate-fade-in"
+          style={{
+            minHeight: activeTab === 'coworking' ? '600px' : 'auto',
+            height: activeTab === 'coworking' ? '600px' : 'auto',
+            position: 'relative'
+          }}
+        >
           <ActiveComponent />
         </div>
 
