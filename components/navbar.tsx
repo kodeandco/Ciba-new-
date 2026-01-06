@@ -26,7 +26,7 @@ export default function Navbar() {
   };
 
   const navigateToTeam = () => {
-    router.push("/Our_team");
+    router.push("/Ourteam"); // Fixed: matches your actual page URL
     setIsOpen(false);
   };
 
@@ -80,22 +80,13 @@ export default function Navbar() {
               <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg shadow-primary/20" />
             </button>
 
-            <button
-              onClick={() => scrollToSection("startups")}
-              className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium relative group rounded-lg hover:bg-primary/5 ${
-                pathname.includes("#startups") ? "text-primary" : ""
-              }`}
-            >
-              Startups
-              <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg shadow-primary/20" />
-            </button>
+            
 
-            {/* Our Team - Navigate to separate page */}
+            {/* Our Team - Fixed URL */}
             <button
               onClick={navigateToTeam}
               className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium relative group rounded-lg hover:bg-primary/5 ${
-                pathname === "/Our_team" ? "text-primary" : ""
+                pathname === "/Ourteam" ? "text-primary" : ""
               }`}
             >
               Our Team
@@ -156,20 +147,13 @@ export default function Navbar() {
               Programs
             </button>
 
-            <button
-              onClick={() => scrollToSection("startups")}
-              className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary hover:shadow-md hover:shadow-primary/20 ${
-                pathname.includes("#startups") ? "bg-primary/5 text-primary" : ""
-              }`}
-            >
-              Startups
-            </button>
+            
 
-            {/* Our Team - Navigate to separate page */}
+            {/* Our Team - Fixed in mobile too */}
             <button
               onClick={navigateToTeam}
               className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary hover:shadow-md hover:shadow-primary/20 ${
-                pathname === "/Our_team" ? "bg-primary/5 text-primary" : ""
+                pathname === "/Ourteam" ? "bg-primary/5 text-primary" : ""
               }`}
             >
               Our Team

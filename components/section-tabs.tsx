@@ -5,7 +5,7 @@ import MentorsSection from './mentors-section'
 import StartupsSection from './startups-section'
 import AssetsSection from './assets-section'
 import PartnersSection from './partners-section'
-import PanoramaTour from './360 Panorama/PanoramaTour'
+import CoworkingSection from './360 Panorama/coworking-section'
 
 export default function SectionTabs() {
   const [activeTab, setActiveTab] = useState('mentors')
@@ -15,7 +15,7 @@ export default function SectionTabs() {
     { id: 'assets', title: 'Assets', component: AssetsSection },
     { id: 'partners', title: 'Growth Partners', component: PartnersSection },
     { id: 'incubated', title: 'Investments', component: StartupsSection },
-    { id: 'coworking', title: 'Coworking', component: PanoramaTour }
+    { id: 'coworking', title: 'Coworking', component: CoworkingSection }
   ]
 
   const ActiveComponent =
