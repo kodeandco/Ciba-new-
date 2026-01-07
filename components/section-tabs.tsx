@@ -48,8 +48,6 @@ export default function SectionTabs() {
               }`}
             >
               {tab.title}
-
-              {/* Active underline */}
               {activeTab === tab.id && (
                 <span className="absolute left-0 bottom-0 w-full h-0.5 bg-primary rounded-full" />
               )}
@@ -57,13 +55,13 @@ export default function SectionTabs() {
           ))}
         </div>
 
-        {/* Content - KEY FIX: Added height constraint for Panorama */}
-        <div 
-          className="animate-fade-in"
+        {/* Content */}
+        <div
+          className="animate-fade-in w-full relative"
           style={{
-            minHeight: activeTab === 'coworking' ? '600px' : 'auto',
-            height: activeTab === 'coworking' ? '600px' : 'auto',
-            position: 'relative'
+            // Make coworking tab fullscreen height, others auto
+            height: activeTab === 'coworking' ? '80vh' : 'auto',
+            minHeight: activeTab === 'coworking' ? '500px' : 'auto',
           }}
         >
           <ActiveComponent />

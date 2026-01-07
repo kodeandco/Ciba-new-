@@ -6,7 +6,7 @@ import { Briefcase, Send, Sparkles, TrendingUp, Users, Rocket } from "lucide-rea
 
 export default function JobPage() {
   const handleApplyNow = () => {
-    window.open('https://docs.google.com/forms/d/e/1FAIpQLSerMZNaiiyCLAEPX-E1sWhT4cvQL7TXTUMpBemHmuY60Tw8nw/viewform', '_blank');
+    window.open('https://docs.google.com/forms/d/e/1FAIpQLSfpO7db72RBkw9JEOc3zN-JYiVqeNltb2xUgc69mnFfo-GoLA/viewform', '_blank');
   };
 
   const highlights = [
