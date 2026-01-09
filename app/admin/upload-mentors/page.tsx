@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Download } from "lucide-react"
 
 interface Mentor {
     _id: string
@@ -64,6 +65,62 @@ export default function MentorsAdminPage() {
     useEffect(() => {
         fetchMentors()
     }, [])
+
+    /* ===============================
+       EXPORT TO CSV
+    ================================ */
+    const exportToCSV = () => {
+        // Define CSV headers
+        const headers = [
+            'Name',
+            'Designation',
+            'Department',
+            'Message',
+            'LinkedIn',
+            'Website',
+            'Has Image'
+        ]
+
+        // Convert mentors to CSV rows
+        const rows = mentors.map(mentor => {
+            return [
+                mentor.name,
+                mentor.designation,
+                mentor.department,
+                mentor.message,
+                mentor.socialMedia?.linkedin || 'N/A',
+                mentor.socialMedia?.website || 'N/A',
+                mentor.image ? 'Yes' : 'No'
+            ]
+        })
+
+        // Escape and format CSV content
+        const escapeCSV = (value: string) => {
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`
+            }
+            return value
+        }
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(escapeCSV).join(','))
+        ].join('\n')
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement('a')
+        const url = URL.createObjectURL(blob)
+
+        const timestamp = new Date().toISOString().split('T')[0]
+        link.setAttribute('href', url)
+        link.setAttribute('download', `mentors-${timestamp}.csv`)
+        link.style.visibility = 'hidden'
+
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
 
     /* ===============================
        FORM HANDLING
@@ -174,9 +231,19 @@ export default function MentorsAdminPage() {
             <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
-                <h1 className="text-4xl font-bold text-blue-900 mb-8">
-                    Mentor Management
-                </h1>
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-4xl font-bold text-blue-900">
+                        Mentor Management
+                    </h1>
+                    <button
+                        onClick={exportToCSV}
+                        disabled={mentors.length === 0}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                    >
+                        <Download className="w-5 h-5" />
+                        Export as CSV
+                    </button>
+                </div>
 
                 {/* FORM */}
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
@@ -274,6 +341,21 @@ export default function MentorsAdminPage() {
                     </div>
                 </div>
 
+                {/* STATS */}
+                <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-blue-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-blue-600 font-medium">Total Mentors</p>
+                            <p className="text-3xl font-bold text-blue-900">{mentors.length}</p>
+                        </div>
+                        <div className="text-blue-400">
+                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
                 {/* LIST */}
                 <div className="grid md:grid-cols-3 gap-8">
                     {mentors.map((mentor) => (
@@ -297,9 +379,35 @@ export default function MentorsAdminPage() {
                                 <p className="text-sm text-blue-700">
                                     {mentor.designation}
                                 </p>
-                                <p className="text-xs text-blue-500 mb-4">
+                                <p className="text-xs text-blue-500 mb-2">
                                     {mentor.department}
                                 </p>
+
+                                {/* Social Links */}
+                                {(mentor.socialMedia?.linkedin || mentor.socialMedia?.website) && (
+                                    <div className="flex gap-2 mb-4">
+                                        {mentor.socialMedia?.linkedin && (
+                                            <a
+                                                href={mentor.socialMedia.linkedin}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 text-xs"
+                                            >
+                                                LinkedIn
+                                            </a>
+                                        )}
+                                        {mentor.socialMedia?.website && (
+                                            <a
+                                                href={mentor.socialMedia.website}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 text-xs"
+                                            >
+                                                Website
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="flex gap-3">
                                     <button

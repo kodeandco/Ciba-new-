@@ -79,7 +79,7 @@ router.post("/", upload.single("pitchDeck"), async (req, res) => {
       website,
       description,
       pitchDeck: {
-        data: req.file.buffer, // Store file buffer directly
+        data: req.file.buffer,
         contentType: req.file.mimetype,
         filename: req.file.originalname,
         size: req.file.size,
@@ -199,9 +199,8 @@ router.post("/", upload.single("pitchDeck"), async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    // Don't send pitch deck buffer in list view (too heavy)
     const applications = await Incubation.find()
-      .select("-pitchDeck.data") // Exclude buffer data
+      .select("-pitchDeck.data")
       .sort({ createdAt: -1 });
     
     res.status(200).json({ success: true, applications });
@@ -212,7 +211,7 @@ router.get("/", async (req, res) => {
 });
 
 // -------------------------
-// GET SINGLE APPLICATION BY ID (with pitch deck)
+// GET SINGLE APPLICATION BY ID
 // -------------------------
 
 router.get("/:id", async (req, res) => {
@@ -242,14 +241,12 @@ router.get("/:id/pitch-deck", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    // Set headers for file download
     res.set({
       "Content-Type": application.pitchDeck.contentType,
       "Content-Disposition": `attachment; filename="${application.pitchDeck.filename}"`,
       "Content-Length": application.pitchDeck.size,
     });
 
-    // Send buffer as file
     res.send(application.pitchDeck.data);
   } catch (err) {
     console.error("Error downloading pitch deck:", err);
@@ -269,13 +266,11 @@ router.get("/:id/pitch-deck/view", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    // Set headers for inline viewing
     res.set({
       "Content-Type": application.pitchDeck.contentType,
       "Content-Disposition": `inline; filename="${application.pitchDeck.filename}"`,
     });
 
-    // Send buffer for viewing
     res.send(application.pitchDeck.data);
   } catch (err) {
     console.error("Error viewing pitch deck:", err);
@@ -295,7 +290,6 @@ router.patch("/:id/status", async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
-    // Find and update the application
     const application = await Incubation.findByIdAndUpdate(
       req.params.id,
       { status },
@@ -306,7 +300,6 @@ router.patch("/:id/status", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    // Return success
     res.status(200).json({ 
       success: true, 
       application: {
@@ -337,7 +330,6 @@ router.post("/:id/send-email", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    // Send email with current status
     const emailResult = await sendIncubationStatusEmail(application, application.status);
     
     if (emailResult.success) {
@@ -361,41 +353,6 @@ router.post("/:id/send-email", async (req, res) => {
   }
 });
 
-// -------------------------
-// SEND STATUS EMAIL (Admin route)
-// -------------------------
-
-router.post("/:id/send-email", async (req, res) => {
-  try {
-    const application = await Incubation.findById(req.params.id);
-
-    if (!application) {
-      return res.status(404).json({ error: "Application not found" });
-    }
-
-    // Send email with current status
-    const emailResult = await sendIncubationStatusEmail(application, application.status);
-    
-    if (emailResult.success) {
-      console.log(`✅ Status email sent successfully to ${application.email}`);
-      return res.status(200).json({ 
-        success: true, 
-        message: "Email sent successfully",
-        emailSent: true
-      });
-    } else {
-      console.error(`⚠️ Email failed: ${emailResult.error}`);
-      return res.status(500).json({ 
-        success: false, 
-        error: "Failed to send email",
-        details: emailResult.error
-      });
-    }
-  } catch (err) {
-    console.error("Error sending email:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
 // -------------------------
 // UPDATE APPLICATION NOTES (Admin route)
 // -------------------------
@@ -404,18 +361,16 @@ router.patch("/:id/notes", async (req, res) => {
   try {
     const { notes } = req.body;
     
-    // Find and update the application notes
     const application = await Incubation.findByIdAndUpdate(
       req.params.id,
       { notes },
       { new: true }
-    ).select("-pitchDeck.data"); // Exclude buffer data for performance
+    ).select("-pitchDeck.data");
 
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    // Return success
     res.status(200).json({ 
       success: true, 
       application,
@@ -427,5 +382,4 @@ router.patch("/:id/notes", async (req, res) => {
   }
 });
 
-// Add this route BEFORE your module.exports line
 module.exports = router;
