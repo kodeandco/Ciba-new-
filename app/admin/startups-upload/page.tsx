@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, Edit2, X, Check } from 'lucide-react';
+import { Trash2, Plus, Edit2, X, Check, Download } from 'lucide-react';
 
 interface Startup {
     _id: string;
@@ -37,6 +37,40 @@ const validateAspectRatio = (file: File): Promise<boolean> =>
         img.src = URL.createObjectURL(file)
     })
 
+/* ===============================
+   EXPORT FUNCTIONS
+================================ */
+const exportToCSV = (startups: Startup[], type: string) => {
+    const headers = ['Company Name', 'Tagline', 'Career URL', 'Has Image', 'Created At'];
+    const rows = startups.map(s => [
+        s.companyName,
+        s.tagline,
+        s.careerUrl,
+        s.hasImage ? 'Yes' : 'No',
+        new Date(s.createdAt).toLocaleDateString()
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+};
+
+const exportToJSON = (startups: Startup[], type: string) => {
+    const jsonContent = JSON.stringify(startups, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+};
+
 export default function StartupAdminPage() {
     const [activeTab, setActiveTab] = useState<'incubated' | 'graduated'>('incubated');
     const [incubatedStartups, setIncubatedStartups] = useState<Startup[]>([]);
@@ -45,6 +79,7 @@ export default function StartupAdminPage() {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
+    const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         companyName: '',
         tagline: '',
@@ -214,6 +249,16 @@ export default function StartupAdminPage() {
         setImageError(null);
     };
 
+    const handleExport = (format: 'csv' | 'json') => {
+        const startups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
+        if (format === 'csv') {
+            exportToCSV(startups, activeTab);
+        } else {
+            exportToJSON(startups, activeTab);
+        }
+        setShowExportMenu(false);
+    };
+
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
 
     return (
@@ -245,14 +290,43 @@ export default function StartupAdminPage() {
                     </div>
 
                     <div className="p-6">
-                        {/* Add Button */}
-                        <button
-                            onClick={() => { setShowAddForm(!showAddForm); cancelEdit(); }}
-                            className="mb-6 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <Plus size={20} />
-                            Add New Startup
-                        </button>
+                        {/* Action Buttons */}
+                        <div className="mb-6 flex gap-3">
+                            <button
+                                onClick={() => { setShowAddForm(!showAddForm); cancelEdit(); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <Plus size={20} />
+                                Add New Startup
+                            </button>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowExportMenu(!showExportMenu)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                    <Download size={20} />
+                                    Export Data
+                                </button>
+
+                                {showExportMenu && (
+                                    <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[160px]">
+                                        <button
+                                            onClick={() => handleExport('csv')}
+                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors rounded-t-lg"
+                                        >
+                                            Export as CSV
+                                        </button>
+                                        <button
+                                            onClick={() => handleExport('json')}
+                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors rounded-b-lg"
+                                        >
+                                            Export as JSON
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
                         {/* Add Form */}
                         {showAddForm && (
