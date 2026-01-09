@@ -23,6 +23,8 @@ import {
     Send,
     StickyNote,
     Save,
+    Download,
+    RefreshCw,
 } from "lucide-react";
 
 interface Application {
@@ -62,9 +64,13 @@ export default function IncubationApplicationsDashboard() {
     const [showNotesModal, setShowNotesModal] = useState(false);
     const [currentNotes, setCurrentNotes] = useState("");
     const [savingNotes, setSavingNotes] = useState(false);
+    const [syncingToSheets, setSyncingToSheets] = useState(false);
+    const [creatingSheet, setCreatingSheet] = useState(false);
+    const [sheetUrl, setSheetUrl] = useState<string | null>(null);
 
     useEffect(() => {
         fetchApplications();
+        fetchSheetInfo();
     }, []);
 
     useEffect(() => {
@@ -84,6 +90,72 @@ export default function IncubationApplicationsDashboard() {
             console.error("Error fetching applications:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSheetInfo = async () => {
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/info");
+            const data = await res.json();
+
+            if (data.success) {
+                setSheetUrl(data.spreadsheetUrl);
+            }
+        } catch (error) {
+            console.log("No sheet configured yet");
+        }
+    };
+
+    const syncToGoogleSheets = async () => {
+        setSyncingToSheets(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert(`Successfully synced ${data.count} applications to Google Sheets!`);
+                if (data.spreadsheetUrl) {
+                    setSheetUrl(data.spreadsheetUrl);
+                }
+            } else {
+                alert("Failed to sync: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error syncing to sheets:", error);
+            alert("Failed to sync to Google Sheets");
+        } finally {
+            setSyncingToSheets(false);
+        }
+    };
+
+    const createNewSheet = async () => {
+        setCreatingSheet(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert("New spreadsheet created! Now sync your applications to it.");
+                setSheetUrl(data.spreadsheetUrl);
+                console.log("Spreadsheet ID:", data.spreadsheetId);
+                console.log("Add this to your .env file: GOOGLE_SHEETS_ID=" + data.spreadsheetId);
+            } else {
+                alert("Failed to create sheet: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error creating sheet:", error);
+            alert("Failed to create Google Sheet");
+        } finally {
+            setCreatingSheet(false);
         }
     };
 
@@ -205,6 +277,59 @@ export default function IncubationApplicationsDashboard() {
         window.open(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, "_blank");
     };
 
+    const exportToSpreadsheet = () => {
+        const headers = [
+            "Startup Name",
+            "Founder Name",
+            "Co-Founders",
+            "Email",
+            "Phone",
+            "Website",
+            "Industry",
+            "Stage",
+            "Team Size",
+            "Funding Raised",
+            "Revenue",
+            "Status",
+            "Has Pitch Deck",
+            "Application Date",
+            "Notes"
+        ];
+
+        const rows = filteredApplications.map(app => [
+            app.startupName,
+            app.founderName,
+            app.coFounders || "",
+            app.email,
+            app.phone,
+            app.website,
+            app.industry,
+            app.stage,
+            app.teamSize,
+            app.fundingRaised,
+            app.revenue,
+            app.status,
+            app.pitchDeck ? "Yes" : "No",
+            new Date(app.createdAt).toLocaleDateString(),
+            app.notes || ""
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `incubation_applications_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
             pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -265,15 +390,56 @@ export default function IncubationApplicationsDashboard() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                            <Rocket className="w-7 h-7 text-white" />
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                                <Rocket className="w-7 h-7 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    Incubation Applications
+                                </h1>
+                                <p className="text-gray-600">Manage and review startup applications</p>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Incubation Applications
-                        </h1>
+                        <div className="flex flex-wrap gap-2">
+                            {sheetUrl && (
+                                <a
+                                    href={sheetUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium shadow-md text-sm"
+                                >
+                                    <Globe className="w-4 h-4" />
+                                    View Sheet
+                                </a>
+                            )}
+                            {/* <button
+                                onClick={syncToGoogleSheets}
+                                disabled={syncingToSheets}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                                {syncingToSheets ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Syncing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <RefreshCw className="w-4 h-4" />
+                                        Sync to Sheets
+                                    </>
+                                )}
+                            </button> */}
+                            <button
+                                onClick={exportToSpreadsheet}
+                                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 font-medium shadow-md text-sm"
+                            >
+                                <Download className="w-4 h-4" />
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
-                    <p className="text-gray-600">Manage and review startup applications</p>
                 </div>
 
                 {/* Stats Cards */}
@@ -344,7 +510,6 @@ export default function IncubationApplicationsDashboard() {
                         </div>
                     </div>
                 </div>
-
                 {/* Applications List */}
                 <div className="space-y-4">
                     {filteredApplications.length === 0 ? (
