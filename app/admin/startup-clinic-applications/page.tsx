@@ -16,6 +16,7 @@ import {
     Users,
     CalendarPlus,
     AlertCircle,
+    Download,
 } from "lucide-react";
 
 interface Booking {
@@ -184,6 +185,77 @@ export default function StartupClinicDashboard() {
         });
     };
 
+    const exportToCSV = () => {
+        // Define CSV headers
+        const headers = [
+            'Name',
+            'Email',
+            'Phone',
+            'Session Date',
+            'Time Slot',
+            'Question 1',
+            'Question 2',
+            'Question 3',
+            'Newsletter Subscribed',
+            'In Calendar',
+            'Calendar Event ID',
+            'Booked At'
+        ];
+
+        // Convert bookings to CSV rows
+        const rows = filteredBookings.map(booking => {
+            const sessionDate = booking.sessionDate
+                ? new Date(booking.sessionDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })
+                : 'Not set';
+
+            return [
+                booking.name,
+                booking.email,
+                booking.phone,
+                sessionDate,
+                booking.slot,
+                booking.question1 || 'No answer provided',
+                booking.question2 || 'No answer provided',
+                booking.question3 || 'No answer provided',
+                booking.subscribeNewsletter ? 'Yes' : 'No',
+                booking.calendarEventId ? 'Yes' : 'No',
+                booking.calendarEventId || 'N/A',
+                formatDate(booking.createdAt)
+            ];
+        });
+
+        // Escape and format CSV content
+        const escapeCSV = (value: string) => {
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+        };
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(escapeCSV).join(','))
+        ].join('\n');
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        link.setAttribute('href', url);
+        link.setAttribute('download', `startup-clinic-bookings-${timestamp}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const stats = {
         total: bookings.length,
         newsletter: bookings.filter(b => b.subscribeNewsletter).length,
@@ -207,15 +279,27 @@ export default function StartupClinicDashboard() {
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 py-8 px-4">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                            <Calendar className="w-7 h-7 text-white" />
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <Calendar className="w-7 h-7 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    Startup Clinic Bookings
+                                </h1>
+                                <p className="text-gray-600">Manage and review clinic session bookings</p>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Startup Clinic Bookings
-                        </h1>
+                        <button
+                            onClick={exportToCSV}
+                            disabled={filteredBookings.length === 0}
+                            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                        >
+                            <Download className="w-5 h-5" />
+                            Export as CSV
+                        </button>
                     </div>
-                    <p className="text-gray-600">Manage and review clinic session bookings</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
