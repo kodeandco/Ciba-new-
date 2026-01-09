@@ -32,11 +32,10 @@ export default function Gallery() {
   return (
     <section 
       id="gallery" 
-      className="py-16 px-4"
-      style={{ background: "oklch(97.923% 0.01042 220.071)" }} // Soft, premium light blue-gray background
+      className="py-16 px-4 bg-gradient-subtle"
     >
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <h2 className="text-4xl font-bold mb-3">Gallery</h2>
+        <h2 className="text-4xl font-bold mb-3 text-foreground">Gallery</h2>
         <p className="text-lg text-muted-foreground">
           Explore highlights from our programs and community events.
         </p>
@@ -47,7 +46,7 @@ export default function Gallery() {
         {gallery.map((item) => (
           <div
             key={item._id}
-            className="bg-background border rounded-xl shadow-sm overflow-hidden"
+            className="bg-card border border-border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
           >
             {/* Header */}
             <div className="flex items-center gap-3 p-3">
@@ -57,7 +56,7 @@ export default function Gallery() {
                 alt="cibamumbai"
               />
               <div>
-                <p className="font-semibold text-sm">cibamumbai</p>
+                <p className="font-semibold text-sm text-card-foreground">cibamumbai</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(item.createdAt).toLocaleDateString("en-IN", {
                     day: "numeric",
@@ -69,7 +68,7 @@ export default function Gallery() {
             </div>
 
             {/* Media */}
-            <div className="relative">
+            <div className="relative bg-muted">
               {item.mediaType === "video" ? (
                 <video
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
@@ -85,7 +84,7 @@ export default function Gallery() {
                 />
               )}
               {item.mediaType === "video" && (
-                <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5">
+                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5">
                   <Play className="w-4 h-4 text-white fill-white" />
                 </div>
               )}
@@ -93,22 +92,23 @@ export default function Gallery() {
 
             {/* Actions */}
             <div className="flex items-center gap-3 px-3 py-2">
-              <button onClick={() => toggleLike(item._id)}>
+              <button onClick={() => toggleLike(item._id)} className="transition-transform hover:scale-110">
                 <Heart
-                  className={`w-5 h-5 ${liked.includes(item._id)
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-500"
-                    }`}
+                  className={`w-5 h-5 transition-colors ${
+                    liked.includes(item._id)
+                      ? "fill-red-500 text-red-500"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 />
               </button>
-              <MessageCircle className="w-5 h-5 text-gray-500" />
-              <Share2 className="w-5 h-5 text-gray-500" />
+              <MessageCircle className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer" />
+              <Share2 className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer" />
             </div>
 
             {/* Content */}
             <div className="px-3 pb-3 text-sm">
-              <p className="font-semibold mb-1">cibamumbai</p>
-              <p className="line-clamp-2">{item.description}</p>
+              <p className="font-semibold mb-1 text-card-foreground">cibamumbai</p>
+              <p className="line-clamp-2 text-muted-foreground">{item.description}</p>
             </div>
           </div>
         ))}
