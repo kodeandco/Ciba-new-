@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import AdminNavbar from "@/components/AdminNavbar"
+import { Users, Edit2, Trash2, Save, X, Upload, Image as ImageIcon, UserCheck, Briefcase, Globe } from "lucide-react"
 
 interface Mentor {
     _id: string
@@ -169,18 +171,64 @@ export default function MentorsAdminPage() {
         }
     }
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-8">
-            <div className="max-w-7xl mx-auto">
+    const stats = {
+        total: mentors.length,
+        withLinkedIn: mentors.filter(m => m.socialMedia?.linkedin).length,
+        withWebsite: mentors.filter(m => m.socialMedia?.website).length,
+    }
 
+    return (
+        <div className="min-h-screen bg-background">
+            <AdminNavbar />
+            
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <h1 className="text-4xl font-bold text-blue-900 mb-8">
-                    Mentor Management
-                </h1>
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                            <Users className="w-7 h-7 text-primary-foreground" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-foreground">
+                            Mentor Management
+                        </h1>
+                    </div>
+                    <p className="text-muted-foreground">Manage mentors and their profiles</p>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Mentors</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.total}</p>
+                            </div>
+                            <Users className="w-12 h-12 text-primary" />
+                        </div>
+                    </div>
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">With LinkedIn</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.withLinkedIn}</p>
+                            </div>
+                            <UserCheck className="w-12 h-12 text-primary" />
+                        </div>
+                    </div>
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">With Website</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.withWebsite}</p>
+                            </div>
+                            <Globe className="w-12 h-12 text-primary" />
+                        </div>
+                    </div>
+                </div>
 
                 {/* FORM */}
-                <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
-                    <h2 className="text-xl font-semibold text-blue-800 mb-6">
+                <div className="bg-card rounded-lg shadow-md p-6 mb-8 border border-border">
+                    <h2 className="text-xl font-semibold text-foreground mb-6">
                         {editingId ? "Edit Mentor" : "Add New Mentor"}
                     </h2>
 
@@ -191,7 +239,7 @@ export default function MentorsAdminPage() {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                         />
                         <input
                             name="designation"
@@ -199,7 +247,7 @@ export default function MentorsAdminPage() {
                             value={formData.designation}
                             onChange={handleChange}
                             required
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                         />
                         <input
                             name="department"
@@ -207,21 +255,21 @@ export default function MentorsAdminPage() {
                             value={formData.department}
                             onChange={handleChange}
                             required
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                         />
                         <input
                             name="linkedin"
                             placeholder="LinkedIn URL"
                             value={formData.linkedin}
                             onChange={handleChange}
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                         />
                         <input
                             name="website"
                             placeholder="Website URL"
                             value={formData.website}
                             onChange={handleChange}
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                         />
 
                         <textarea
@@ -229,12 +277,12 @@ export default function MentorsAdminPage() {
                             placeholder="Mentor Message / Bio"
                             value={formData.message}
                             onChange={handleChange}
-                            className="border border-blue-200 p-3 rounded-lg col-span-full min-h-[120px] focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="bg-background border border-input p-3 rounded-lg col-span-full min-h-[120px] focus:ring-2 focus:ring-ring outline-none text-foreground placeholder:text-muted-foreground"
                             required
                         />
 
                         <div className="col-span-full">
-                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                            <label className="block text-sm font-medium text-foreground mb-2">
                                 Upload Image (4:3 aspect ratio required)
                             </label>
                             <input
@@ -242,12 +290,12 @@ export default function MentorsAdminPage() {
                                 accept="image/*"
                                 onChange={handleFileChange}
                                 required={!editingId}
-                                className="text-blue-700 w-full"
+                                className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:cursor-pointer hover:file:bg-primary/90"
                             />
                             {imageError && (
-                                <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                <p className="text-destructive text-sm mt-2">{imageError}</p>
                             )}
-                            <p className="text-gray-500 text-xs mt-1">
+                            <p className="text-muted-foreground text-xs mt-1">
                                 Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
                             </p>
                         </div>
@@ -256,7 +304,7 @@ export default function MentorsAdminPage() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                             >
                                 {isSubmitting ? "Submitting..." : editingId ? "Update Mentor" : "Add Mentor"}
                             </button>
@@ -265,7 +313,7 @@ export default function MentorsAdminPage() {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="flex-1 bg-blue-100 text-blue-700 py-3 rounded-lg hover:bg-blue-200"
+                                    className="flex-1 bg-muted text-muted-foreground py-3 rounded-lg hover:bg-muted/80 font-medium"
                                 >
                                     Cancel
                                 </button>
@@ -275,51 +323,98 @@ export default function MentorsAdminPage() {
                 </div>
 
                 {/* LIST */}
-                <div className="grid md:grid-cols-3 gap-8">
-                    {mentors.map((mentor) => (
-                        <div
-                            key={mentor._id}
-                            className="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 hover:shadow-xl transition"
-                        >
-                            {/* 4:3 Aspect Ratio Container */}
-                            <div className="relative w-full" style={{ paddingBottom: '75%' }}>
-                                <img
-                                    src={mentor.image || "/placeholder.svg"}
-                                    alt={mentor.name}
-                                    className="absolute top-0 left-0 w-full h-full object-cover"
-                                />
-                            </div>
-
-                            <div className="p-4">
-                                <h3 className="font-bold text-lg text-blue-900">
-                                    {mentor.name}
-                                </h3>
-                                <p className="text-sm text-blue-700">
-                                    {mentor.designation}
-                                </p>
-                                <p className="text-xs text-blue-500 mb-4">
-                                    {mentor.department}
-                                </p>
-
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => handleEdit(mentor)}
-                                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(mentor._id)}
-                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">All Mentors</h2>
+                    {mentors.length === 0 ? (
+                        <div className="bg-card p-12 rounded-lg shadow-md text-center border border-border">
+                            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                            <p className="text-muted-foreground text-lg">No mentors found. Add one to get started!</p>
                         </div>
-                    ))}
-                </div>
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {mentors.map((mentor) => (
+                                <div
+                                    key={mentor._id}
+                                    className="bg-card rounded-lg shadow-md overflow-hidden border border-border hover:shadow-lg transition-shadow"
+                                >
+                                    {/* 4:3 Aspect Ratio Container */}
+                                    <div className="relative w-full" style={{ paddingBottom: '75%' }}>
+                                        {mentor.image ? (
+                                            <img
+                                                src={mentor.image}
+                                                alt={mentor.name}
+                                                className="absolute top-0 left-0 w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="absolute top-0 left-0 w-full h-full bg-primary flex items-center justify-center text-6xl font-bold text-primary-foreground">
+                                                {mentor.name.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
 
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-lg text-foreground">
+                                            {mentor.name}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            {mentor.designation}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mb-3">
+                                            {mentor.department}
+                                        </p>
+
+                                        <p className="text-sm text-foreground mb-4 line-clamp-2">
+                                            {mentor.message}
+                                        </p>
+
+                                        {/* Social Links */}
+                                        {(mentor.socialMedia?.linkedin || mentor.socialMedia?.website) && (
+                                            <div className="flex gap-2 mb-4">
+                                                {mentor.socialMedia?.linkedin && (
+                                                    <a
+                                                        href={mentor.socialMedia.linkedin}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+                                                    >
+                                                        LinkedIn
+                                                    </a>
+                                                )}
+                                                {mentor.socialMedia?.website && (
+                                                    <a
+                                                        href={mentor.socialMedia.website}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+                                                    >
+                                                        Website
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => handleEdit(mentor)}
+                                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(mentor._id)}
+                                                className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

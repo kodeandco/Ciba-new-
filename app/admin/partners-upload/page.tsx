@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import AdminNavbar from "@/components/AdminNavbar"
 
 /* ===============================
    TYPES
@@ -164,17 +165,19 @@ export default function PartnersAdminPage() {
        UI
     ================================ */
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-8">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-background">
+            <AdminNavbar />
+            
+            <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
                 {/* HEADER */}
-                <h1 className="text-4xl font-bold text-blue-900 mb-10">
+                <h1 className="text-3xl font-bold text-foreground mb-8">
                     Partners Management
                 </h1>
 
                 {/* FORM */}
-                <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
-                    <h2 className="text-xl font-semibold text-blue-800 mb-6">
+                <div className="bg-card rounded-lg shadow-lg p-6 mb-8 border border-border">
+                    <h2 className="text-xl font-semibold text-foreground mb-6">
                         {editingId ? "Edit Partner" : "Add Partner"}
                     </h2>
 
@@ -185,7 +188,7 @@ export default function PartnersAdminPage() {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            className="border border-blue-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="border border-border bg-background text-foreground p-3 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                         />
 
                         <textarea
@@ -194,23 +197,23 @@ export default function PartnersAdminPage() {
                             value={formData.description}
                             onChange={handleChange}
                             required
-                            className="border border-blue-200 p-3 rounded-lg min-h-[120px] focus:ring-2 focus:ring-blue-400 outline-none"
+                            className="border border-border bg-background text-foreground p-3 rounded-lg min-h-[120px] focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                         />
 
                         <div>
-                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                            <label className="block text-sm font-medium text-foreground mb-2">
                                 Upload Image (4:3 aspect ratio required)
                             </label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleFileChange}
-                                className="text-blue-700 w-full"
+                                className="text-foreground w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer"
                             />
                             {imageError && (
-                                <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                <p className="text-destructive text-sm mt-2">{imageError}</p>
                             )}
-                            <p className="text-gray-500 text-xs mt-1">
+                            <p className="text-muted-foreground text-xs mt-1">
                                 Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
                             </p>
                         </div>
@@ -219,7 +222,7 @@ export default function PartnersAdminPage() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading
                                     ? "Saving..."
@@ -232,7 +235,7 @@ export default function PartnersAdminPage() {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="flex-1 bg-blue-100 text-blue-700 py-3 rounded-lg hover:bg-blue-200"
+                                    className="flex-1 bg-muted text-foreground py-3 rounded-lg hover:bg-muted/80 transition-all font-semibold"
                                 >
                                     Cancel
                                 </button>
@@ -242,11 +245,11 @@ export default function PartnersAdminPage() {
                 </div>
 
                 {/* LIST */}
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {partners.map(partner => (
                         <div
                             key={partner._id}
-                            className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden hover:shadow-xl transition"
+                            className="bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all"
                         >
                             {/* 4:3 Aspect Ratio Container */}
                             <div className="relative w-full" style={{ paddingBottom: '75%' }}>
@@ -258,25 +261,25 @@ export default function PartnersAdminPage() {
                             </div>
 
                             <div className="p-4">
-                                <h3 className="font-bold text-lg text-blue-900">
+                                <h3 className="font-bold text-lg text-foreground">
                                     {partner.name}
                                 </h3>
 
-                                <p className="text-sm text-blue-700 mt-2">
+                                <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
                                     {partner.description}
                                 </p>
 
                                 <div className="flex gap-3 mt-4">
                                     <button
                                         onClick={() => handleEdit(partner)}
-                                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg"
+                                        className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2 rounded-lg transition-all font-semibold"
                                     >
                                         Edit
                                     </button>
 
                                     <button
                                         onClick={() => handleDelete(partner._id)}
-                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg"
+                                        className="flex-1 bg-destructive/20 hover:bg-destructive/30 text-destructive py-2 rounded-lg transition-all font-semibold"
                                     >
                                         Delete
                                     </button>
@@ -285,6 +288,13 @@ export default function PartnersAdminPage() {
                         </div>
                     ))}
                 </div>
+
+                {partners.length === 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-muted-foreground text-lg">No partners found</p>
+                        <p className="text-muted-foreground text-sm mt-2">Add your first partner to get started</p>
+                    </div>
+                )}
 
             </div>
         </div>
