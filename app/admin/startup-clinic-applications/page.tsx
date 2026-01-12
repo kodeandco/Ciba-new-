@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AdminNavbar from "@/components/AdminNavbar";
 import {
     Calendar,
     Search,
@@ -127,7 +128,6 @@ export default function StartupClinicDashboard() {
     const filterBookings = () => {
         let filtered = bookings;
 
-        // Apply month filter
         if (selectedMonth !== "all") {
             const monthNum = parseInt(selectedMonth);
             filtered = filtered.filter((booking) => {
@@ -136,7 +136,6 @@ export default function StartupClinicDashboard() {
             });
         }
 
-        // Apply week filter
         if (selectedWeek !== "all") {
             const [year, week] = selectedWeek.split("-").map(Number);
             filtered = filtered.filter((booking) => {
@@ -147,7 +146,6 @@ export default function StartupClinicDashboard() {
             });
         }
 
-        // Apply search filter
         if (searchTerm) {
             filtered = filtered.filter(
                 (booking) =>
@@ -158,17 +156,14 @@ export default function StartupClinicDashboard() {
             );
         }
 
-        // Sort by session date and time (most recent/upcoming first)
         filtered.sort((a, b) => {
             const dateA = new Date(a.sessionDate).getTime();
             const dateB = new Date(b.sessionDate).getTime();
 
-            // If dates are the same, sort by time slot
             if (dateA === dateB) {
                 return a.slot.localeCompare(b.slot);
             }
 
-            // Sort by date (upcoming first)
             return dateA - dateB;
         });
 
@@ -269,100 +264,90 @@ export default function StartupClinicDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 animate-spin text-green-600" />
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 py-8 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-background">
+            <AdminNavbar />
+            
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                                <Calendar className="w-7 h-7 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-900">
-                                    Startup Clinic Bookings
-                                </h1>
-                                <p className="text-gray-600">Manage and review clinic session bookings</p>
-                            </div>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                            <Calendar className="w-7 h-7 text-primary-foreground" />
                         </div>
-                        <button
-                            onClick={exportToCSV}
-                            disabled={filteredBookings.length === 0}
-                            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                        >
-                            <Download className="w-5 h-5" />
-                            Export as CSV
-                        </button>
+                        <h1 className="text-3xl font-bold text-foreground">
+                            Startup Clinic Bookings
+                        </h1>
                     </div>
+                    <p className="text-muted-foreground">Manage and review clinic session bookings</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white p-6 rounded-lg shadow-md border-2 border-green-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Total Bookings</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                                <p className="text-sm text-muted-foreground">Total Bookings</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.total}</p>
                             </div>
-                            <Users className="w-12 h-12 text-green-600" />
+                            <Users className="w-12 h-12 text-primary" />
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-200">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Today's Bookings</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.today}</p>
+                                <p className="text-sm text-muted-foreground">Today's Bookings</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.today}</p>
                             </div>
-                            <Clock className="w-12 h-12 text-blue-600" />
+                            <Clock className="w-12 h-12 text-primary" />
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md border-2 border-purple-200">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Newsletter Subscribers</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.newsletter}</p>
+                                <p className="text-sm text-muted-foreground">Newsletter Subscribers</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.newsletter}</p>
                             </div>
-                            <Bell className="w-12 h-12 text-purple-600" />
+                            <Bell className="w-12 h-12 text-primary" />
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-200">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">In Google Calendar</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.inCalendar}</p>
+                                <p className="text-sm text-muted-foreground">In Google Calendar</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.inCalendar}</p>
                             </div>
-                            <Calendar className="w-12 h-12 text-blue-600" />
+                            <Calendar className="w-12 h-12 text-primary" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                <div className="bg-card p-4 rounded-lg shadow-md mb-6 border border-border">
                     <div className="flex flex-col gap-4">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                             <input
                                 type="text"
                                 placeholder="Search by name, email, phone, or slot..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                className="w-full pl-10 pr-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Filter by Month
                                 </label>
                                 <select
                                     value={selectedMonth}
                                     onChange={(e) => setSelectedMonth(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white"
+                                    className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                                 >
                                     {months.map((month) => (
                                         <option key={month.value} value={month.value}>
@@ -373,13 +358,13 @@ export default function StartupClinicDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Filter by Week
                                 </label>
                                 <select
                                     value={selectedWeek}
                                     onChange={(e) => setSelectedWeek(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white"
+                                    className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                                 >
                                     {getCurrentWeekOptions().map((week) => (
                                         <option key={week.value} value={week.value}>
@@ -396,7 +381,7 @@ export default function StartupClinicDashboard() {
                                     setSelectedMonth("all");
                                     setSelectedWeek("all");
                                 }}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                                className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors font-medium"
                             >
                                 Clear Filters
                             </button>
@@ -406,27 +391,27 @@ export default function StartupClinicDashboard() {
 
                 <div className="space-y-4">
                     {filteredBookings.length === 0 ? (
-                        <div className="bg-white p-12 rounded-lg shadow-md text-center">
-                            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 text-lg">No bookings found</p>
+                        <div className="bg-card p-12 rounded-lg shadow-md text-center border border-border">
+                            <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                            <p className="text-muted-foreground text-lg">No bookings found</p>
                         </div>
                     ) : (
                         filteredBookings.map((booking) => (
                             <div
                                 key={booking._id}
-                                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-gray-100"
+                                className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-border"
                             >
                                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-3 mb-3">
-                                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <User className="w-6 h-6 text-green-600" />
+                                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <User className="w-6 h-6 text-primary" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                                <h3 className="text-xl font-bold text-foreground mb-1">
                                                     {booking.name}
                                                 </h3>
-                                                <p className="text-sm text-gray-600">
+                                                <p className="text-sm text-muted-foreground">
                                                     Booked on {formatDate(booking.createdAt)}
                                                 </p>
                                             </div>
@@ -434,19 +419,19 @@ export default function StartupClinicDashboard() {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Mail className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-700 truncate">{booking.email}</span>
+                                                <Mail className="w-4 h-4 text-muted-foreground" />
+                                                <span className="text-foreground truncate">{booking.email}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Phone className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-700">{booking.phone}</span>
+                                                <Phone className="w-4 h-4 text-muted-foreground" />
+                                                <span className="text-foreground">{booking.phone}</span>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                            <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-2 rounded-lg">
-                                                <Calendar className="w-4 h-4 text-blue-600" />
-                                                <span className="text-blue-700 font-medium">
+                                            <div className="flex items-center gap-2 text-sm bg-primary/5 px-3 py-2 rounded-lg">
+                                                <Calendar className="w-4 h-4 text-primary" />
+                                                <span className="text-primary font-medium">
                                                     {booking.sessionDate ? new Date(booking.sessionDate).toLocaleDateString('en-US', {
                                                         weekday: 'short',
                                                         month: 'short',
@@ -455,27 +440,27 @@ export default function StartupClinicDashboard() {
                                                     }) : 'Date not set'}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-sm bg-green-50 px-3 py-2 rounded-lg">
-                                                <Clock className="w-4 h-4 text-green-600" />
-                                                <span className="text-green-700 font-medium">{booking.slot}</span>
+                                            <div className="flex items-center gap-2 text-sm bg-primary/5 px-3 py-2 rounded-lg">
+                                                <Clock className="w-4 h-4 text-primary" />
+                                                <span className="text-primary font-medium">{booking.slot}</span>
                                             </div>
                                         </div>
 
                                         <div className="flex flex-wrap gap-2">
-                                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                                            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium inline-flex items-center gap-1">
                                                 <CheckCircle className="w-3 h-3" /> Confirmed
                                             </span>
                                             {booking.subscribeNewsletter && (
-                                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium inline-flex items-center gap-1">
                                                     <Bell className="w-3 h-3" /> Newsletter Subscribed
                                                 </span>
                                             )}
                                             {booking.calendarEventId ? (
-                                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium inline-flex items-center gap-1">
                                                     <Calendar className="w-3 h-3" /> In Google Calendar
                                                 </span>
                                             ) : (
-                                                <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                                                <span className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium inline-flex items-center gap-1">
                                                     <AlertCircle className="w-3 h-3" /> Not in Calendar
                                                 </span>
                                             )}
@@ -485,7 +470,7 @@ export default function StartupClinicDashboard() {
                                     <div className="flex flex-col gap-2 lg:items-end">
                                         <button
                                             onClick={() => setSelectedBooking(booking)}
-                                            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2"
+                                            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2"
                                         >
                                             <MessageSquare className="w-4 h-4" /> View Questions
                                         </button>
@@ -493,7 +478,7 @@ export default function StartupClinicDashboard() {
                                             <button
                                                 onClick={() => addToGoogleCalendar(booking._id)}
                                                 disabled={addingToCalendar === booking._id}
-                                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="px-6 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {addingToCalendar === booking._id ? (
                                                     <>
@@ -518,14 +503,14 @@ export default function StartupClinicDashboard() {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedBooking(null)}>
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+                        className="bg-card rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-border"
                     >
-                        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+                        <div className="p-6 border-b border-border sticky top-0 bg-card z-10">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-bold text-gray-900">Booking Details</h2>
+                                <h2 className="text-2xl font-bold text-foreground">Booking Details</h2>
                                 <button
                                     onClick={() => setSelectedBooking(null)}
-                                    className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                                    className="text-muted-foreground hover:text-foreground text-2xl font-bold transition-colors"
                                 >
                                     ×
                                 </button>
@@ -534,33 +519,33 @@ export default function StartupClinicDashboard() {
 
                         <div className="p-6 space-y-6">
                             <div>
-                                <h3 className="text-lg font-semibold mb-3 text-gray-900">Personal Information</h3>
+                                <h3 className="text-lg font-semibold mb-3 text-foreground">Personal Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-gray-600">Name</p>
-                                        <p className="font-medium text-gray-900">{selectedBooking.name}</p>
+                                        <p className="text-sm text-muted-foreground">Name</p>
+                                        <p className="font-medium text-foreground">{selectedBooking.name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Email</p>
-                                        <p className="font-medium text-gray-900">{selectedBooking.email}</p>
+                                        <p className="text-sm text-muted-foreground">Email</p>
+                                        <p className="font-medium text-foreground">{selectedBooking.email}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Phone</p>
-                                        <p className="font-medium text-gray-900">{selectedBooking.phone}</p>
+                                        <p className="text-sm text-muted-foreground">Phone</p>
+                                        <p className="font-medium text-foreground">{selectedBooking.phone}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Slot</p>
-                                        <p className="font-medium text-gray-900">{selectedBooking.slot}</p>
+                                        <p className="text-sm text-muted-foreground">Slot</p>
+                                        <p className="font-medium text-foreground">{selectedBooking.slot}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-3 text-gray-900">Booking Information</h3>
+                                <h3 className="text-lg font-semibold mb-3 text-foreground">Booking Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-gray-600">Session Date</p>
-                                        <p className="font-medium text-gray-900">
+                                        <p className="text-sm text-muted-foreground">Session Date</p>
+                                        <p className="font-medium text-foreground">
                                             {selectedBooking.sessionDate ? new Date(selectedBooking.sessionDate).toLocaleDateString('en-US', {
                                                 weekday: 'long',
                                                 year: 'numeric',
@@ -570,22 +555,22 @@ export default function StartupClinicDashboard() {
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Time Slot</p>
-                                        <p className="font-medium text-gray-900">{selectedBooking.slot}</p>
+                                        <p className="text-sm text-muted-foreground">Time Slot</p>
+                                        <p className="font-medium text-foreground">{selectedBooking.slot}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Booked At</p>
-                                        <p className="font-medium text-gray-900">{formatDate(selectedBooking.createdAt)}</p>
+                                        <p className="text-sm text-muted-foreground">Booked At</p>
+                                        <p className="font-medium text-foreground">{formatDate(selectedBooking.createdAt)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Calendar Status</p>
-                                        <p className="font-medium text-gray-900">
+                                        <p className="text-sm text-muted-foreground">Calendar Status</p>
+                                        <p className="font-medium text-foreground">
                                             {selectedBooking.calendarEventId ? (
-                                                <span className="text-blue-600 inline-flex items-center gap-1">
+                                                <span className="text-primary inline-flex items-center gap-1">
                                                     <CheckCircle className="w-4 h-4" /> Added to Calendar
                                                 </span>
                                             ) : (
-                                                <span className="text-yellow-600 inline-flex items-center gap-1">
+                                                <span className="text-muted-foreground inline-flex items-center gap-1">
                                                     <AlertCircle className="w-4 h-4" /> Not in Calendar
                                                 </span>
                                             )}
@@ -595,19 +580,19 @@ export default function StartupClinicDashboard() {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-3 text-gray-900">Questions Submitted</h3>
+                                <h3 className="text-lg font-semibold mb-3 text-foreground">Questions Submitted</h3>
                                 <div className="space-y-4">
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Question 1:</p>
-                                        <p className="text-gray-900">{selectedBooking.question1 || "No answer provided"}</p>
+                                    <div className="bg-muted p-4 rounded-lg">
+                                        <p className="text-sm font-medium text-foreground mb-2">Question 1:</p>
+                                        <p className="text-foreground">{selectedBooking.question1 || "No answer provided"}</p>
                                     </div>
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Question 2:</p>
-                                        <p className="text-gray-900">{selectedBooking.question2 || "No answer provided"}</p>
+                                    <div className="bg-muted p-4 rounded-lg">
+                                        <p className="text-sm font-medium text-foreground mb-2">Question 2:</p>
+                                        <p className="text-foreground">{selectedBooking.question2 || "No answer provided"}</p>
                                     </div>
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Question 3:</p>
-                                        <p className="text-gray-900">{selectedBooking.question3 || "No answer provided"}</p>
+                                    <div className="bg-muted p-4 rounded-lg">
+                                        <p className="text-sm font-medium text-foreground mb-2">Question 3:</p>
+                                        <p className="text-foreground">{selectedBooking.question3 || "No answer provided"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -615,13 +600,13 @@ export default function StartupClinicDashboard() {
                             <div className="flex gap-3 pt-4">
                                 <a
                                     href={`mailto:${selectedBooking.email}`}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-medium inline-flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-center font-medium inline-flex items-center justify-center gap-2"
                                 >
                                     <Mail className="w-4 h-4" /> Send Email
                                 </a>
                                 <a
                                     href={`tel:${selectedBooking.phone}`}
-                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center font-medium inline-flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors text-center font-medium inline-flex items-center justify-center gap-2"
                                 >
                                     <Phone className="w-4 h-4" /> Call
                                 </a>

@@ -259,5 +259,5 @@ export default function PanoramaTour() {
         {currentScene + 1} / {scenes.length}
       </div>
     </div>
-  )
+  );
 }

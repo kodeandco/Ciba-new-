@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Edit2, Trash2, Save, X, Upload, Image } from "lucide-react"
+import AdminNavbar from "@/components/AdminNavbar"
+import { Plus, Edit2, Trash2, Save, X, Upload, Image as ImageIcon, MessageSquare, CheckCircle, AlertCircle } from "lucide-react"
 
 interface Testimonial {
     _id: string
@@ -213,100 +214,145 @@ export default function TestimonialsAdmin() {
         }
     }
 
+    const stats = {
+        total: testimonials.length,
+        active: testimonials.filter(t => t.isActive).length,
+        inactive: testimonials.filter(t => !t.isActive).length,
+    }
+
     return (
-        <div className="min-h-screen bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="min-h-screen bg-background">
+            <AdminNavbar />
+            
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                                Testimonials Management
-                            </h1>
-                            <p className="text-slate-600 mt-2">Manage success stories and client feedback</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                            <MessageSquare className="w-7 h-7 text-primary-foreground" />
                         </div>
-                        <button
-                            onClick={() => openModal()}
-                            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg shadow-blue-500/20"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Add Testimonial
-                        </button>
+                        <h1 className="text-3xl font-bold text-foreground">
+                            Testimonials Management
+                        </h1>
                     </div>
+                    <p className="text-muted-foreground">Manage success stories and client feedback</p>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Testimonials</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.total}</p>
+                            </div>
+                            <MessageSquare className="w-12 h-12 text-primary" />
+                        </div>
+                    </div>
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Active</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.active}</p>
+                            </div>
+                            <CheckCircle className="w-12 h-12 text-primary" />
+                        </div>
+                    </div>
+                    <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Inactive</p>
+                                <p className="text-3xl font-bold text-foreground">{stats.inactive}</p>
+                            </div>
+                            <AlertCircle className="w-12 h-12 text-muted-foreground" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Add Button */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => openModal()}
+                        className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-all hover:bg-primary/90 shadow-md"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Add Testimonial
+                    </button>
                 </div>
 
                 {/* Testimonials List */}
                 {loading ? (
                     <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
                 ) : testimonials.length === 0 ? (
-                    <div className="text-center py-20">
-                        <p className="text-slate-500">No testimonials found. Click "Add Testimonial" to create one.</p>
+                    <div className="bg-card p-12 rounded-lg shadow-md text-center border border-border">
+                        <MessageSquare className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground text-lg">No testimonials found. Click "Add Testimonial" to create one.</p>
                     </div>
                 ) : (
                     <div className="space-y-6">
                         {testimonials.map((testimonial) => (
                             <div
                                 key={testimonial._id}
-                                className="relative rounded-2xl p-[2px] bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 transition-all duration-300"
+                                className="bg-card rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-border"
                             >
-                                <div className="bg-white rounded-2xl p-6 h-full">
-                                    <div className="flex gap-6">
-                                        {/* Left side - Image (4:3 ratio) */}
-                                        <div className="flex-shrink-0">
-                                            {testimonial.image ? (
-                                                <img
-                                                    src={testimonial.image}
-                                                    alt={testimonial.name}
-                                                    className="w-48 h-36 rounded-lg object-cover border-2 border-blue-400"
-                                                    style={{ aspectRatio: '4/3' }}
-                                                />
-                                            ) : (
-                                                <div className="w-48 h-36 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-4xl font-bold border-2 border-blue-400 text-white">
-                                                    {testimonial.name.charAt(0)}
-                                                </div>
-                                            )}
+                                <div className="flex gap-6">
+                                    {/* Left side - Image (4:3 ratio) */}
+                                    <div className="flex-shrink-0">
+                                        {testimonial.image ? (
+                                            <img
+                                                src={testimonial.image}
+                                                alt={testimonial.name}
+                                                className="w-48 h-36 rounded-lg object-cover border-2 border-primary"
+                                                style={{ aspectRatio: '4/3' }}
+                                            />
+                                        ) : (
+                                            <div className="w-48 h-36 rounded-lg bg-primary flex items-center justify-center text-4xl font-bold border-2 border-primary text-primary-foreground">
+                                                {testimonial.name.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Right side - Content */}
+                                    <div className="flex-1 flex flex-col">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div>
+                                                <h3 className="font-semibold text-foreground text-lg">{testimonial.name}</h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {testimonial.designation} at {testimonial.company}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => openModal(testimonial)}
+                                                    className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                                                >
+                                                    <Edit2 className="w-4 h-4 text-primary" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(testimonial._id)}
+                                                    className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        {/* Right side - Content */}
-                                        <div className="flex-1 flex flex-col">
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div>
-                                                    <h3 className="font-semibold text-slate-900 text-lg">{testimonial.name}</h3>
-                                                    <p className="text-sm text-slate-600">
-                                                        {testimonial.designation} at {testimonial.company}
-                                                    </p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => openModal(testimonial)}
-                                                        className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"
-                                                    >
-                                                        <Edit2 className="w-4 h-4 text-blue-500" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(testimonial._id)}
-                                                        className="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 className="w-4 h-4 text-red-500" />
-                                                    </button>
-                                                </div>
-                                            </div>
+                                        <p className="text-foreground text-sm leading-relaxed mb-4 flex-1">
+                                            "{testimonial.message}"
+                                        </p>
 
-                                            <p className="text-slate-700 text-sm leading-relaxed mb-4 flex-1">
-                                                "{testimonial.message}"
-                                            </p>
-
-                                            <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
-                                                <span>Order: {testimonial.displayOrder}</span>
-                                                <span
-                                                    className={`px-2 py-1 rounded ${testimonial.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                                                        }`}
-                                                >
-                                                    {testimonial.isActive ? "Active" : "Inactive"}
-                                                </span>
-                                            </div>
+                                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
+                                            <span>Order: {testimonial.displayOrder}</span>
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${testimonial.isActive 
+                                                    ? "bg-primary/10 text-primary" 
+                                                    : "bg-muted text-muted-foreground"
+                                                }`}
+                                            >
+                                                {testimonial.isActive ? "Active" : "Inactive"}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -317,24 +363,27 @@ export default function TestimonialsAdmin() {
 
                 {/* Modal */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xl">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => closeModal()}>
+                        <div 
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-card rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border shadow-2xl"
+                        >
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                                <h2 className="text-2xl font-bold text-foreground">
                                     {editingId ? "Edit Testimonial" : "Add Testimonial"}
                                 </h2>
                                 <button
                                     onClick={closeModal}
-                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-muted rounded-lg transition-colors"
                                 >
-                                    <X className="w-6 h-6 text-slate-600" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
 
                             <div className="space-y-6">
                                 {/* Image Upload */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    <label className="block text-sm font-medium text-foreground mb-2">
                                         Profile Image (4:3 ratio recommended)
                                     </label>
                                     <div className="flex items-start gap-4">
@@ -342,22 +391,22 @@ export default function TestimonialsAdmin() {
                                             <img
                                                 src={imagePreview}
                                                 alt="Preview"
-                                                className="w-48 h-36 rounded-lg object-cover border-2 border-blue-400"
+                                                className="w-48 h-36 rounded-lg object-cover border-2 border-primary"
                                                 style={{ aspectRatio: '4/3' }}
                                             />
                                         ) : (
-                                            <div className="w-48 h-36 rounded-lg bg-slate-100 flex flex-col items-center justify-center border-2 border-slate-300 border-dashed">
-                                                <Image className="w-12 h-12 text-slate-400 mb-2" />
-                                                <span className="text-xs text-slate-500">4:3 ratio</span>
+                                            <div className="w-48 h-36 rounded-lg bg-muted flex flex-col items-center justify-center border-2 border-border border-dashed">
+                                                <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
+                                                <span className="text-xs text-muted-foreground">4:3 ratio</span>
                                             </div>
                                         )}
                                         <div className="flex flex-col gap-2">
-                                            <label className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer transition-colors">
+                                            <label className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer transition-colors hover:bg-primary/90">
                                                 <Upload className="w-4 h-4" />
                                                 Upload Image
                                                 <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                             </label>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="text-xs text-muted-foreground">
                                                 Recommended: 800x600px (4:3 ratio)<br />
                                                 Max size: 5MB
                                             </p>
@@ -367,52 +416,52 @@ export default function TestimonialsAdmin() {
 
                                 {/* Name */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Name *</label>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Name *</label>
                                     <input
                                         type="text"
                                         required
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
+                                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground"
                                         placeholder="John Doe"
                                     />
                                 </div>
 
                                 {/* Designation */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Designation *</label>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Designation *</label>
                                     <input
                                         type="text"
                                         required
                                         value={formData.designation}
                                         onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
+                                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground"
                                         placeholder="CEO"
                                     />
                                 </div>
 
                                 {/* Company */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Company *</label>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Company *</label>
                                     <input
                                         type="text"
                                         required
                                         value={formData.company}
                                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
+                                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground"
                                         placeholder="Tech Solutions Inc."
                                     />
                                 </div>
 
                                 {/* Message */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Message *</label>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Message *</label>
                                     <textarea
                                         required
                                         value={formData.message}
                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                         rows={4}
-                                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-slate-900"
+                                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all resize-none text-foreground placeholder:text-muted-foreground"
                                         placeholder="Share your experience..."
                                     />
                                 </div>
@@ -420,20 +469,20 @@ export default function TestimonialsAdmin() {
                                 {/* Display Order and Active Status */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Display Order</label>
+                                        <label className="block text-sm font-medium text-foreground mb-2">Display Order</label>
                                         <input
                                             type="number"
                                             value={formData.displayOrder}
                                             onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })}
-                                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
+                                            className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                                        <label className="block text-sm font-medium text-foreground mb-2">Status</label>
                                         <select
                                             value={formData.isActive.toString()}
                                             onChange={(e) => setFormData({ ...formData, isActive: e.target.value === "true" })}
-                                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
+                                            className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground"
                                         >
                                             <option value="true">Active</option>
                                             <option value="false">Inactive</option>
@@ -446,14 +495,14 @@ export default function TestimonialsAdmin() {
                                     <button
                                         onClick={handleSubmit}
                                         disabled={loading}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Save className="w-5 h-5" />
                                         {loading ? "Saving..." : editingId ? "Update" : "Create"}
                                     </button>
                                     <button
                                         onClick={closeModal}
-                                        className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition-colors"
+                                        className="px-6 py-3 bg-muted text-muted-foreground rounded-lg font-semibold transition-colors hover:bg-muted/80"
                                     >
                                         Cancel
                                     </button>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, Edit2, X, Check, Download } from 'lucide-react';
+import AdminNavbar from '@/components/AdminNavbar';
+import { Trash2, Plus, Edit2, X, Check, Briefcase } from 'lucide-react';
 
 interface Startup {
     _id: string;
@@ -262,18 +263,30 @@ export default function StartupAdminPage() {
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Startup Admin Dashboard</h1>
+        <div className="min-h-screen bg-background">
+            <AdminNavbar />
+            
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                            <Briefcase className="w-7 h-7 text-primary-foreground" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-foreground">
+                            Startup Admin Dashboard
+                        </h1>
+                    </div>
+                    <p className="text-muted-foreground">Manage incubated and graduated startups</p>
+                </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
                     {/* Tabs */}
-                    <div className="flex border-b border-gray-200">
+                    <div className="flex border-b border-border">
                         <button
                             onClick={() => { setActiveTab('incubated'); setShowAddForm(false); cancelEdit(); }}
                             className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'incubated'
-                                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                 }`}
                         >
                             Incubated Startups ({incubatedStartups.length})
@@ -281,8 +294,8 @@ export default function StartupAdminPage() {
                         <button
                             onClick={() => { setActiveTab('graduated'); setShowAddForm(false); cancelEdit(); }}
                             className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'graduated'
-                                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                 }`}
                         >
                             Graduated Startups ({graduatedStartups.length})
@@ -290,101 +303,72 @@ export default function StartupAdminPage() {
                     </div>
 
                     <div className="p-6">
-                        {/* Action Buttons */}
-                        <div className="mb-6 flex gap-3">
-                            <button
-                                onClick={() => { setShowAddForm(!showAddForm); cancelEdit(); }}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <Plus size={20} />
-                                Add New Startup
-                            </button>
-
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowExportMenu(!showExportMenu)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                >
-                                    <Download size={20} />
-                                    Export Data
-                                </button>
-
-                                {showExportMenu && (
-                                    <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[160px]">
-                                        <button
-                                            onClick={() => handleExport('csv')}
-                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors rounded-t-lg"
-                                        >
-                                            Export as CSV
-                                        </button>
-                                        <button
-                                            onClick={() => handleExport('json')}
-                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors rounded-b-lg"
-                                        >
-                                            Export as JSON
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        {/* Add Button */}
+                        <button
+                            onClick={() => { setShowAddForm(!showAddForm); cancelEdit(); }}
+                            className="mb-6 flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                        >
+                            <Plus size={20} />
+                            Add New Startup
+                        </button>
 
                         {/* Add Form */}
                         {showAddForm && (
-                            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold mb-4">Add New {activeTab === 'incubated' ? 'Incubated' : 'Graduated'} Startup</h3>
+                            <div className="mb-6 p-4 bg-muted rounded-lg border border-border">
+                                <h3 className="text-lg font-semibold text-foreground mb-4">Add New {activeTab === 'incubated' ? 'Incubated' : 'Graduated'} Startup</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <input
                                         type="text"
                                         placeholder="Company Name"
                                         value={formData.companyName}
                                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Tagline"
                                         value={formData.tagline}
                                         onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                                     />
                                     <input
                                         type="url"
                                         placeholder="Career URL"
                                         value={formData.careerUrl}
                                         onChange={(e) => setFormData({ ...formData, careerUrl: e.target.value })}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-foreground mb-2">
                                         Logo Image - 4:3 Aspect Ratio Required
                                     </label>
                                     <input
                                         type="file"
                                         accept="image/*"
                                         onChange={handleFileChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:cursor-pointer hover:file:bg-primary/90"
                                     />
                                     {imageError && (
-                                        <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                        <p className="text-destructive text-sm mt-2">{imageError}</p>
                                     )}
-                                    <p className="text-gray-500 text-xs mt-1">
+                                    <p className="text-muted-foreground text-xs mt-1">
                                         Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
                                     </p>
                                     {formData.image && (
-                                        <p className="mt-2 text-sm text-gray-600">Selected: {formData.image.name}</p>
+                                        <p className="mt-2 text-sm text-foreground">Selected: {formData.image.name}</p>
                                     )}
                                 </div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={handleAdd}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                                     >
                                         Add Startup
                                     </button>
                                     <button
                                         onClick={() => { setShowAddForm(false); setFormData({ companyName: '', tagline: '', careerUrl: '', image: null }); setImageError(null); }}
-                                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                                        className="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -394,13 +378,13 @@ export default function StartupAdminPage() {
 
                         {/* Startups List */}
                         {loading ? (
-                            <div className="text-center py-12 text-gray-600">Loading startups...</div>
+                            <div className="text-center py-12 text-muted-foreground">Loading startups...</div>
                         ) : currentStartups.length === 0 ? (
-                            <div className="text-center py-12 text-gray-600">No startups found. Add one to get started!</div>
+                            <div className="text-center py-12 text-muted-foreground">No startups found. Add one to get started!</div>
                         ) : (
                             <div className="space-y-4">
                                 {currentStartups.map((startup) => (
-                                    <div key={startup._id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                                    <div key={startup._id} className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow bg-card">
                                         {editingId === startup._id ? (
                                             <div className="space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -408,52 +392,52 @@ export default function StartupAdminPage() {
                                                         type="text"
                                                         value={formData.companyName}
                                                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                                                     />
                                                     <input
                                                         type="text"
                                                         value={formData.tagline}
                                                         onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                                                     />
                                                     <input
                                                         type="url"
                                                         value={formData.careerUrl}
                                                         onChange={(e) => setFormData({ ...formData, careerUrl: e.target.value })}
-                                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    <label className="block text-sm font-medium text-foreground mb-2">
                                                         Update Logo Image - 4:3 Aspect Ratio Required
                                                     </label>
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         onChange={handleFileChange}
-                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:cursor-pointer hover:file:bg-primary/90"
                                                     />
                                                     {imageError && (
-                                                        <p className="text-red-600 text-sm mt-2">{imageError}</p>
+                                                        <p className="text-destructive text-sm mt-2">{imageError}</p>
                                                     )}
-                                                    <p className="text-gray-500 text-xs mt-1">
+                                                    <p className="text-muted-foreground text-xs mt-1">
                                                         Recommended dimensions: 800x600, 1200x900, or any 4:3 ratio
                                                     </p>
                                                     {formData.image && (
-                                                        <p className="mt-2 text-sm text-gray-600">Selected: {formData.image.name}</p>
+                                                        <p className="mt-2 text-sm text-foreground">Selected: {formData.image.name}</p>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleUpdate(startup._id)}
-                                                        className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                        className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                                                     >
                                                         <Check size={16} />
                                                         Save
                                                     </button>
                                                     <button
                                                         onClick={cancelEdit}
-                                                        className="flex items-center gap-2 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                                                        className="flex items-center gap-2 px-3 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
                                                     >
                                                         <X size={16} />
                                                         Cancel
@@ -468,18 +452,18 @@ export default function StartupAdminPage() {
                                                             <img
                                                                 src={`${API_BASE}/admin/${activeTab}-startups/${startup._id}/image`}
                                                                 alt={startup.companyName}
-                                                                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg border border-gray-200"
+                                                                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg border border-border"
                                                             />
                                                         </div>
                                                     )}
                                                     <div className="flex-1">
-                                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{startup.companyName}</h3>
-                                                        <p className="text-gray-600 mb-2">{startup.tagline}</p>
+                                                        <h3 className="text-lg font-semibold text-foreground mb-1">{startup.companyName}</h3>
+                                                        <p className="text-muted-foreground mb-2">{startup.tagline}</p>
                                                         <a
                                                             href={startup.careerUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-blue-600 hover:text-blue-800 text-sm underline"
+                                                            className="text-primary hover:text-primary/80 text-sm underline"
                                                         >
                                                             {startup.careerUrl}
                                                         </a>
@@ -488,14 +472,14 @@ export default function StartupAdminPage() {
                                                 <div className="flex gap-2 ml-4">
                                                     <button
                                                         onClick={() => startEdit(startup)}
-                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
                                                         title="Edit"
                                                     >
                                                         <Edit2 size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(startup._id)}
-                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                        className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                                                         title="Delete"
                                                     >
                                                         <Trash2 size={18} />

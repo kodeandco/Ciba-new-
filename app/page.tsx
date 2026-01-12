@@ -40,6 +40,17 @@ export default function Home() {
             <Testimonials />
           </AnimatedSection>
         </section>
+
+        <section id="tour" className="overflow-x-hidden">
+          <TourSection />
+        </section>
+
+        {/* MAGIC Navigation Section */}
+
+
+        
+
+        {/* A - Assets (Startups) */}
         
         {/* G - Gallery */}
         <section id="gallery" className="overflow-x-hidden">

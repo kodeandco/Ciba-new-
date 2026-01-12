@@ -15,31 +15,31 @@ const teamMembers = [
     name: "Sindhu Nair",
     designation: "Head of Finance & Admin",
     linkedin: "linkedin.com/in/sindhunairfaa",
-    imagePath: "/Ourteam/Sindhu.jpg"
+    imagePath: "/Sindhu.jpg"
   },
   {
     name: "Sagar Ranshoor",
     designation: "Head of Incubation",
     linkedin: "linkedin.com/in/sagar-ranshoor",
-    imagePath: "/Ourteam/Sagar.jpg"
+    imagePath: "/Sagar.jpg"
   },
   {
     name: "Saurabh Mirashi",
     designation: "Digital Marcom Manager",
     linkedin: "linkedin.com/in/saurabh-mirashi-54b3561b5",
-    imagePath: "/Ourteam/Saurabh.jpg"
+    imagePath: "/Saurabh.jpg"
   },
   {
     name: "Akshaya Choughule",
     designation: "Center Admin",
     linkedin: "linkedin.com/in/akshaya-posam-61846bb8",
-    imagePath: "/Ourteam/Akshaya.jpg"
+    imagePath: "/Akshaya.jpg"
   },
   {
     name: "Radhika Nikalje",
     designation: "Facility Executive",
     linkedin: null,
-    imagePath: "/Ourteam/Radhika.jpg"
+    imagePath: "/Radhika.jpg"
   }
 ];
 

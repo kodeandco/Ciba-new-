@@ -1,11 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
+
 import MentorsSection from './mentors-section'
 import StartupsSection from './startups-section'
 import AssetsSection from './assets-section'
 import PartnersSection from './partners-section'
-import CoworkingSection from './360 Panorama/PanoramaTour'
+
+// ✅ Client-only Panorama (KEY FIX)
+const CoworkingSection = dynamic(
+  () => import('./360 Panorama/PanoramaTour'),
+  { ssr: false }
+)
 
 export default function SectionTabs() {
   const [activeTab, setActiveTab] = useState('mentors')
@@ -22,12 +29,12 @@ export default function SectionTabs() {
     tabs.find(tab => tab.id === activeTab)?.component || MentorsSection
 
   return (
-    <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-muted/10 dark:via-background dark:to-muted/5 border-y border-border">
+    <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-muted/20 border-y border-border">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Section Header */}
+        {/* Header */}
         <div className="mb-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
+          <h2 className="text-4xl md:text-5xl font-bold mb-3">
             Mentorship & Startup Spotlight
           </h2>
           <p className="text-base md:text-lg text-muted-foreground mb-8">
@@ -35,13 +42,13 @@ export default function SectionTabs() {
           </p>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="flex items-center justify-center gap-6 md:gap-10 border-b border-border mb-10 overflow-x-auto">
+        {/* Tabs */}
+        <div className="flex justify-center gap-6 border-b mb-10 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative pb-4 text-sm md:text-base font-medium transition-all duration-300 whitespace-nowrap ${
+              className={`relative pb-4 text-sm md:text-base font-medium ${
                 activeTab === tab.id
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -49,7 +56,7 @@ export default function SectionTabs() {
             >
               {tab.title}
               {activeTab === tab.id && (
-                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-primary rounded-full" />
+                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-primary" />
               )}
             </button>
           ))}
@@ -57,14 +64,16 @@ export default function SectionTabs() {
 
         {/* Content */}
         <div
-          className="animate-fade-in w-full relative"
+          className="animate-fade-in"
           style={{
-            // Make coworking tab fullscreen height, others auto
-            height: activeTab === 'coworking' ? '80vh' : 'auto',
-            minHeight: activeTab === 'coworking' ? '500px' : 'auto',
+            height: activeTab === 'coworking' ? '600px' : 'auto',
+            minHeight: activeTab === 'coworking' ? '600px' : 'auto',
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <ActiveComponent />
+          {/* ✅ key forces panorama re-init */}
+          <ActiveComponent key={activeTab} />
         </div>
 
       </div>
