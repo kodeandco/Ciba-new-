@@ -1,263 +1,330 @@
-'use client'
-
-import React, { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three'
-import { ChevronLeft, ChevronRight, Home } from 'lucide-react'
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { ChevronLeft, ChevronRight, Info, Maximize } from 'lucide-react';
 
 interface Hotspot {
-  position: [number, number, number]
-  nextScene: number
-  label: string
+  position: [number, number, number];
+  nextScene: number;
+  label: string;
 }
 
 interface Scene {
-  name: string
-  image: string
-  hotspots: Hotspot[]
+  name: string;
+  image: string;
+  hotspots: Hotspot[];
+}
+
+interface MouseState {
+  x: number;
+  y: number;
+  isDragging: boolean;
+  startX: number;
+  startY: number;
 }
 
 export default function PanoramaTour() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const sceneRef = useRef<THREE.Scene | null>(null)
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
-  const animationRef = useRef<number | null>(null)
-  const [currentScene, setCurrentScene] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStartRef = useRef({ x: 0, y: 0 })
-  const rotationRef = useRef({ x: 0, y: 0 })
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentScene, setCurrentScene] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const mouseRef = useRef<MouseState>({ x: 0, y: 0, isDragging: false, startX: 0, startY: 0 });
+  const hotspotRefs = useRef<THREE.Mesh[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
 
   const scenes: Scene[] = [
     {
-      name: 'Living Room',
-      image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=2048&h=1024&fit=crop',
-      hotspots: [{ position: [5, 0, -3], nextScene: 1, label: 'Go to Kitchen' }]
-    },
-    {
-      name: 'Kitchen',
-      image: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=2048&h=1024&fit=crop',
+      name: "Living Room",
+      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=2048&h=1024&fit=crop",
       hotspots: [
-        { position: [-5, 0, 3], nextScene: 0, label: 'Back to Living Room' },
-        { position: [5, 0, 2], nextScene: 2, label: 'Go to Bedroom' }
+        { position: [5, 0, -3], nextScene: 1, label: "Go to Kitchen" }
       ]
     },
     {
-      name: 'Bedroom',
-      image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=2048&h=1024&fit=crop',
-      hotspots: [{ position: [-5, 0, -2], nextScene: 1, label: 'Back to Kitchen' }]
+      name: "Kitchen",
+      image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=2048&h=1024&fit=crop",
+      hotspots: [
+        { position: [-5, 0, 3], nextScene: 0, label: "Back to Living Room" },
+        { position: [5, 0, 2], nextScene: 2, label: "Go to Bedroom" }
+      ]
+    },
+    {
+      name: "Bedroom",
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=2048&h=1024&fit=crop",
+      hotspots: [
+        { position: [-5, 0, -2], nextScene: 1, label: "Back to Kitchen" }
+      ]
     }
-  ]
+  ];
 
-  const [isMobile, setIsMobile] = useState(false)
-  
+  // Detect mobile
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Initialize Three.js
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current) return;
 
-    const width = containerRef.current.clientWidth
-    const height = containerRef.current.clientHeight
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
 
-    const scene = new THREE.Scene()
-    sceneRef.current = scene
+    const camera = new THREE.PerspectiveCamera(
+      isMobile ? 85 : 75,
+      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 0, 0.1);
+    cameraRef.current = camera;
 
-    const camera = new THREE.PerspectiveCamera(isMobile ? 85 : 75, width / height, 0.1, 1000)
-    camera.position.set(0, 0, 0.1)
-    cameraRef.current = camera
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    containerRef.current.appendChild(renderer.domElement)
-    rendererRef.current = renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
     // Animation loop
     const animate = () => {
-      animationRef.current = requestAnimationFrame(animate)
-      if (cameraRef.current) {
-        cameraRef.current.rotation.y = rotationRef.current.y
-        cameraRef.current.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationRef.current.x))
-      }
-      renderer.render(scene, camera)
-    }
-    animate()
+      animationFrameRef.current = requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    };
+    animate();
 
     // Handle resize
     const handleResize = () => {
-      if (!containerRef.current || !cameraRef.current || !rendererRef.current) return
-      const w = containerRef.current.clientWidth
-      const h = containerRef.current.clientHeight
-      cameraRef.current.aspect = w / h
-      cameraRef.current.updateProjectionMatrix()
-      rendererRef.current.setSize(w, h)
-    }
-    window.addEventListener('resize', handleResize)
+      if (!containerRef.current) return;
+      camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    };
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      if (animationRef.current) cancelAnimationFrame(animationRef.current)
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement)
-      }
-      renderer.dispose()
-    }
-  }, [isMobile])
+      window.removeEventListener('resize', handleResize);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (containerRef.current && renderer.domElement) containerRef.current.removeChild(renderer.domElement);
+      renderer.dispose();
+    };
+  }, [isMobile]);
 
-  // Load panorama texture
+  // Interaction handlers
   useEffect(() => {
-    if (!sceneRef.current || !rendererRef.current) return
-    const scene = sceneRef.current
-    
-    setIsLoading(true)
+    const canvas = rendererRef.current?.domElement;
+    const camera = cameraRef.current;
+    if (!canvas || !camera) return;
 
-    // Clear previous
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      mouseRef.current.isDragging = true;
+      const clientX = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+      mouseRef.current.x = clientX;
+      mouseRef.current.y = clientY;
+      mouseRef.current.startX = clientX;
+      mouseRef.current.startY = clientY;
+    };
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!mouseRef.current.isDragging) return;
+      e.preventDefault();
+      const clientX = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+      const deltaX = clientX - mouseRef.current.x;
+      const deltaY = clientY - mouseRef.current.y;
+      const sensitivity = isMobile ? 0.008 : 0.005;
+      camera.rotation.y += deltaX * sensitivity;
+      camera.rotation.x += deltaY * sensitivity;
+      camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+      mouseRef.current.x = clientX;
+      mouseRef.current.y = clientY;
+    };
+
+    const handleEnd = (e: MouseEvent | TouchEvent) => {
+      if (!mouseRef.current.isDragging) return;
+      const moveDistance = Math.sqrt(
+        Math.pow(mouseRef.current.x - mouseRef.current.startX, 2) +
+        Math.pow(mouseRef.current.y - mouseRef.current.startY, 2)
+      );
+      mouseRef.current.isDragging = false;
+      if (moveDistance > 10) return;
+
+      const rect = canvas.getBoundingClientRect();
+      let x: number, y: number;
+      if ((e as TouchEvent).changedTouches) {
+        const touch = (e as TouchEvent).changedTouches[0];
+        x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+      } else {
+        x = ((e as MouseEvent).clientX - rect.left) / rect.width * 2 - 1;
+        y = -((e as MouseEvent).clientY - rect.top) / rect.height * 2 + 1;
+      }
+
+      const raycaster = new THREE.Raycaster();
+      const mouseVector = new THREE.Vector2(x, y);
+      raycaster.setFromCamera(mouseVector, camera);
+      const intersects = raycaster.intersectObjects(hotspotRefs.current);
+      if (intersects.length > 0) {
+        const nextScene = intersects[0].object.userData.nextScene as number;
+        setCurrentScene(nextScene);
+      }
+    };
+
+    canvas.addEventListener('mousedown', handleStart as EventListener);
+    canvas.addEventListener('mousemove', handleMove as EventListener);
+    canvas.addEventListener('mouseup', handleEnd as EventListener);
+    canvas.addEventListener('mouseleave', handleEnd as EventListener);
+    canvas.addEventListener('click', handleEnd as EventListener);
+
+    canvas.addEventListener('touchstart', handleStart as EventListener, { passive: false });
+    canvas.addEventListener('touchmove', handleMove as EventListener, { passive: false });
+    canvas.addEventListener('touchend', handleEnd as EventListener);
+    canvas.addEventListener('touchcancel', handleEnd as EventListener);
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleStart as EventListener);
+      canvas.removeEventListener('mousemove', handleMove as EventListener);
+      canvas.removeEventListener('mouseup', handleEnd as EventListener);
+      canvas.removeEventListener('mouseleave', handleEnd as EventListener);
+      canvas.removeEventListener('click', handleEnd as EventListener);
+      canvas.removeEventListener('touchstart', handleStart as EventListener);
+      canvas.removeEventListener('touchmove', handleMove as EventListener);
+      canvas.removeEventListener('touchend', handleEnd as EventListener);
+      canvas.removeEventListener('touchcancel', handleEnd as EventListener);
+    };
+  }, [isMobile, currentScene]);
+
+  // Load panorama
+  useEffect(() => {
+    if (!sceneRef.current || !cameraRef.current) return;
+
+    setIsLoading(true);
+    const scene = sceneRef.current;
+
+    // Clean previous objects
     while (scene.children.length > 0) {
-      const child = scene.children[0]
-      scene.remove(child)
-      if ((child as THREE.Mesh).geometry) (child as THREE.Mesh).geometry.dispose()
+      const child = scene.children[0];
+      scene.remove(child);
+      if ((child as THREE.Mesh).geometry) (child as THREE.Mesh).geometry.dispose();
       if ((child as THREE.Mesh).material) {
-        const mat = (child as THREE.Mesh).material as THREE.Material
-        mat.dispose()
+        const material = (child as THREE.Mesh).material as THREE.MeshBasicMaterial;
+        if (material.map) material.map.dispose();
+        material.dispose();
       }
     }
+    hotspotRefs.current = [];
 
-    const loader = new THREE.TextureLoader()
-    loader.load(
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
       scenes[currentScene].image,
-      (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace
-        const geometry = new THREE.SphereGeometry(500, isMobile ? 32 : 60, isMobile ? 16 : 40)
-        geometry.scale(-1, 1, 1)
-        const material = new THREE.MeshBasicMaterial({ map: texture })
-        const sphere = new THREE.Mesh(geometry, material)
-        scene.add(sphere)
-        setIsLoading(false)
+      (texture: any) => {
+        texture.anisotropy = rendererRef.current!.capabilities.getMaxAnisotropy();
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+
+        const geometry = new THREE.SphereGeometry(500, isMobile ? 32 : 60, isMobile ? 16 : 40);
+        geometry.scale(-1, 1, 1);
+
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+        // Add hotspots
+        scenes[currentScene].hotspots.forEach((hotspot) => {
+          const hotspotGeometry = new THREE.SphereGeometry(isMobile ? 0.5 : 0.3, 8, 8);
+          const hotspotMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+          const hotspotMesh = new THREE.Mesh(hotspotGeometry, hotspotMaterial);
+          hotspotMesh.position.set(...hotspot.position);
+          hotspotMesh.userData = { scale: 1, growing: true, nextScene: hotspot.nextScene };
+          scene.add(hotspotMesh);
+          hotspotRefs.current.push(hotspotMesh);
+        });
+
+        setIsLoading(false);
       },
       undefined,
-      () => setIsLoading(false)
-    )
+      (error) => {
+        console.error('Error loading texture:', error);
+        setIsLoading(false);
+      }
+    );
 
-    rotationRef.current = { x: 0, y: 0 }
-  }, [currentScene, isMobile])
+    // Animate hotspots
+    let animationId: number;
+    const animateHotspots = () => {
+      hotspotRefs.current.forEach((hotspot) => {
+        if (hotspot.userData.growing) {
+          hotspot.userData.scale += 0.02;
+          if (hotspot.userData.scale >= 1.3) hotspot.userData.growing = false;
+        } else {
+          hotspot.userData.scale -= 0.02;
+          if (hotspot.userData.scale <= 0.8) hotspot.userData.growing = true;
+        }
+        hotspot.scale.setScalar(hotspot.userData.scale);
+      });
+      animationId = requestAnimationFrame(animateHotspots);
+    };
+    animateHotspots();
 
-  // Mouse/Touch controls
-  useEffect(() => {
-    const canvas = rendererRef.current?.domElement
-    if (!canvas) return
-
-    const onMouseDown = (e: MouseEvent | TouchEvent) => {
-      setIsDragging(true)
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      dragStartRef.current = { x: clientX, y: clientY }
-    }
-
-    const onMouseMove = (e: MouseEvent | TouchEvent) => {
-      if (!isDragging) return
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      
-      const deltaX = clientX - dragStartRef.current.x
-      const deltaY = clientY - dragStartRef.current.y
-      
-      rotationRef.current.y += deltaX * 0.005
-      rotationRef.current.x += deltaY * 0.005
-      
-      dragStartRef.current = { x: clientX, y: clientY }
-    }
-
-    const onMouseUp = () => {
-      setIsDragging(false)
-    }
-
-    canvas.addEventListener('mousedown', onMouseDown)
-    canvas.addEventListener('mousemove', onMouseMove)
-    canvas.addEventListener('mouseup', onMouseUp)
-    canvas.addEventListener('touchstart', onMouseDown)
-    canvas.addEventListener('touchmove', onMouseMove)
-    canvas.addEventListener('touchend', onMouseUp)
+    if (cameraRef.current) cameraRef.current.rotation.set(0, 0, 0);
 
     return () => {
-      canvas.removeEventListener('mousedown', onMouseDown)
-      canvas.removeEventListener('mousemove', onMouseMove)
-      canvas.removeEventListener('mouseup', onMouseUp)
-      canvas.removeEventListener('touchstart', onMouseDown)
-      canvas.removeEventListener('touchmove', onMouseMove)
-      canvas.removeEventListener('touchend', onMouseUp)
-    }
-  }, [isDragging])
-
-  const goToNextScene = () => {
-    if (currentScene < scenes.length - 1) {
-      setCurrentScene(currentScene + 1)
-    }
-  }
-
-  const goToPrevScene = () => {
-    if (currentScene > 0) {
-      setCurrentScene(currentScene - 1)
-    }
-  }
-
-  const goToHome = () => {
-    setCurrentScene(0)
-  }
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+  }, [currentScene, isMobile]);
 
   return (
-    <div className="relative w-full h-full bg-black rounded-xl overflow-hidden">
-      {/* Canvas Container */}
-      <div ref={containerRef} className="w-full h-full" />
+    <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, overflow: 'hidden', touchAction: 'none', userSelect: 'none', backgroundColor: 'transparent' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100%', cursor: 'grab', backgroundColor: 'transparent' }} />
 
-      {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="text-white text-lg font-medium">Loading panorama...</div>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50 }}>
+          <div style={{ color: 'white', fontSize: '20px' }}>Loading {scenes[currentScene].name}...</div>
         </div>
       )}
 
-      {/* Scene Info */}
-      <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-lg">
-        <h3 className="font-semibold text-lg">{scenes[currentScene].name}</h3>
-        <p className="text-sm text-white/70">Drag to look around</p>
+      {/* UI Overlay */}
+      <div style={{ position: 'absolute', top: isMobile ? '8px' : '16px', left: isMobile ? '8px' : '16px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: isMobile ? '8px 12px' : '8px 16px', borderRadius: '8px', maxWidth: '320px', zIndex: 10 }}>
+        <h2 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold', margin: '0 0 4px 0' }}>{scenes[currentScene].name}</h2>
+        <p style={{ fontSize: isMobile ? '12px' : '14px', opacity: 0.8, margin: 0 }}>{isMobile ? 'Swipe to look • Tap cyan spheres' : 'Drag to look around • Click cyan spheres to move'}</p>
       </div>
 
-      {/* Navigation Controls */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
-        <button
-          onClick={goToPrevScene}
-          disabled={currentScene === 0}
-          className="bg-black/70 backdrop-blur-md text-white p-3 rounded-full hover:bg-black/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronLeft size={24} />
+      {/* Navigation buttons */}
+      <div style={{ position: 'absolute', bottom: isMobile ? '80px' : '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: isMobile ? '8px' : '12px', zIndex: 10 }}>
+        <button onClick={() => setCurrentScene((prev) => (prev - 1 + scenes.length) % scenes.length)} style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: isMobile ? '8px' : '12px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}>
+          <ChevronLeft size={isMobile ? 20 : 24} />
         </button>
-        
-        <button
-          onClick={goToHome}
-          className="bg-black/70 backdrop-blur-md text-white p-3 rounded-full hover:bg-black/90 transition-all"
-        >
-          <Home size={24} />
-        </button>
-
-        <button
-          onClick={goToNextScene}
-          disabled={currentScene === scenes.length - 1}
-          className="bg-black/70 backdrop-blur-md text-white p-3 rounded-full hover:bg-black/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronRight size={24} />
+        <button onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)} style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: isMobile ? '8px' : '12px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}>
+          <ChevronRight size={isMobile ? 20 : 24} />
         </button>
       </div>
 
-      {/* Scene Counter */}
-      <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-2 rounded-lg text-sm">
-        {currentScene + 1} / {scenes.length}
-      </div>
+      {!isMobile && (
+        <div style={{ position: 'absolute', bottom: '16px', right: '16px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '8px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', zIndex: 10 }}>
+          <Info size={16} />
+          <span>Look for glowing cyan spheres to navigate</span>
+        </div>
+      )}
+
+      {isMobile && (
+        <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', zIndex: 10 }}>
+          <Maximize size={12} />
+          <span>Rotate device for better view</span>
+        </div>
+      )}
     </div>
   );
 }
