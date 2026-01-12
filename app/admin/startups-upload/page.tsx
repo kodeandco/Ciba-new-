@@ -38,6 +38,40 @@ const validateAspectRatio = (file: File): Promise<boolean> =>
         img.src = URL.createObjectURL(file)
     })
 
+/* ===============================
+   EXPORT FUNCTIONS
+================================ */
+const exportToCSV = (startups: Startup[], type: string) => {
+    const headers = ['Company Name', 'Tagline', 'Career URL', 'Has Image', 'Created At'];
+    const rows = startups.map(s => [
+        s.companyName,
+        s.tagline,
+        s.careerUrl,
+        s.hasImage ? 'Yes' : 'No',
+        new Date(s.createdAt).toLocaleDateString()
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+};
+
+const exportToJSON = (startups: Startup[], type: string) => {
+    const jsonContent = JSON.stringify(startups, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+};
+
 export default function StartupAdminPage() {
     const [activeTab, setActiveTab] = useState<'incubated' | 'graduated'>('incubated');
     const [incubatedStartups, setIncubatedStartups] = useState<Startup[]>([]);
@@ -46,6 +80,7 @@ export default function StartupAdminPage() {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
+    const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         companyName: '',
         tagline: '',
@@ -213,6 +248,16 @@ export default function StartupAdminPage() {
         setEditingId(null);
         setFormData({ companyName: '', tagline: '', careerUrl: '', image: null });
         setImageError(null);
+    };
+
+    const handleExport = (format: 'csv' | 'json') => {
+        const startups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
+        if (format === 'csv') {
+            exportToCSV(startups, activeTab);
+        } else {
+            exportToJSON(startups, activeTab);
+        }
+        setShowExportMenu(false);
     };
 
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;

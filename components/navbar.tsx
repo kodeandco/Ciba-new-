@@ -112,6 +112,32 @@ export default function Navbar() {
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
+
+            {/* Theme Toggle Button */}
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="ml-3 p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all hover:scale-110 group relative"
+                aria-label="Toggle dark mode"
+              >
+                <div className="relative w-5 h-5">
+                  <Sun 
+                    className={`absolute inset-0 w-5 h-5 text-amber-500 transition-all duration-500 ${
+                      isDark 
+                        ? 'rotate-90 scale-0 opacity-0' 
+                        : 'rotate-0 scale-100 opacity-100'
+                    }`}
+                  />
+                  <Moon 
+                    className={`absolute inset-0 w-5 h-5 text-blue-400 transition-all duration-500 ${
+                      isDark 
+                        ? 'rotate-0 scale-100 opacity-100' 
+                        : '-rotate-90 scale-0 opacity-0'
+                    }`}
+                  />
+                </div>
+              </button>
+            )}
           </div>
         </div>
 

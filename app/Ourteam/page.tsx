@@ -9,7 +9,7 @@ const teamMembers = [
     name: "Prasad Menon",
     designation: "CEO - CIBA",
     linkedin: "linkedin.com/in/menonprasad",
-    imagePath: "/Prasad sir.jpg"
+    imagePath: "/Ourteam/Prasad sir.jpg"
   },
   {
     name: "Sindhu Nair",

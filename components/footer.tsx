@@ -44,16 +44,7 @@ export default function Footer() {
 
             {/* Social Links */}
             <div className="flex gap-2.5 justify-center lg:justify-start">
-              <a
-                href="https://www.linkedin.com/company/centre-for-incubation-&-business-acceleration/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-500 transition-all hover:scale-110"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={16} />
-              </a>
-
+              
               <a
                 href="https://www.instagram.com/cibaindia/"
                 target="_blank"

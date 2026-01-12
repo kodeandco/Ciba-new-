@@ -17,6 +17,7 @@ import {
     Users,
     CalendarPlus,
     AlertCircle,
+    Download,
 } from "lucide-react";
 
 interface Booking {
@@ -177,6 +178,77 @@ export default function StartupClinicDashboard() {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const exportToCSV = () => {
+        // Define CSV headers
+        const headers = [
+            'Name',
+            'Email',
+            'Phone',
+            'Session Date',
+            'Time Slot',
+            'Question 1',
+            'Question 2',
+            'Question 3',
+            'Newsletter Subscribed',
+            'In Calendar',
+            'Calendar Event ID',
+            'Booked At'
+        ];
+
+        // Convert bookings to CSV rows
+        const rows = filteredBookings.map(booking => {
+            const sessionDate = booking.sessionDate
+                ? new Date(booking.sessionDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })
+                : 'Not set';
+
+            return [
+                booking.name,
+                booking.email,
+                booking.phone,
+                sessionDate,
+                booking.slot,
+                booking.question1 || 'No answer provided',
+                booking.question2 || 'No answer provided',
+                booking.question3 || 'No answer provided',
+                booking.subscribeNewsletter ? 'Yes' : 'No',
+                booking.calendarEventId ? 'Yes' : 'No',
+                booking.calendarEventId || 'N/A',
+                formatDate(booking.createdAt)
+            ];
+        });
+
+        // Escape and format CSV content
+        const escapeCSV = (value: string) => {
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+        };
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(escapeCSV).join(','))
+        ].join('\n');
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        link.setAttribute('href', url);
+        link.setAttribute('download', `startup-clinic-bookings-${timestamp}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const stats = {

@@ -68,6 +68,62 @@ export default function MentorsAdminPage() {
     }, [])
 
     /* ===============================
+       EXPORT TO CSV
+    ================================ */
+    const exportToCSV = () => {
+        // Define CSV headers
+        const headers = [
+            'Name',
+            'Designation',
+            'Department',
+            'Message',
+            'LinkedIn',
+            'Website',
+            'Has Image'
+        ]
+
+        // Convert mentors to CSV rows
+        const rows = mentors.map(mentor => {
+            return [
+                mentor.name,
+                mentor.designation,
+                mentor.department,
+                mentor.message,
+                mentor.socialMedia?.linkedin || 'N/A',
+                mentor.socialMedia?.website || 'N/A',
+                mentor.image ? 'Yes' : 'No'
+            ]
+        })
+
+        // Escape and format CSV content
+        const escapeCSV = (value: string) => {
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`
+            }
+            return value
+        }
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(escapeCSV).join(','))
+        ].join('\n')
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement('a')
+        const url = URL.createObjectURL(blob)
+
+        const timestamp = new Date().toISOString().split('T')[0]
+        link.setAttribute('href', url)
+        link.setAttribute('download', `mentors-${timestamp}.csv`)
+        link.style.visibility = 'hidden'
+
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    /* ===============================
        FORM HANDLING
     =============================== */
     const handleChange = (e: any) => {
@@ -318,6 +374,21 @@ export default function MentorsAdminPage() {
                                     Cancel
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* STATS */}
+                <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-blue-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-blue-600 font-medium">Total Mentors</p>
+                            <p className="text-3xl font-bold text-blue-900">{mentors.length}</p>
+                        </div>
+                        <div className="text-blue-400">
+                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
                         </div>
                     </div>
                 </div>

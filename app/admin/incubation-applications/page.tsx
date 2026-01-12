@@ -24,6 +24,8 @@ import {
     Send,
     StickyNote,
     Save,
+    Download,
+    RefreshCw,
 } from "lucide-react";
 
 interface Application {
@@ -63,9 +65,13 @@ export default function IncubationApplicationsDashboard() {
     const [showNotesModal, setShowNotesModal] = useState(false);
     const [currentNotes, setCurrentNotes] = useState("");
     const [savingNotes, setSavingNotes] = useState(false);
+    const [syncingToSheets, setSyncingToSheets] = useState(false);
+    const [creatingSheet, setCreatingSheet] = useState(false);
+    const [sheetUrl, setSheetUrl] = useState<string | null>(null);
 
     useEffect(() => {
         fetchApplications();
+        fetchSheetInfo();
     }, []);
 
     useEffect(() => {
@@ -85,6 +91,72 @@ export default function IncubationApplicationsDashboard() {
             console.error("Error fetching applications:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSheetInfo = async () => {
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/info");
+            const data = await res.json();
+
+            if (data.success) {
+                setSheetUrl(data.spreadsheetUrl);
+            }
+        } catch (error) {
+            console.log("No sheet configured yet");
+        }
+    };
+
+    const syncToGoogleSheets = async () => {
+        setSyncingToSheets(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert(`Successfully synced ${data.count} applications to Google Sheets!`);
+                if (data.spreadsheetUrl) {
+                    setSheetUrl(data.spreadsheetUrl);
+                }
+            } else {
+                alert("Failed to sync: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error syncing to sheets:", error);
+            alert("Failed to sync to Google Sheets");
+        } finally {
+            setSyncingToSheets(false);
+        }
+    };
+
+    const createNewSheet = async () => {
+        setCreatingSheet(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/incubation/sheets/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert("New spreadsheet created! Now sync your applications to it.");
+                setSheetUrl(data.spreadsheetUrl);
+                console.log("Spreadsheet ID:", data.spreadsheetId);
+                console.log("Add this to your .env file: GOOGLE_SHEETS_ID=" + data.spreadsheetId);
+            } else {
+                alert("Failed to create sheet: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error creating sheet:", error);
+            alert("Failed to create Google Sheet");
+        } finally {
+            setCreatingSheet(false);
         }
     };
 
@@ -204,6 +276,59 @@ export default function IncubationApplicationsDashboard() {
 
     const viewPitchDeck = (id: string) => {
         window.open(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, "_blank");
+    };
+
+    const exportToSpreadsheet = () => {
+        const headers = [
+            "Startup Name",
+            "Founder Name",
+            "Co-Founders",
+            "Email",
+            "Phone",
+            "Website",
+            "Industry",
+            "Stage",
+            "Team Size",
+            "Funding Raised",
+            "Revenue",
+            "Status",
+            "Has Pitch Deck",
+            "Application Date",
+            "Notes"
+        ];
+
+        const rows = filteredApplications.map(app => [
+            app.startupName,
+            app.founderName,
+            app.coFounders || "",
+            app.email,
+            app.phone,
+            app.website,
+            app.industry,
+            app.stage,
+            app.teamSize,
+            app.fundingRaised,
+            app.revenue,
+            app.status,
+            app.pitchDeck ? "Yes" : "No",
+            new Date(app.createdAt).toLocaleDateString(),
+            app.notes || ""
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `incubation_applications_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const getStatusBadge = (status: string) => {
@@ -347,7 +472,6 @@ export default function IncubationApplicationsDashboard() {
                         </div>
                     </div>
                 </div>
-
                 {/* Applications List */}
                 <div className="space-y-4">
                     {filteredApplications.length === 0 ? (
