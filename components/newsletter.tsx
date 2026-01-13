@@ -30,9 +30,11 @@ export default function Newsletter() {
           cache: "no-store",
         })
         const data = await res.json()
-        setNewsletters(data)
+        // Ensure data is always an array
+        setNewsletters(Array.isArray(data) ? data : [])
       } catch (error) {
         console.error("Failed to fetch newsletters", error)
+        setNewsletters([]) // Always set to empty array on error
       } finally {
         setLoading(false)
       }
@@ -48,9 +50,11 @@ export default function Newsletter() {
         cache: "no-store",
       })
       const data = await res.json()
-      setAllNewsletters(data)
+      // Ensure data is always an array
+      setAllNewsletters(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error("Failed to fetch all newsletters", error)
+      setAllNewsletters([]) // Always set to empty array on error
     } finally {
       setLoadingAll(false)
     }
@@ -136,61 +140,63 @@ export default function Newsletter() {
         )}
 
         {/* Empty State */}
-        {!loading && newsletters.length === 0 && (
+        {!loading && (!Array.isArray(newsletters) || newsletters.length === 0) && (
           <p className="text-center text-muted-foreground">
             No newsletters available.
           </p>
         )}
 
         {/* Newsletter Cards - Latest 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {newsletters.map((newsletter, index) => (
-            <div
-              key={newsletter._id}
-              className="glass-effect rounded-2xl p-6 hover-lift group cursor-pointer animate-scale-in border border-blue-100 dark:border-blue-900"
-              style={{ animationDelay: `${index * 150}ms` }}
-              onClick={() => setSelectedNewsletter(newsletter)}
-            >
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-all">
-                  <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
+        {!loading && Array.isArray(newsletters) && newsletters.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {newsletters.map((newsletter, index) => (
+              <div
+                key={newsletter._id}
+                className="glass-effect rounded-2xl p-6 hover-lift group cursor-pointer animate-scale-in border border-blue-100 dark:border-blue-900"
+                style={{ animationDelay: `${index * 150}ms` }}
+                onClick={() => setSelectedNewsletter(newsletter)}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-all">
+                    <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
 
-                <div className="flex-1">
-                  <p className="text-sm text-blue-600 dark:text-blue-400 font-semibold mb-2">
-                    {new Date(newsletter.newsletterDate).toLocaleDateString(
-                      "en-IN",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      }
-                    )}
-                  </p>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-600 dark:text-blue-400 font-semibold mb-2">
+                      {new Date(newsletter.newsletterDate).toLocaleDateString(
+                        "en-IN",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
+                    </p>
 
-                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all">
-                    {newsletter.title}
-                  </h3>
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all">
+                      {newsletter.title}
+                    </h3>
 
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {newsletter.description}
-                  </p>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {newsletter.description}
+                    </p>
 
-                  <div className="flex gap-3">
-                    <button
-                      className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:gap-3 transition-all"
-                      onClick={(e) => handleReadNewsletter(e, newsletter)}
-                    >
-                      <FileText size={18} />
-                      Read Full Newsletter
-                      <ArrowRight size={18} />
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:gap-3 transition-all"
+                        onClick={(e) => handleReadNewsletter(e, newsletter)}
+                      >
+                        <FileText size={18} />
+                        Read Full Newsletter
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Newsletter Detail Modal */}
@@ -279,7 +285,7 @@ export default function Newsletter() {
             <div className="p-6">
               {loadingAll ? (
                 <p className="text-center text-muted-foreground py-8">Loading all newsletters...</p>
-              ) : allNewsletters.length === 0 ? (
+              ) : !Array.isArray(allNewsletters) || allNewsletters.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No newsletters found.</p>
               ) : (
                 <div className="space-y-4">

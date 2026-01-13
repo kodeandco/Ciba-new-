@@ -389,7 +389,7 @@ export default function IncubationApplicationsDashboard() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
