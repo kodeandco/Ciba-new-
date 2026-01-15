@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,6 +34,90 @@ interface Booking {
     subscribeNewsletter: boolean;
     createdAt: string;
     calendarEventId?: string;
+}
+
+/* ===============================
+   CSV Export Component
+================================ */
+interface CSVColumn<T> {
+    header: string;
+    accessor: (item: T) => string | number | boolean;
+}
+
+interface ExportToCSVProps<T> {
+    data: T[];
+    columns: CSVColumn<T>[];
+    filename?: string;
+    buttonText?: string;
+    className?: string;
+    variant?: "primary" | "secondary" | "outline";
+}
+
+function ExportToCSV<T>({
+    data,
+    columns,
+    filename,
+    buttonText = "Export to CSV",
+    className = "",
+    variant = "primary",
+}: ExportToCSVProps<T>) {
+    const handleExport = () => {
+        const headers = columns.map((col) => col.header);
+
+        const rows = data.map((item) =>
+            columns.map((col) => {
+                const value = col.accessor(item);
+                return value !== null && value !== undefined ? String(value) : "";
+            })
+        );
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map((row) =>
+                row
+                    .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+                    .join(",")
+            ),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        const defaultFilename = `export_${new Date().toISOString().split("T")[0]}.csv`;
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename || defaultFilename);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const getButtonStyles = () => {
+        const baseStyles =
+            "px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed";
+
+        const variantStyles = {
+            primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+            secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+            outline: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+        };
+
+        return `${baseStyles} ${variantStyles[variant]} ${className}`;
+    };
+
+    return (
+        <button
+            onClick={handleExport}
+            disabled={data.length === 0}
+            className={getButtonStyles()}
+            title={data.length === 0 ? "No data to export" : "Export to CSV"}
+        >
+            <Download className="w-5 h-5" />
+            {buttonText}
+        </button>
+    );
 }
 
 export default function StartupClinicDashboard() {
@@ -180,76 +265,41 @@ export default function StartupClinicDashboard() {
         });
     };
 
-    const exportToCSV = () => {
-        // Define CSV headers
-        const headers = [
-            'Name',
-            'Email',
-            'Phone',
-            'Session Date',
-            'Time Slot',
-            'Question 1',
-            'Question 2',
-            'Question 3',
-            'Newsletter Subscribed',
-            'In Calendar',
-            'Calendar Event ID',
-            'Booked At'
-        ];
-
-        // Convert bookings to CSV rows
-        const rows = filteredBookings.map(booking => {
-            const sessionDate = booking.sessionDate
-                ? new Date(booking.sessionDate).toLocaleDateString('en-US', {
+    /* ===============================
+       CSV COLUMNS DEFINITION
+    ================================ */
+    const csvColumns: CSVColumn<Booking>[] = [
+        { header: "Name", accessor: (b) => b.name },
+        { header: "Email", accessor: (b) => b.email },
+        { header: "Phone", accessor: (b) => b.phone },
+        {
+            header: "Session Date",
+            accessor: (b) => b.sessionDate
+                ? new Date(b.sessionDate).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
                 })
-                : 'Not set';
-
-            return [
-                booking.name,
-                booking.email,
-                booking.phone,
-                sessionDate,
-                booking.slot,
-                booking.question1 || 'No answer provided',
-                booking.question2 || 'No answer provided',
-                booking.question3 || 'No answer provided',
-                booking.subscribeNewsletter ? 'Yes' : 'No',
-                booking.calendarEventId ? 'Yes' : 'No',
-                booking.calendarEventId || 'N/A',
-                formatDate(booking.createdAt)
-            ];
-        });
-
-        // Escape and format CSV content
-        const escapeCSV = (value: string) => {
-            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-                return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-        };
-
-        const csvContent = [
-            headers.join(','),
-            ...rows.map(row => row.map(escapeCSV).join(','))
-        ].join('\n');
-
-        // Create and trigger download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-
-        const timestamp = new Date().toISOString().split('T')[0];
-        link.setAttribute('href', url);
-        link.setAttribute('download', `startup-clinic-bookings-${timestamp}.csv`);
-        link.style.visibility = 'hidden';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+                : 'Not set'
+        },
+        { header: "Time Slot", accessor: (b) => b.slot },
+        { header: "Question 1", accessor: (b) => b.question1 || "No answer provided" },
+        { header: "Question 2", accessor: (b) => b.question2 || "No answer provided" },
+        { header: "Question 3", accessor: (b) => b.question3 || "No answer provided" },
+        { header: "Newsletter Subscribed", accessor: (b) => b.subscribeNewsletter ? "Yes" : "No" },
+        { header: "In Calendar", accessor: (b) => b.calendarEventId ? "Yes" : "No" },
+        { header: "Calendar Event ID", accessor: (b) => b.calendarEventId || "N/A" },
+        {
+            header: "Booked At",
+            accessor: (b) => new Date(b.createdAt).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        },
+    ];
 
     const stats = {
         total: bookings.length,
@@ -273,18 +323,29 @@ export default function StartupClinicDashboard() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                            <Calendar className="w-7 h-7 text-primary-foreground" />
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                <Calendar className="w-7 h-7 text-primary-foreground" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground">
+                                    Startup Clinic Bookings
+                                </h1>
+                                <p className="text-muted-foreground">Manage and review clinic session bookings</p>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Startup Clinic Bookings
-                        </h1>
+                        <ExportToCSV
+                            data={filteredBookings}
+                            columns={csvColumns}
+                            filename={`startup-clinic-bookings-${new Date().toISOString().split('T')[0]}.csv`}
+                            buttonText="Export to CSV"
+                            variant="primary"
+                        />
                     </div>
-                    <p className="text-muted-foreground">Manage and review clinic session bookings</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

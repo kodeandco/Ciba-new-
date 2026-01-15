@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import AdminNavbar from "@/components/AdminNavbar"
-import { Users, Edit2, Trash2, Save, X, Upload, Image as ImageIcon, UserCheck, Briefcase, Globe } from "lucide-react"
+import { Users, Edit2, Trash2, Download, UserCheck, Globe } from "lucide-react"
 
 interface Mentor {
     _id: string
@@ -18,6 +18,90 @@ interface Mentor {
 }
 
 const API_URL = "http://localhost:5000/api/mentors"
+
+/* ===============================
+   CSV Export Component
+================================ */
+interface CSVColumn<T> {
+    header: string
+    accessor: (item: T) => string | number | boolean
+}
+
+interface ExportToCSVProps<T> {
+    data: T[]
+    columns: CSVColumn<T>[]
+    filename?: string
+    buttonText?: string
+    className?: string
+    variant?: "primary" | "secondary" | "outline"
+}
+
+function ExportToCSV<T>({
+    data,
+    columns,
+    filename,
+    buttonText = "Export to CSV",
+    className = "",
+    variant = "primary",
+}: ExportToCSVProps<T>) {
+    const handleExport = () => {
+        const headers = columns.map((col) => col.header)
+
+        const rows = data.map((item) =>
+            columns.map((col) => {
+                const value = col.accessor(item)
+                return value !== null && value !== undefined ? String(value) : ""
+            })
+        )
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map((row) =>
+                row
+                    .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+                    .join(",")
+            ),
+        ].join("\n")
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+        const link = document.createElement("a")
+        const url = URL.createObjectURL(blob)
+
+        const defaultFilename = `export_${new Date().toISOString().split("T")[0]}.csv`
+
+        link.setAttribute("href", url)
+        link.setAttribute("download", filename || defaultFilename)
+        link.style.visibility = "hidden"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    const getButtonStyles = () => {
+        const baseStyles =
+            "px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+
+        const variantStyles = {
+            primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+            secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+            outline: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+        }
+
+        return `${baseStyles} ${variantStyles[variant]} ${className}`
+    }
+
+    return (
+        <button
+            onClick={handleExport}
+            disabled={data.length === 0}
+            className={getButtonStyles()}
+            title={data.length === 0 ? "No data to export" : "Export to CSV"}
+        >
+            <Download className="w-5 h-5" />
+            {buttonText}
+        </button>
+    )
+}
 
 /* ===============================
    HELPER: Validate 4:3 Aspect Ratio
@@ -68,60 +152,17 @@ export default function MentorsAdminPage() {
     }, [])
 
     /* ===============================
-       EXPORT TO CSV
+       CSV COLUMNS DEFINITION
     ================================ */
-    const exportToCSV = () => {
-        // Define CSV headers
-        const headers = [
-            'Name',
-            'Designation',
-            'Department',
-            'Message',
-            'LinkedIn',
-            'Website',
-            'Has Image'
-        ]
-
-        // Convert mentors to CSV rows
-        const rows = mentors.map(mentor => {
-            return [
-                mentor.name,
-                mentor.designation,
-                mentor.department,
-                mentor.message,
-                mentor.socialMedia?.linkedin || 'N/A',
-                mentor.socialMedia?.website || 'N/A',
-                mentor.image ? 'Yes' : 'No'
-            ]
-        })
-
-        // Escape and format CSV content
-        const escapeCSV = (value: string) => {
-            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-                return `"${value.replace(/"/g, '""')}"`
-            }
-            return value
-        }
-
-        const csvContent = [
-            headers.join(','),
-            ...rows.map(row => row.map(escapeCSV).join(','))
-        ].join('\n')
-
-        // Create and trigger download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-        const link = document.createElement('a')
-        const url = URL.createObjectURL(blob)
-
-        const timestamp = new Date().toISOString().split('T')[0]
-        link.setAttribute('href', url)
-        link.setAttribute('download', `mentors-${timestamp}.csv`)
-        link.style.visibility = 'hidden'
-
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    }
+    const csvColumns: CSVColumn<Mentor>[] = [
+        { header: "Name", accessor: (m) => m.name },
+        { header: "Designation", accessor: (m) => m.designation },
+        { header: "Department", accessor: (m) => m.department },
+        { header: "Message", accessor: (m) => m.message },
+        { header: "LinkedIn", accessor: (m) => m.socialMedia?.linkedin || "N/A" },
+        { header: "Website", accessor: (m) => m.socialMedia?.website || "N/A" },
+        { header: "Has Image", accessor: (m) => m.image ? "Yes" : "No" },
+    ]
 
     /* ===============================
        FORM HANDLING
@@ -236,17 +277,26 @@ export default function MentorsAdminPage() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                            <Users className="w-7 h-7 text-primary-foreground" />
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                <Users className="w-7 h-7 text-primary-foreground" />
+                            </div>
+                            <h1 className="text-3xl font-bold text-foreground">
+                                Mentor Management
+                            </h1>
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Mentor Management
-                        </h1>
+                        <ExportToCSV
+                            data={mentors}
+                            columns={csvColumns}
+                            filename={`mentors-${new Date().toISOString().split('T')[0]}.csv`}
+                            buttonText="Export to CSV"
+                            variant="primary"
+                        />
                     </div>
                     <p className="text-muted-foreground">Manage mentors and their profiles</p>
                 </div>
@@ -474,7 +524,7 @@ export default function MentorsAdminPage() {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(mentor._id)}
-                                                className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                                                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                                 Delete

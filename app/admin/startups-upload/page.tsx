@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminNavbar from '@/components/AdminNavbar';
-import { Trash2, Plus, Edit2, X, Check, Briefcase } from 'lucide-react';
+import { Trash2, Plus, Edit2, X, Check, Briefcase, Download } from 'lucide-react';
 
 interface Startup {
     _id: string;
@@ -39,7 +39,7 @@ const validateAspectRatio = (file: File): Promise<boolean> =>
     })
 
 /* ===============================
-   EXPORT FUNCTIONS
+   EXPORT FUNCTION
 ================================ */
 const exportToCSV = (startups: Startup[], type: string) => {
     const headers = ['Company Name', 'Tagline', 'Career URL', 'Has Image', 'Created At'];
@@ -53,22 +53,13 @@ const exportToCSV = (startups: Startup[], type: string) => {
 
     const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-};
-
-const exportToJSON = (startups: Startup[], type: string) => {
-    const jsonContent = JSON.stringify(startups, null, 2);
-    const blob = new Blob([jsonContent], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${type}_startups_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
 };
 
@@ -80,7 +71,6 @@ export default function StartupAdminPage() {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
-    const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         companyName: '',
         tagline: '',
@@ -250,14 +240,9 @@ export default function StartupAdminPage() {
         setImageError(null);
     };
 
-    const handleExport = (format: 'csv' | 'json') => {
+    const handleExport = () => {
         const startups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
-        if (format === 'csv') {
-            exportToCSV(startups, activeTab);
-        } else {
-            exportToJSON(startups, activeTab);
-        }
-        setShowExportMenu(false);
+        exportToCSV(startups, activeTab);
     };
 
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
@@ -265,18 +250,32 @@ export default function StartupAdminPage() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                            <Briefcase className="w-7 h-7 text-primary-foreground" />
+                {/* Header with Export Button */}
+                <div className="mb-8 flex items-start justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                <Briefcase className="w-7 h-7 text-primary-foreground" />
+                            </div>
+                            <h1 className="text-3xl font-bold text-foreground">
+                                Startup Admin Dashboard
+                            </h1>
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Startup Admin Dashboard
-                        </h1>
+                        <p className="text-muted-foreground">Manage incubated and graduated startups</p>
                     </div>
-                    <p className="text-muted-foreground">Manage incubated and graduated startups</p>
+
+                    {/* Export Button - Top Right */}
+                    <button
+                        onClick={handleExport}
+                        disabled={currentStartups.length === 0}
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={currentStartups.length === 0 ? "No data to export" : `Export ${activeTab} startups to CSV`}
+                    >
+                        <Download className="w-5 h-5" />
+                        Export to CSV
+                    </button>
                 </div>
 
                 <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
