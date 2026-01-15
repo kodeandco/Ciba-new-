@@ -158,43 +158,7 @@ export default function AdminHomePage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer"
-               onClick={() => router.push('/admin/incubation-applications')}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Rocket className="w-6 h-6 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-green-500">+12%</span>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-1">{stats.applications}</h3>
-            <p className="text-sm text-muted-foreground">Active Applications</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer"
-               onClick={() => router.push('/admin/startups-upload')}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-green-500">+23%</span>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-1">{stats.startups}</h3>
-            <p className="text-sm text-muted-foreground">Total Startups</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer"
-               onClick={() => router.push('/admin/upload-mentors')}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <UserCheck className="w-6 h-6 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-green-500">+5%</span>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-1">{stats.mentors}</h3>
-            <p className="text-sm text-muted-foreground">Active Mentors</p>
-          </div>
-        </div>
+        
 
         {/* Quick Actions */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
@@ -222,29 +186,7 @@ export default function AdminHomePage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h3 className="text-xl font-bold text-foreground mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
-              <div 
-                key={activity.id}
-                className={`flex items-start gap-4 pb-4 ${
-                  index !== recentActivities.length - 1 ? 'border-b border-border' : ''
-                }`}
-              >
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  {getActivityIcon(activity.icon)}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{activity.title}</p>
-                  <p className="text-xs text-muted-foreground">{activity.subtitle}</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        
       </main>
     </div>
   );

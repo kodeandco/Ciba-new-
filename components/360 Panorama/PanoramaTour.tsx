@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { ChevronLeft, ChevronRight, Info, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Maximize, Moon, Sun } from 'lucide-react';
 
 interface Hotspot {
   position: [number, number, number];
@@ -29,6 +27,7 @@ export default function PanoramaTour() {
   const [currentScene, setCurrentScene] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isDark, setIsDark] = useState<boolean>(false);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -61,15 +60,26 @@ export default function PanoramaTour() {
     }
   ];
 
-  // Detect mobile
+  // Theme toggle
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Initialize Three.js
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -85,20 +95,21 @@ export default function PanoramaTour() {
     camera.position.set(0, 0, 0.1);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Animation loop
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
       renderer.render(scene, camera);
     };
     animate();
 
-    // Handle resize
     const handleResize = () => {
       if (!containerRef.current) return;
       camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
@@ -110,23 +121,29 @@ export default function PanoramaTour() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      if (containerRef.current && renderer.domElement) containerRef.current.removeChild(renderer.domElement);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (containerRef.current && renderer.domElement) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
       renderer.dispose();
     };
   }, [isMobile]);
 
-  // Interaction handlers
   useEffect(() => {
     const canvas = rendererRef.current?.domElement;
+    if (!canvas || !cameraRef.current) return;
+
     const camera = cameraRef.current;
-    if (!canvas || !camera) return;
 
     const handleStart = (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
       mouseRef.current.isDragging = true;
+
       const clientX = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+
       mouseRef.current.x = clientX;
       mouseRef.current.y = clientY;
       mouseRef.current.startX = clientX;
@@ -136,45 +153,76 @@ export default function PanoramaTour() {
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!mouseRef.current.isDragging) return;
       e.preventDefault();
+
       const clientX = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = (e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+
       const deltaX = clientX - mouseRef.current.x;
       const deltaY = clientY - mouseRef.current.y;
+
       const sensitivity = isMobile ? 0.008 : 0.005;
+
       camera.rotation.y += deltaX * sensitivity;
       camera.rotation.x += deltaY * sensitivity;
+
       camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
       mouseRef.current.x = clientX;
       mouseRef.current.y = clientY;
     };
 
     const handleEnd = (e: MouseEvent | TouchEvent) => {
       if (!mouseRef.current.isDragging) return;
+
       const moveDistance = Math.sqrt(
         Math.pow(mouseRef.current.x - mouseRef.current.startX, 2) +
         Math.pow(mouseRef.current.y - mouseRef.current.startY, 2)
       );
+
       mouseRef.current.isDragging = false;
+
       if (moveDistance > 10) return;
 
-      const rect = canvas.getBoundingClientRect();
-      let x: number, y: number;
       if ((e as TouchEvent).changedTouches) {
+        const rect = canvas.getBoundingClientRect();
         const touch = (e as TouchEvent).changedTouches[0];
-        x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-        y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-      } else {
-        x = ((e as MouseEvent).clientX - rect.left) / rect.width * 2 - 1;
-        y = -((e as MouseEvent).clientY - rect.top) / rect.height * 2 + 1;
-      }
+        const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
 
-      const raycaster = new THREE.Raycaster();
-      const mouseVector = new THREE.Vector2(x, y);
-      raycaster.setFromCamera(mouseVector, camera);
-      const intersects = raycaster.intersectObjects(hotspotRefs.current);
-      if (intersects.length > 0) {
-        const nextScene = intersects[0].object.userData.nextScene as number;
-        setCurrentScene(nextScene);
+        const raycaster = new THREE.Raycaster();
+        const mouseVector = new THREE.Vector2(x, y);
+        raycaster.setFromCamera(mouseVector, camera);
+
+        const intersects = raycaster.intersectObjects(hotspotRefs.current);
+        if (intersects.length > 0) {
+          const nextScene = intersects[0].object.userData.nextScene as number;
+          setCurrentScene(nextScene);
+        }
+      }
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      if (e.type === 'click' && !('ontouchstart' in window)) {
+        const moveDistance = Math.sqrt(
+          Math.pow(mouseRef.current.x - mouseRef.current.startX, 2) +
+          Math.pow(mouseRef.current.y - mouseRef.current.startY, 2)
+        );
+
+        if (moveDistance > 10) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+        const raycaster = new THREE.Raycaster();
+        const mouseVector = new THREE.Vector2(x, y);
+        raycaster.setFromCamera(mouseVector, camera);
+
+        const intersects = raycaster.intersectObjects(hotspotRefs.current);
+        if (intersects.length > 0) {
+          const nextScene = intersects[0].object.userData.nextScene as number;
+          setCurrentScene(nextScene);
+        }
       }
     };
 
@@ -182,7 +230,7 @@ export default function PanoramaTour() {
     canvas.addEventListener('mousemove', handleMove as EventListener);
     canvas.addEventListener('mouseup', handleEnd as EventListener);
     canvas.addEventListener('mouseleave', handleEnd as EventListener);
-    canvas.addEventListener('click', handleEnd as EventListener);
+    canvas.addEventListener('click', handleClick as EventListener);
 
     canvas.addEventListener('touchstart', handleStart as EventListener, { passive: false });
     canvas.addEventListener('touchmove', handleMove as EventListener, { passive: false });
@@ -196,7 +244,7 @@ export default function PanoramaTour() {
       canvas.removeEventListener('mousemove', handleMove as EventListener);
       canvas.removeEventListener('mouseup', handleEnd as EventListener);
       canvas.removeEventListener('mouseleave', handleEnd as EventListener);
-      canvas.removeEventListener('click', handleEnd as EventListener);
+      canvas.removeEventListener('click', handleClick as EventListener);
       canvas.removeEventListener('touchstart', handleStart as EventListener);
       canvas.removeEventListener('touchmove', handleMove as EventListener);
       canvas.removeEventListener('touchend', handleEnd as EventListener);
@@ -204,14 +252,12 @@ export default function PanoramaTour() {
     };
   }, [isMobile, currentScene]);
 
-  // Load panorama
   useEffect(() => {
     if (!sceneRef.current || !cameraRef.current) return;
 
     setIsLoading(true);
     const scene = sceneRef.current;
 
-    // Clean previous objects
     while (scene.children.length > 0) {
       const child = scene.children[0];
       scene.remove(child);
@@ -227,28 +273,31 @@ export default function PanoramaTour() {
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
       scenes[currentScene].image,
-      (texture: any) => {
-        texture.anisotropy = rendererRef.current!.capabilities.getMaxAnisotropy();
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-
-        const geometry = new THREE.SphereGeometry(500, isMobile ? 32 : 60, isMobile ? 16 : 40);
+      (texture) => {
+        const geometry = new THREE.SphereGeometry(500, 60, 40);
         geometry.scale(-1, 1, 1);
 
         const material = new THREE.MeshBasicMaterial({ map: texture });
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        // Add hotspots
         scenes[currentScene].hotspots.forEach((hotspot) => {
-          const hotspotGeometry = new THREE.SphereGeometry(isMobile ? 0.5 : 0.3, 8, 8);
-          const hotspotMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+          const hotspotSize = isMobile ? 0.5 : 0.3;
+          const hotspotGeometry = new THREE.SphereGeometry(hotspotSize, 16, 16);
+          const hotspotMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0066cc,
+            transparent: true,
+            opacity: 0.8
+          });
           const hotspotMesh = new THREE.Mesh(hotspotGeometry, hotspotMaterial);
           hotspotMesh.position.set(...hotspot.position);
-          hotspotMesh.userData = { scale: 1, growing: true, nextScene: hotspot.nextScene };
+
+          hotspotMesh.userData = {
+            scale: 1,
+            growing: true,
+            nextScene: hotspot.nextScene
+          };
+
           scene.add(hotspotMesh);
           hotspotRefs.current.push(hotspotMesh);
         });
@@ -262,7 +311,6 @@ export default function PanoramaTour() {
       }
     );
 
-    // Animate hotspots
     let animationId: number;
     const animateHotspots = () => {
       hotspotRefs.current.forEach((hotspot) => {
@@ -279,7 +327,9 @@ export default function PanoramaTour() {
     };
     animateHotspots();
 
-    if (cameraRef.current) cameraRef.current.rotation.set(0, 0, 0);
+    if (cameraRef.current) {
+      cameraRef.current.rotation.set(0, 0, 0);
+    }
 
     return () => {
       if (animationId) cancelAnimationFrame(animationId);
@@ -287,44 +337,85 @@ export default function PanoramaTour() {
   }, [currentScene, isMobile]);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, overflow: 'hidden', touchAction: 'none', userSelect: 'none', backgroundColor: 'transparent' }}>
-      <div ref={containerRef} style={{ width: '100%', height: '100%', cursor: 'grab', backgroundColor: 'transparent' }} />
+    <div className="w-full h-screen overflow-hidden relative" style={{ background: 'transparent' }}>
+      <div ref={containerRef} className="w-full h-full cursor-grab" />
 
       {isLoading && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50 }}>
-          <div style={{ color: 'white', fontSize: '20px' }}>Loading {scenes[currentScene].name}...</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-50 animate-fade-in">
+          <div className="text-white text-xl font-medium">
+            Loading {scenes[currentScene].name}...
+          </div>
         </div>
       )}
 
-      {/* UI Overlay */}
-      <div style={{ position: 'absolute', top: isMobile ? '8px' : '16px', left: isMobile ? '8px' : '16px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: isMobile ? '8px 12px' : '8px 16px', borderRadius: '8px', maxWidth: '320px', zIndex: 10 }}>
-        <h2 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold', margin: '0 0 4px 0' }}>{scenes[currentScene].name}</h2>
-        <p style={{ fontSize: isMobile ? '12px' : '14px', opacity: 0.8, margin: 0 }}>{isMobile ? 'Swipe to look • Tap cyan spheres' : 'Drag to look around • Click cyan spheres to move'}</p>
+      {/* Theme Toggle */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        className="absolute top-4 right-4 p-3 bg-card/80 backdrop-blur-sm rounded-full border border-border hover:bg-card transition-all z-20 hover-lift"
+        aria-label="Toggle theme"
+      >
+        {isDark ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+      </button>
+
+      {/* Scene Info */}
+      <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm text-card-foreground p-4 rounded-lg shadow-xl max-w-xs z-10 border border-border animate-slide-in-left">
+        <h2 className="text-lg font-bold mb-1 text-primary">
+          {scenes[currentScene].name}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {isMobile ? 'Swipe to look • Tap blue spheres' : 'Drag to look around • Click blue spheres to move'}
+        </p>
       </div>
 
       {/* Navigation buttons */}
-      <div style={{ position: 'absolute', bottom: isMobile ? '80px' : '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: isMobile ? '8px' : '12px', zIndex: 10 }}>
-        <button onClick={() => setCurrentScene((prev) => (prev - 1 + scenes.length) % scenes.length)} style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: isMobile ? '8px' : '12px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}>
-          <ChevronLeft size={isMobile ? 20 : 24} />
+      <div className="absolute bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+        <button
+          onClick={() => setCurrentScene((prev) => (prev - 1 + scenes.length) % scenes.length)}
+          className="p-3 bg-primary/80 backdrop-blur-sm text-primary-foreground rounded-full border border-primary hover:bg-primary transition-all hover-lift"
+          aria-label="Previous scene"
+        >
+          <ChevronLeft size={24} />
         </button>
-        <button onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)} style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: isMobile ? '8px' : '12px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')}>
-          <ChevronRight size={isMobile ? 20 : 24} />
+        <button
+          onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)}
+          className="p-3 bg-primary/80 backdrop-blur-sm text-primary-foreground rounded-full border border-primary hover:bg-primary transition-all hover-lift"
+          aria-label="Next scene"
+        >
+          <ChevronRight size={24} />
         </button>
       </div>
 
+      {/* Instructions */}
       {!isMobile && (
-        <div style={{ position: 'absolute', bottom: '16px', right: '16px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '8px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', zIndex: 10 }}>
-          <Info size={16} />
-          <span>Look for glowing cyan spheres to navigate</span>
+        <div className="absolute bottom-6 right-6 bg-card/90 backdrop-blur-sm text-card-foreground p-3 rounded-lg shadow-lg flex items-center gap-2 text-sm z-10 border border-border animate-slide-in-right">
+          <Info size={16} className="text-primary" />
+          <span>Look for glowing blue spheres to navigate</span>
         </div>
       )}
 
+      {/* Mobile hint */}
       {isMobile && (
-        <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', zIndex: 10 }}>
-          <Maximize size={12} />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm text-card-foreground px-4 py-2 rounded-full text-xs flex items-center gap-2 z-10 border border-border animate-bounce-subtle">
+          <Maximize size={12} className="text-primary" />
           <span>Rotate device for better view</span>
         </div>
       )}
+
+      {/* Scene indicators */}
+      <div className="absolute bottom-32 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        {scenes.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentScene(index)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              index === currentScene
+                ? 'bg-primary w-8'
+                : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
+            }`}
+            aria-label={`Go to ${scenes[index].name}`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
