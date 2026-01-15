@@ -23,12 +23,30 @@ export default function SectionTabs() {
     { id: 'mentors', title: 'Mentorships', component: MentorsSection },
     { id: 'assets', title: 'Assets', component: AssetsSection },
     { id: 'partners', title: 'Growth Partners', component: PartnersSection },
-    { id: 'investment', title: 'investment', component: InvestmentSection },
+    { id: 'investment', title: 'Investment', component: InvestmentSection },
     { id: 'coworking', title: 'Coworking', component: CoworkingSection }
   ]
 
   const ActiveComponent =
     tabs.find(tab => tab.id === activeTab)?.component || MentorsSection
+
+  const handleTabClick = (tabId: string) => {
+    // Don't change active tab if clicking Coworking
+    if (tabId === 'coworking') {
+      // Scroll to tour section
+      const tourSection = document.getElementById('tour')
+
+      if (tourSection) {
+        tourSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    } else {
+      // Normal tab switching for other tabs
+      setActiveTab(tabId)
+    }
+  }
 
   return (
     <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-muted/20 border-y border-border">
@@ -49,12 +67,11 @@ export default function SectionTabs() {
           {tabs.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative pb-4 px-2 text-sm md:text-base font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              onClick={() => handleTabClick(tab.id)}
+              className={`relative pb-4 px-2 text-sm md:text-base font-medium whitespace-nowrap transition-all ${activeTab === tab.id
+                ? 'text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               {tab.title}
               {activeTab === tab.id && (

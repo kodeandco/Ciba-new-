@@ -2,6 +2,7 @@
 
 import { useState, useEffect, JSX } from "react";
 import AdminNavbar from "@/components/AdminNavbar";
+import ExportToCSV from "@/components/ExportToCSV";
 import {
     Rocket,
     Search,
@@ -104,59 +105,6 @@ export default function IncubationApplicationsDashboard() {
             }
         } catch (error) {
             console.log("No sheet configured yet");
-        }
-    };
-
-    const syncToGoogleSheets = async () => {
-        setSyncingToSheets(true);
-        try {
-            const res = await fetch("http://localhost:5000/api/incubation/sheets/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({}),
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                alert(`Successfully synced ${data.count} applications to Google Sheets!`);
-                if (data.spreadsheetUrl) {
-                    setSheetUrl(data.spreadsheetUrl);
-                }
-            } else {
-                alert("Failed to sync: " + (data.error || "Unknown error"));
-            }
-        } catch (error) {
-            console.error("Error syncing to sheets:", error);
-            alert("Failed to sync to Google Sheets");
-        } finally {
-            setSyncingToSheets(false);
-        }
-    };
-
-    const createNewSheet = async () => {
-        setCreatingSheet(true);
-        try {
-            const res = await fetch("http://localhost:5000/api/incubation/sheets/create", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                alert("New spreadsheet created! Now sync your applications to it.");
-                setSheetUrl(data.spreadsheetUrl);
-                console.log("Spreadsheet ID:", data.spreadsheetId);
-                console.log("Add this to your .env file: GOOGLE_SHEETS_ID=" + data.spreadsheetId);
-            } else {
-                alert("Failed to create sheet: " + (data.error || "Unknown error"));
-            }
-        } catch (error) {
-            console.error("Error creating sheet:", error);
-            alert("Failed to create Google Sheet");
-        } finally {
-            setCreatingSheet(false);
         }
     };
 
@@ -278,58 +226,23 @@ export default function IncubationApplicationsDashboard() {
         window.open(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, "_blank");
     };
 
-    const exportToSpreadsheet = () => {
-        const headers = [
-            "Startup Name",
-            "Founder Name",
-            "Co-Founders",
-            "Email",
-            "Phone",
-            "Website",
-            "Industry",
-            "Stage",
-            "Team Size",
-            "Funding Raised",
-            "Revenue",
-            "Status",
-            "Has Pitch Deck",
-            "Application Date",
-            "Notes"
-        ];
-
-        const rows = filteredApplications.map(app => [
-            app.startupName,
-            app.founderName,
-            app.coFounders || "",
-            app.email,
-            app.phone,
-            app.website,
-            app.industry,
-            app.stage,
-            app.teamSize,
-            app.fundingRaised,
-            app.revenue,
-            app.status,
-            app.pitchDeck ? "Yes" : "No",
-            new Date(app.createdAt).toLocaleDateString(),
-            app.notes || ""
-        ]);
-
-        const csvContent = [
-            headers.join(","),
-            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-        ].join("\n");
-
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `incubation_applications_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    const applicationColumns = [
+        { header: "Startup Name", accessor: (app: Application) => app.startupName },
+        { header: "Founder Name", accessor: (app: Application) => app.founderName },
+        { header: "Co-Founders", accessor: (app: Application) => app.coFounders || "" },
+        { header: "Email", accessor: (app: Application) => app.email },
+        { header: "Phone", accessor: (app: Application) => app.phone },
+        { header: "Website", accessor: (app: Application) => app.website },
+        { header: "Industry", accessor: (app: Application) => app.industry },
+        { header: "Stage", accessor: (app: Application) => app.stage },
+        { header: "Team Size", accessor: (app: Application) => app.teamSize },
+        { header: "Funding Raised", accessor: (app: Application) => app.fundingRaised },
+        { header: "Revenue", accessor: (app: Application) => app.revenue },
+        { header: "Status", accessor: (app: Application) => app.status },
+        { header: "Has Pitch Deck", accessor: (app: Application) => app.pitchDeck ? "Yes" : "No" },
+        { header: "Application Date", accessor: (app: Application) => new Date(app.createdAt).toLocaleDateString() },
+        { header: "Notes", accessor: (app: Application) => app.notes || "" },
+    ];
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
@@ -389,19 +302,30 @@ export default function IncubationApplicationsDashboard() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                            <Rocket className="w-7 h-7 text-primary-foreground" />
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                <Rocket className="w-7 h-7 text-primary-foreground" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground">
+                                    Incubation Applications
+                                </h1>
+                                <p className="text-muted-foreground">Manage and review startup applications</p>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Incubation Applications
-                        </h1>
+                        <ExportToCSV
+                            data={filteredApplications}
+                            columns={applicationColumns}
+                            filename={`incubation_applications_${new Date().toISOString().split('T')[0]}.csv`}
+                            buttonText="Export to CSV"
+                            variant="primary"
+                        />
                     </div>
-                    <p className="text-muted-foreground">Manage and review startup applications</p>
                 </div>
 
                 {/* Stats Cards */}
