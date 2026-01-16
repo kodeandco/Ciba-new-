@@ -3,7 +3,7 @@ const multer = require("multer");
 const Newsletter = require("../models/newsletter_model");
 const Subscriber = require("../models/subscriber_model");
 const { sendNewsletterToAllSubscribers, sendWelcomeEmail } = require("../utils/emailService");
-
+const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Multer setup

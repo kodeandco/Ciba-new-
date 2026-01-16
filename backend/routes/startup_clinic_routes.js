@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const StartupClinic = require("../models/startup_clinic_model");
 const { createCalendarEvent } = require("../utils/googleCalendar");
-
+const authMiddleware = require("../middleware/authMiddleware");
 // -------------------------
 // CHECK SLOT AVAILABILITY FOR A DATE (MUST BE BEFORE /:id ROUTE)
 // -------------------------

@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const GraduatedStartup = require("../models/graduated_startup_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({

@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const Gallery = require("../models/gallery_model");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 

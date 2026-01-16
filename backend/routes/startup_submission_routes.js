@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const StartupSubmission = require("../models/startup_submission_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 // Test route (optional, you can keep it for debugging)
 router.get("/test", (req, res) => {
   res.json({ message: "Startup submission route is working!" });

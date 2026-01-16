@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Partner = require("../models/partners_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 /* =====================================================
    CREATE PARTNER (POST)
    Expects:

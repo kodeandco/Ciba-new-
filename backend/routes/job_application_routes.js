@@ -4,7 +4,7 @@ const multer = require("multer");
 const JobApplication = require("../models/job_application_model");
 const CIBAJob = require("../models/ciba_job_model");
 const IncubatedStartup = require("../models/incubated_startup_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 const storage = multer.memoryStorage();
 
 const upload = multer({

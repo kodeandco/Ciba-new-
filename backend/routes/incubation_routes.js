@@ -5,7 +5,7 @@ const multer = require("multer");
 const nodemailer = require("nodemailer");
 const Incubation = require("../models/incubation_models");
 const { sendIncubationStatusEmail } = require("../utils/emailService");
-
+const authMiddleware = require("../middleware/authMiddleware");
 // Configure multer to store in memory (as Buffer)
 const storage = multer.memoryStorage();
 

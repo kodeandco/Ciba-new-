@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Testimonial = require('../models/testimonials_model.js');
-
+const authMiddleware = require("../middleware/authMiddleware");
 // Middleware for error handling
 const asyncHandler = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
