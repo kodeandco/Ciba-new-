@@ -56,7 +56,11 @@ const galleryRoutes = require("./routes/gallery_routes");
 const mentorsRoutes = require("./routes/mentors_route");
 const partnersRoutes = require("./routes/partners_routes");
 const testimonialsRoutes = require("./routes/testimonials_routes");
+const authRoutes = require("./routes/authRoutes");
+
+
 // Mount routes
+app.use("/api/auth", authRoutes);
 app.use("/api/clinic", startupClinicRoutes);
 app.use("/api/incubation", incubationRoutes);
 app.use("/api/newsletter", newsletterRoutes);
@@ -69,6 +73,7 @@ app.use("/api/gallery", galleryRoutes);
 app.use("/api/mentors", mentorsRoutes);
 app.use("/api/partners", partnersRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
+
 console.log("✅ All routes mounted successfully!");
 
 // Route verification
@@ -98,12 +103,82 @@ console.log("  Admin:");
 console.log("    GET    /api/admin/ciba-jobs");
 console.log("    GET    /api/admin/incubated-startups\n");
 
+// GET /admin/setup - browser-friendly setup page
+app.get("/admin/setup", (req, res) => {
+  const { setupToken } = req.query;
+
+  if (!setupToken) {
+    return res.status(400).send("<h2>Missing setup token</h2>");
+  }
+
+  // Simple HTML page to submit admin setup
+  res.send(`
+    <html>
+      <head>
+        <title>Admin Setup</title>
+      </head>
+      <body style="font-family: sans-serif; padding: 20px;">
+        <h2>Admin Setup</h2>
+        <form id="setupForm">
+          <input type="hidden" name="setupToken" value="${setupToken}" />
+          <div>
+            <label>Email: <input type="email" name="email" required /></label>
+          </div>
+          <div>
+            <label>Password: <input type="password" name="password" required /></label>
+          </div>
+          <button type="submit" style="margin-top: 10px;">Create Admin</button>
+        </form>
+
+        <div id="message" style="margin-top: 20px; color: green;"></div>
+
+        <script>
+          const form = document.getElementById('setupForm');
+          const messageDiv = document.getElementById('message');
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+              email: form.email.value,
+              password: form.password.value,
+              setupToken: form.setupToken.value
+            };
+
+            try {
+              const res = await fetch('http://localhost:5000/api/auth/setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+
+              const result = await res.json();
+
+              if (res.ok) {
+                messageDiv.style.color = 'green';
+                messageDiv.textContent = result.message;
+              } else {
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = result.error || JSON.stringify(result);
+              }
+            } catch (err) {
+              messageDiv.style.color = 'red';
+              messageDiv.textContent = 'Error: ' + err.message;
+            }
+          });
+        </script>
+      </body>
+    </html>
+  `);
+});
 
 // Error Handler - MUST be after routes
 app.use((err, req, res, next) => {
   console.error("❌ Server Error:", err.stack);
   res.status(500).json({ error: err.message });
 });
+
+
 
 // 404 Handler - MUST be LAST, after all routes and error handler
 app.use((req, res) => {

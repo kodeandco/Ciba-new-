@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import AdminNavbar from "@/components/AdminNavbar";
-import { 
-  Rocket, 
-  Users, 
+import {
+  Rocket,
+  Users,
   UserCheck,
   Image,
   Mail,
@@ -31,37 +31,61 @@ interface RecentActivity {
 
 export default function AdminHomePage() {
   const router = useRouter();
+
+  // ✅ All hooks at top
   const [stats, setStats] = useState<Stats>({
     applications: 0,
     startups: 0,
     mentors: 0
   });
   const [loading, setLoading] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
+  // ✅ Define fetchStats before useEffect
   const fetchStats = async () => {
     try {
-      // Fetch incubation applications
       const incubationRes = await fetch("http://localhost:5000/api/incubation");
       const incubationData = await incubationRes.json();
-      
-      // You can add more API calls here for startups, mentors
-      // For now using mock data for others
-      
+
       setStats({
         applications: incubationData.success ? incubationData.applications.length : 0,
-        startups: 156, // Replace with actual API call
-        mentors: 42 // Replace with actual API call
+        startups: 156,
+        mentors: 42
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
-    } finally {
-      setLoading(false);
     }
   };
+
+  // ✅ Single useEffect handles token check and stats fetch
+  useEffect(() => {
+    const token = localStorage.getItem("admin-token");
+    if (!token) {
+      router.replace("/admin/login");
+      return;
+    }
+
+    fetch("http://localhost:5000/api/auth/verify", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Invalid token");
+        return res.json();
+      })
+      .then(() => {
+        setTokenValid(true);
+        fetchStats(); // fetch stats after token validated
+      })
+      .catch(() => {
+        localStorage.removeItem("admin-token");
+        router.replace("/admin/login");
+      })
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!tokenValid) return null;
+
 
   const quickActions = [
     {
@@ -145,7 +169,7 @@ export default function AdminHomePage() {
   return (
     <div className="min-h-screen bg-background">
       <AdminNavbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -158,7 +182,7 @@ export default function AdminHomePage() {
         </div>
 
         {/* Stats Grid */}
-        
+
 
         {/* Quick Actions */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
@@ -167,7 +191,7 @@ export default function AdminHomePage() {
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
-                <button 
+                <button
                   key={index}
                   onClick={() => router.push(action.path)}
                   className="flex items-center gap-3 px-4 py-3 bg-primary/5 hover:bg-primary/10 rounded-lg transition-all text-left group"
@@ -186,7 +210,7 @@ export default function AdminHomePage() {
           </div>
         </div>
 
-        
+
       </main>
     </div>
   );

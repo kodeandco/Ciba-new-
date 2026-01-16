@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Image, 
-  Rocket, 
-  Mail, 
-  Users, 
-  Building2, 
-  FileText, 
+import {
+  Menu,
+  X,
+  Home,
+  Image,
+  Rocket,
+  Mail,
+  Users,
+  Building2,
+  FileText,
   UserCheck,
   ChevronDown,
   Sun,
@@ -35,57 +35,57 @@ export default function AdminNavbar() {
   }, []);
 
   const adminPages = [
-    { 
-      id: 'adminhomep', 
-      label: 'Dashboard', 
+    {
+      id: 'adminhomep',
+      label: 'Dashboard',
       icon: Home,
       path: '/admin'
     },
-    { 
-      id: 'gallery-upload', 
-      label: 'Gallery', 
+    {
+      id: 'gallery-upload',
+      label: 'Gallery',
       icon: Image,
       path: '/admin/gallery-upload'
     },
-    { 
-      id: 'incubation-applications', 
-      label: 'Incubation Apps', 
+    {
+      id: 'incubation-applications',
+      label: 'Incubation Apps',
       icon: Rocket,
       path: '/admin/incubation-applications'
     },
-    { 
-      id: 'newsletter-upload', 
-      label: 'Newsletter', 
+    {
+      id: 'newsletter-upload',
+      label: 'Newsletter',
       icon: Mail,
       path: '/admin/newsletter-upload'
     },
-    { 
-      id: 'partners-upload', 
-      label: 'Partners', 
+    {
+      id: 'partners-upload',
+      label: 'Partners',
       icon: Users,
       path: '/admin/partners-upload'
     },
-    { 
-      id: 'startup-clinic-applications', 
-      label: 'Startup Clinic', 
+    {
+      id: 'startup-clinic-applications',
+      label: 'Startup Clinic',
       icon: Building2,
       path: '/admin/startup-clinic-applications'
     },
-    { 
-      id: 'startups-upload', 
-      label: 'Startups', 
+    {
+      id: 'startups-upload',
+      label: 'Startups',
       icon: Rocket,
       path: '/admin/startups-upload'
     },
-    { 
-      id: 'testimonials-upload', 
-      label: 'Testimonials', 
+    {
+      id: 'testimonials-upload',
+      label: 'Testimonials',
       icon: FileText,
       path: '/admin/testimonials-upload'
     },
-    { 
-      id: 'upload-mentors', 
-      label: 'Mentors', 
+    {
+      id: 'upload-mentors',
+      label: 'Mentors',
       icon: UserCheck,
       path: '/admin/upload-mentors'
     }
@@ -103,10 +103,17 @@ export default function AdminNavbar() {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
-    router.push('/login');
+    // 1️⃣ Remove everything first
+    localStorage.removeItem("admin-token");
+    localStorage.removeItem("admin-email");
+    localStorage.removeItem("admin-id");
+
+    // 2️⃣ Redirect immediately
+    router.replace("/admin/login"); // use replace to prevent back navigation
     setIsOpen(false);
   };
+
+
 
   // Prevent hydration mismatch by not rendering theme toggle until mounted
   if (!mounted) {
@@ -136,9 +143,9 @@ export default function AdminNavbar() {
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-card/95 border-b border-border shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          
+
           {/* Logo */}
-          <div 
+          <div
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => navigateTo('/admin')}
           >
@@ -157,9 +164,8 @@ export default function AdminNavbar() {
           <div className="hidden lg:flex items-center gap-2">
             <button
               onClick={() => navigateTo('/admin/Adminhomep')}
-              className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium rounded-lg hover:bg-primary/5 ${
-                pathname === '/admin' ? 'text-primary bg-primary/5' : ''
-              }`}
+              className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium rounded-lg hover:bg-primary/5 ${pathname === '/admin' ? 'text-primary bg-primary/5' : ''
+                }`}
             >
               Dashboard
             </button>
@@ -176,7 +182,7 @@ export default function AdminNavbar() {
 
               {isDropdownOpen && (
                 <>
-                  <div 
+                  <div
                     className="fixed inset-0 z-10"
                     onClick={() => setIsDropdownOpen(false)}
                   />
@@ -187,9 +193,8 @@ export default function AdminNavbar() {
                         <button
                           key={page.id}
                           onClick={() => navigateTo(page.path)}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-primary/10 transition-all hover:text-primary ${
-                            pathname === page.path ? 'bg-primary/5 text-primary' : ''
-                          }`}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-primary/10 transition-all hover:text-primary ${pathname === page.path ? 'bg-primary/5 text-primary' : ''
+                            }`}
                         >
                           <Icon className="w-4 h-4" />
                           {page.label}
@@ -254,9 +259,8 @@ export default function AdminNavbar() {
           <div className="lg:hidden pb-4 space-y-2 animate-slide-up">
             <button
               onClick={() => navigateTo('/admin')}
-              className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary ${
-                pathname === '/admin' ? 'bg-primary/5 text-primary' : ''
-              }`}
+              className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary ${pathname === '/admin' ? 'bg-primary/5 text-primary' : ''
+                }`}
             >
               Dashboard
             </button>
@@ -269,9 +273,8 @@ export default function AdminNavbar() {
                   <button
                     key={page.id}
                     onClick={() => navigateTo(page.path)}
-                    className={`flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary ${
-                      pathname === page.path ? 'bg-primary/5 text-primary' : ''
-                    }`}
+                    className={`flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary ${pathname === page.path ? 'bg-primary/5 text-primary' : ''
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {page.label}
