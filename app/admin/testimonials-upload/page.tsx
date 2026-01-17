@@ -27,7 +27,7 @@ interface TestimonialFormData {
 
 // API base URL
 const API_BASE_URL = 'http://localhost:5000/api/testimonials';
-
+const token = localStorage.getItem("admin-token");
 // API functions
 const api = {
     getTestimonials: async (): Promise<Testimonial[]> => {
@@ -46,7 +46,10 @@ const api = {
     createTestimonial: async (data: TestimonialFormData): Promise<Testimonial> => {
         const response = await fetch(`${API_BASE_URL}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(data)
         });
 
@@ -62,7 +65,10 @@ const api = {
     updateTestimonial: async (id: string, data: TestimonialFormData): Promise<Testimonial> => {
         const response = await fetch(`${API_BASE_URL}/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(data)
         });
 
@@ -77,7 +83,10 @@ const api = {
     },
     deleteTestimonial: async (id: string): Promise<{ success: boolean }> => {
         const response = await fetch(`${API_BASE_URL}/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
         });
 
         if (!response.ok) {
@@ -220,10 +229,11 @@ export default function TestimonialsAdmin() {
         inactive: testimonials.filter(t => !t.isActive).length,
     }
 
+
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -346,10 +356,10 @@ export default function TestimonialsAdmin() {
                                         <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
                                             <span>Order: {testimonial.displayOrder}</span>
                                             <span
-                                                className={`px-3 py-1 rounded-full text-xs font-medium ${testimonial.isActive 
-                                                    ? "bg-primary/10 text-primary" 
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${testimonial.isActive
+                                                    ? "bg-primary/10 text-primary"
                                                     : "bg-muted text-muted-foreground"
-                                                }`}
+                                                    }`}
                                             >
                                                 {testimonial.isActive ? "Active" : "Inactive"}
                                             </span>
@@ -364,7 +374,7 @@ export default function TestimonialsAdmin() {
                 {/* Modal */}
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => closeModal()}>
-                        <div 
+                        <div
                             onClick={(e) => e.stopPropagation()}
                             className="bg-card rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border shadow-2xl"
                         >

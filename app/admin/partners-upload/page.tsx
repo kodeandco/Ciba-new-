@@ -69,7 +69,10 @@ export default function PartnersAdminPage() {
         const data = await res.json()
         setPartners(Array.isArray(data) ? data : [])
     }
-
+    const token = localStorage.getItem("admin-token");
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    }
     useEffect(() => {
         fetchPartners()
     }, [])
@@ -130,7 +133,10 @@ export default function PartnersAdminPage() {
 
         await fetch(url, {
             method,
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(payload)
         })
 
@@ -157,7 +163,7 @@ export default function PartnersAdminPage() {
     ================================ */
     const handleDelete = async (id: string) => {
         if (!confirm("Delete this partner?")) return
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" })
+        await fetch(`${API_URL}/${id}`, { method: "DELETE", headers })
         fetchPartners()
     }
 
@@ -167,7 +173,7 @@ export default function PartnersAdminPage() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
                 {/* HEADER */}
