@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Testimonial = require('../models/testimonials_model.js');
 const authMiddleware = require("../middleware/authMiddleware");
+
 // Middleware for error handling
 const asyncHandler = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -32,8 +33,38 @@ const validateTestimonial = (req, res, next) => {
   next();
 };
 
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
+// @route   GET /api/testimonials/active
+// @desc    Get only active testimonials (PUBLIC)
+// @access  Public
+router.get('/active', asyncHandler(async (req, res) => {
+  const testimonials = await Testimonial.getActive();
+
+  res.status(200).json({
+    success: true,
+    count: testimonials.length,
+    data: testimonials
+  });
+}));
+
+// @route   GET /api/testimonials/featured
+// @desc    Get featured testimonials (PUBLIC)
+// @access  Public
+router.get('/featured', asyncHandler(async (req, res) => {
+  const testimonials = await Testimonial.getFeatured();
+
+  res.status(200).json({
+    success: true,
+    count: testimonials.length,
+    data: testimonials
+  });
+}));
+
 // @route   GET /api/testimonials
-// @desc    Get all testimonials (with optional filters)
+// @desc    Get all testimonials (PUBLIC - with optional filters)
 // @access  Public
 router.get('/', asyncHandler(async (req, res) => {
   const { 
@@ -77,34 +108,8 @@ router.get('/', asyncHandler(async (req, res) => {
   });
 }));
 
-// @route   GET /api/testimonials/active
-// @desc    Get only active testimonials
-// @access  Public
-router.get('/active', asyncHandler(async (req, res) => {
-  const testimonials = await Testimonial.getActive();
-
-  res.status(200).json({
-    success: true,
-    count: testimonials.length,
-    data: testimonials
-  });
-}));
-
-// @route   GET /api/testimonials/featured
-// @desc    Get featured testimonials
-// @access  Public
-router.get('/featured', asyncHandler(async (req, res) => {
-  const testimonials = await Testimonial.getFeatured();
-
-  res.status(200).json({
-    success: true,
-    count: testimonials.length,
-    data: testimonials
-  });
-}));
-
 // @route   GET /api/testimonials/:id
-// @desc    Get single testimonial by ID
+// @desc    Get single testimonial by ID (PUBLIC)
 // @access  Public
 router.get('/:id', asyncHandler(async (req, res) => {
   const testimonial = await Testimonial.findById(req.params.id).select('-__v');
@@ -122,10 +127,14 @@ router.get('/:id', asyncHandler(async (req, res) => {
   });
 }));
 
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
 // @route   POST /api/testimonials
-// @desc    Create new testimonial
-// @access  Private (add auth middleware as needed)
-router.post('/', validateTestimonial, asyncHandler(async (req, res) => {
+// @desc    Create new testimonial (PROTECTED)
+// @access  Private
+router.post('/', authMiddleware, validateTestimonial, asyncHandler(async (req, res) => {
   const testimonialData = {
     name: req.body.name,
     designation: req.body.designation,
@@ -135,7 +144,8 @@ router.post('/', validateTestimonial, asyncHandler(async (req, res) => {
     isActive: req.body.isActive !== undefined ? req.body.isActive : true,
     displayOrder: req.body.displayOrder || 0,
     rating: req.body.rating || 5,
-    featured: req.body.featured || false
+    featured: req.body.featured || false,
+    createdBy: req.user._id // Track who created it
   };
 
   const testimonial = await Testimonial.create(testimonialData);
@@ -148,9 +158,9 @@ router.post('/', validateTestimonial, asyncHandler(async (req, res) => {
 }));
 
 // @route   PUT /api/testimonials/:id
-// @desc    Update testimonial
-// @access  Private (add auth middleware as needed)
-router.put('/:id', validateTestimonial, asyncHandler(async (req, res) => {
+// @desc    Update testimonial (PROTECTED)
+// @access  Private
+router.put('/:id', authMiddleware, validateTestimonial, asyncHandler(async (req, res) => {
   let testimonial = await Testimonial.findById(req.params.id);
 
   if (!testimonial) {
@@ -169,7 +179,8 @@ router.put('/:id', validateTestimonial, asyncHandler(async (req, res) => {
     isActive: req.body.isActive,
     displayOrder: req.body.displayOrder,
     rating: req.body.rating,
-    featured: req.body.featured
+    featured: req.body.featured,
+    updatedBy: req.user._id // Track who updated it
   };
 
   testimonial = await Testimonial.findByIdAndUpdate(
@@ -189,9 +200,9 @@ router.put('/:id', validateTestimonial, asyncHandler(async (req, res) => {
 }));
 
 // @route   PATCH /api/testimonials/:id/toggle-active
-// @desc    Toggle active status
-// @access  Private (add auth middleware as needed)
-router.patch('/:id/toggle-active', asyncHandler(async (req, res) => {
+// @desc    Toggle active status (PROTECTED)
+// @access  Private
+router.patch('/:id/toggle-active', authMiddleware, asyncHandler(async (req, res) => {
   const testimonial = await Testimonial.findById(req.params.id);
 
   if (!testimonial) {
@@ -211,9 +222,9 @@ router.patch('/:id/toggle-active', asyncHandler(async (req, res) => {
 }));
 
 // @route   PATCH /api/testimonials/:id/toggle-featured
-// @desc    Toggle featured status
-// @access  Private (add auth middleware as needed)
-router.patch('/:id/toggle-featured', asyncHandler(async (req, res) => {
+// @desc    Toggle featured status (PROTECTED)
+// @access  Private
+router.patch('/:id/toggle-featured', authMiddleware, asyncHandler(async (req, res) => {
   const testimonial = await Testimonial.findById(req.params.id);
 
   if (!testimonial) {
@@ -233,9 +244,9 @@ router.patch('/:id/toggle-featured', asyncHandler(async (req, res) => {
 }));
 
 // @route   PATCH /api/testimonials/reorder
-// @desc    Reorder testimonials
-// @access  Private (add auth middleware as needed)
-router.patch('/reorder', asyncHandler(async (req, res) => {
+// @desc    Reorder testimonials (PROTECTED)
+// @access  Private
+router.patch('/reorder', authMiddleware, asyncHandler(async (req, res) => {
   const { testimonials } = req.body;
 
   if (!Array.isArray(testimonials)) {
@@ -258,9 +269,9 @@ router.patch('/reorder', asyncHandler(async (req, res) => {
 }));
 
 // @route   DELETE /api/testimonials/:id
-// @desc    Delete testimonial
-// @access  Private (add auth middleware as needed)
-router.delete('/:id', asyncHandler(async (req, res) => {
+// @desc    Delete testimonial (PROTECTED)
+// @access  Private
+router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const testimonial = await Testimonial.findById(req.params.id);
 
   if (!testimonial) {
@@ -280,9 +291,9 @@ router.delete('/:id', asyncHandler(async (req, res) => {
 }));
 
 // @route   DELETE /api/testimonials
-// @desc    Delete multiple testimonials
-// @access  Private (add auth middleware as needed)
-router.delete('/', asyncHandler(async (req, res) => {
+// @desc    Delete multiple testimonials (PROTECTED)
+// @access  Private
+router.delete('/', authMiddleware, asyncHandler(async (req, res) => {
   const { ids } = req.body;
 
   if (!Array.isArray(ids) || ids.length === 0) {

@@ -11,7 +11,29 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // ⚠️ CRITICAL: Specific routes MUST come BEFORE parameterized routes like /:id
 
-// GET all newsletters (not just latest 2) - MUST BE BEFORE /:id
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
+// GET top 2 latest newsletters (PUBLIC - root route)
+router.get("/", async (req, res) => {
+  console.log("📋 Getting latest 2 newsletters");
+  
+  try {
+    const newsletters = await Newsletter.find({})
+      .sort({ newsletterDate: -1 })
+      .limit(2)
+      .select("-file.data");
+    
+    console.log(`✅ Found ${newsletters.length} newsletters`);
+    res.json(newsletters);
+  } catch (err) {
+    console.error("❌ Error fetching newsletters:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET all newsletters (PUBLIC - not just latest 2) - MUST BE BEFORE /:id
 router.get("/all", async (req, res) => {
   console.log("📋 Getting ALL newsletters");
   
@@ -28,7 +50,7 @@ router.get("/all", async (req, res) => {
   }
 });
 
-// POST subscribe to newsletter
+// POST subscribe to newsletter (PUBLIC)
 router.post("/subscribe", async (req, res) => {
   console.log("📧 Newsletter subscription request");
   
@@ -69,7 +91,27 @@ router.post("/subscribe", async (req, res) => {
   }
 });
 
-// GET file by ID - MUST BE BEFORE /:id
+// GET single newsletter by ID (PUBLIC - MUST BE AFTER specific routes)
+router.get("/:id", async (req, res) => {
+  console.log("📄 Getting newsletter by ID:", req.params.id);
+  
+  try {
+    const newsletter = await Newsletter.findById(req.params.id)
+      .select("-file.data");
+    
+    if (!newsletter) {
+      return res.status(404).json({ error: "Newsletter not found" });
+    }
+    
+    console.log("✅ Newsletter found:", newsletter.title);
+    res.json(newsletter);
+  } catch (err) {
+    console.error("❌ Error fetching newsletter:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET file by ID (PUBLIC - MUST BE BEFORE other /:id routes)
 router.get("/:id/file", async (req, res) => {
   console.log("📄 File route hit for ID:", req.params.id);
   
@@ -101,9 +143,14 @@ router.get("/:id/file", async (req, res) => {
   }
 });
 
-// POST new newsletter with file upload - MUST BE BEFORE /:id routes
-router.post("/", upload.single("file"), async (req, res) => {
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
+// POST new newsletter with file upload (PROTECTED - MUST BE BEFORE /:id routes)
+router.post("/", authMiddleware, upload.single("file"), async (req, res) => {
   console.log("📝 Creating new newsletter");
+  console.log("👤 Admin:", req.user.email);
   
   try {
     const { title, description, newsletterDate, sendEmail } = req.body;
@@ -124,7 +171,8 @@ router.post("/", upload.single("file"), async (req, res) => {
             contentType: req.file.mimetype,
             filename: req.file.originalname
           }
-        : undefined
+        : undefined,
+      createdBy: req.user._id // Track who created it
     });
 
     await newsletter.save();
@@ -169,10 +217,10 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
-// PUT update newsletter
-// PUT update newsletter - with proper multer handling
-router.put("/:id", upload.single("file"), async (req, res) => {
+// PUT update newsletter (PROTECTED)
+router.put("/:id", authMiddleware, upload.single("file"), async (req, res) => {
   console.log("✏️ Updating newsletter:", req.params.id);
+  console.log("👤 Admin:", req.user.email);
   console.log("📦 Request body:", req.body);
   console.log("📄 Request file:", req.file ? req.file.originalname : 'No file');
   
@@ -194,7 +242,8 @@ router.put("/:id", upload.single("file"), async (req, res) => {
     const updateData = {
       title,
       description,
-      newsletterDate: new Date(newsletterDate)
+      newsletterDate: new Date(newsletterDate),
+      updatedBy: req.user._id // Track who updated it
     };
 
     if (req.file) {
@@ -224,9 +273,10 @@ router.put("/:id", upload.single("file"), async (req, res) => {
   }
 });
 
-// DELETE newsletter by ID - MUST BE BEFORE GET /:id
-router.delete("/:id", async (req, res) => {
+// DELETE newsletter by ID (PROTECTED - MUST BE BEFORE GET /:id)
+router.delete("/:id", authMiddleware, async (req, res) => {
   console.log("🗑️ Deleting newsletter:", req.params.id);
+  console.log("👤 Admin:", req.user.email);
   
   try {
     const newsletter = await Newsletter.findByIdAndDelete(req.params.id);
@@ -239,44 +289,6 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Newsletter deleted successfully" });
   } catch (err) {
     console.error("❌ Error deleting newsletter:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET top 2 latest newsletters (root route)
-router.get("/", async (req, res) => {
-  console.log("📋 Getting latest 2 newsletters");
-  
-  try {
-    const newsletters = await Newsletter.find({})
-      .sort({ newsletterDate: -1 })
-      .limit(2)
-      .select("-file.data");
-    
-    console.log(`✅ Found ${newsletters.length} newsletters`);
-    res.json(newsletters);
-  } catch (err) {
-    console.error("❌ Error fetching newsletters:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET single newsletter by ID - MUST BE LAST among /:id routes
-router.get("/:id", async (req, res) => {
-  console.log("📄 Getting newsletter by ID:", req.params.id);
-  
-  try {
-    const newsletter = await Newsletter.findById(req.params.id)
-      .select("-file.data");
-    
-    if (!newsletter) {
-      return res.status(404).json({ error: "Newsletter not found" });
-    }
-    
-    console.log("✅ Newsletter found:", newsletter.title);
-    res.json(newsletter);
-  } catch (err) {
-    console.error("❌ Error fetching newsletter:", err);
     res.status(500).json({ error: err.message });
   }
 });

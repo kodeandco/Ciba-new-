@@ -2,40 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Partner = require("../models/partners_model");
 const authMiddleware = require("../middleware/authMiddleware");
-/* =====================================================
-   CREATE PARTNER (POST)
-   Expects:
-   {
-     name,
-     description,
-     image: base64 string (optional),
-     contentType: "image/png" | "image/jpeg"
-   }
-===================================================== */
-router.post("/", async (req, res) => {
-  try {
-    const { name, description, image, contentType } = req.body;
 
-    const partner = new Partner({
-      name,
-      description,
-      image: image
-        ? {
-            data: Buffer.from(image, "base64"),
-            contentType
-          }
-        : undefined
-    });
-
-    await partner.save();
-    res.status(201).json({ message: "Partner created", partner });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
 
 /* =====================================================
-   GET ALL PARTNERS
+   GET ALL PARTNERS (PUBLIC)
 ===================================================== */
 router.get("/", async (req, res) => {
   try {
@@ -56,10 +29,47 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
 /* =====================================================
-   UPDATE PARTNER (PUT)
+   CREATE PARTNER (POST - PROTECTED)
+   Expects:
+   {
+     name,
+     description,
+     image: base64 string (optional),
+     contentType: "image/png" | "image/jpeg"
+   }
 ===================================================== */
-router.put("/:id", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { name, description, image, contentType } = req.body;
+
+    const partner = new Partner({
+      name,
+      description,
+      image: image
+        ? {
+            data: Buffer.from(image, "base64"),
+            contentType
+          }
+        : undefined,
+      createdBy: req.user._id // Track who created it
+    });
+
+    await partner.save();
+    res.status(201).json({ message: "Partner created", partner });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* =====================================================
+   UPDATE PARTNER (PUT - PROTECTED)
+===================================================== */
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const { name, description, image, contentType } = req.body;
 
@@ -76,6 +86,8 @@ router.put("/:id", async (req, res) => {
       };
     }
 
+    partner.updatedBy = req.user._id; // Track who updated it
+
     await partner.save();
     res.json({ message: "Partner updated", partner });
   } catch (err) {
@@ -84,11 +96,16 @@ router.put("/:id", async (req, res) => {
 });
 
 /* =====================================================
-   DELETE PARTNER
+   DELETE PARTNER (PROTECTED)
 ===================================================== */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    await Partner.findByIdAndDelete(req.params.id);
+    const partner = await Partner.findByIdAndDelete(req.params.id);
+    
+    if (!partner) {
+      return res.status(404).json({ error: "Partner not found" });
+    }
+    
     res.json({ message: "Partner deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const IncubatedStartup = require("../models/incubated_startup_model");
 const authMiddleware = require("../middleware/authMiddleware");
+
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -18,8 +19,12 @@ const upload = multer({
   },
 });
 
-// GET all incubated startups (without image data for performance)
-router.get("/admin/incubated-startups", async (req, res) => {
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
+// GET all incubated startups - PUBLIC (without image data for performance)
+router.get("/incubated-startups", async (req, res) => {
   try {
     const startups = await IncubatedStartup.find({})
       .select("-image.data") // Exclude image data from list
@@ -38,8 +43,8 @@ router.get("/admin/incubated-startups", async (req, res) => {
   }
 });
 
-// GET single startup image
-router.get("/admin/incubated-startups/:id/image", async (req, res) => {
+// GET single startup image - PUBLIC
+router.get("/incubated-startups/:id/image", async (req, res) => {
   try {
     const startup = await IncubatedStartup.findById(req.params.id);
 
@@ -48,6 +53,7 @@ router.get("/admin/incubated-startups/:id/image", async (req, res) => {
     }
 
     res.set("Content-Type", startup.image.contentType);
+    res.set("Cache-Control", "public, max-age=86400");
     res.send(startup.image.data);
   } catch (error) {
     console.error("Error fetching image:", error);
@@ -55,11 +61,16 @@ router.get("/admin/incubated-startups/:id/image", async (req, res) => {
   }
 });
 
-// POST - Add new incubated startup (with optional image)
-router.post("/admin/incubated-startups", upload.single("image"), async (req, res) => {
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
+// POST - Add new incubated startup (PROTECTED)
+router.post("/admin/incubated-startups", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     console.log("Request body:", req.body);
     console.log("Request file:", req.file);
+    console.log("Authenticated admin:", req.user.email);
     
     const companyName = req.body.companyName;
     const tagline = req.body.tagline;
@@ -69,7 +80,12 @@ router.post("/admin/incubated-startups", upload.single("image"), async (req, res
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const startupData = { companyName, tagline, careerUrl };
+    const startupData = { 
+      companyName, 
+      tagline, 
+      careerUrl,
+      createdBy: req.user._id // Track who created it
+    };
 
     // Add image if uploaded
     if (req.file) {
@@ -84,7 +100,7 @@ router.post("/admin/incubated-startups", upload.single("image"), async (req, res
 
     res.status(201).json({ 
       success: true, 
-      message: "Startup added!", 
+      message: "Startup added successfully!", 
       startup: {
         ...saved.toObject(),
         image: saved.image ? { contentType: saved.image.contentType } : null
@@ -96,11 +112,12 @@ router.post("/admin/incubated-startups", upload.single("image"), async (req, res
   }
 });
 
-// PUT - Update incubated startup (with optional image)
-router.put("/admin/incubated-startups/:id", upload.single("image"), async (req, res) => {
+// PUT - Update incubated startup (PROTECTED)
+router.put("/admin/incubated-startups/:id", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     console.log("Update request body:", req.body);
     console.log("Update request file:", req.file);
+    console.log("Authenticated admin:", req.user.email);
     
     const companyName = req.body.companyName;
     const tagline = req.body.tagline;
@@ -110,7 +127,13 @@ router.put("/admin/incubated-startups/:id", upload.single("image"), async (req, 
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const updateData = { companyName, tagline, careerUrl };
+    const updateData = { 
+      companyName, 
+      tagline, 
+      careerUrl,
+      updatedBy: req.user._id, // Track who updated it
+      updatedAt: new Date()
+    };
 
     // Add image if uploaded
     if (req.file) {
@@ -144,19 +167,69 @@ router.put("/admin/incubated-startups/:id", upload.single("image"), async (req, 
   }
 });
 
-// DELETE - Delete incubated startup by ID
-router.delete("/admin/incubated-startups/:id", async (req, res) => {
+// DELETE - Delete incubated startup by ID (PROTECTED)
+router.delete("/admin/incubated-startups/:id", authMiddleware, async (req, res) => {
   try {
+    console.log("Delete request by admin:", req.user.email);
+    
     const deleted = await IncubatedStartup.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
       return res.status(404).json({ error: "Startup not found" });
     }
 
-    res.json({ success: true, message: "Startup deleted successfully" });
+    res.json({ 
+      success: true, 
+      message: "Startup deleted successfully",
+      deletedId: req.params.id 
+    });
   } catch (error) {
     console.error("Error deleting startup:", error);
     res.status(500).json({ error: "Delete failed" });
+  }
+});
+
+// ===================================
+// ADMIN-SPECIFIC ROUTES (Protected)
+// ===================================
+
+// GET all incubated startups for admin panel (PROTECTED)
+router.get("/admin/incubated-startups", authMiddleware, async (req, res) => {
+  try {
+    const startups = await IncubatedStartup.find({})
+      .select("-image.data") // Exclude image data from list
+      .sort({ createdAt: -1 });
+    
+    // Add hasImage flag
+    const startupsWithImageFlag = startups.map(startup => ({
+      ...startup.toObject(),
+      hasImage: !!(startup.image && startup.image.contentType)
+    }));
+    
+    res.json({ 
+      success: true,
+      startups: startupsWithImageFlag 
+    });
+  } catch (error) {
+    console.error("Error fetching incubated startups:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// GET single startup image for admin (PROTECTED)
+router.get("/admin/incubated-startups/:id/image", authMiddleware, async (req, res) => {
+  try {
+    const startup = await IncubatedStartup.findById(req.params.id);
+
+    if (!startup || !startup.image || !startup.image.data) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    res.set("Content-Type", startup.image.contentType);
+    res.send(startup.image.data);
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    res.status(500).json({ error: "Failed to fetch image" });
   }
 });
 

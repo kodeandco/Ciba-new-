@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer");
 const Incubation = require("../models/incubation_models");
 const { sendIncubationStatusEmail } = require("../utils/emailService");
 const authMiddleware = require("../middleware/authMiddleware");
+
 // Configure multer to store in memory (as Buffer)
 const storage = multer.memoryStorage();
 
@@ -21,8 +22,12 @@ const upload = multer({
   },
 });
 
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
 // -------------------------
-// INCUBATION APPLICATION API
+// INCUBATION APPLICATION API (PUBLIC - for applicants)
 // -------------------------
 
 router.post("/", upload.single("pitchDeck"), async (req, res) => {
@@ -193,11 +198,15 @@ router.post("/", upload.single("pitchDeck"), async (req, res) => {
   }
 });
 
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
 // -------------------------
-// GET ALL APPLICATIONS (Admin route)
+// GET ALL APPLICATIONS (Admin route - PROTECTED)
 // -------------------------
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const applications = await Incubation.find()
       .select("-pitchDeck.data")
@@ -211,10 +220,10 @@ router.get("/", async (req, res) => {
 });
 
 // -------------------------
-// GET SINGLE APPLICATION BY ID
+// GET SINGLE APPLICATION BY ID (PROTECTED)
 // -------------------------
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const application = await Incubation.findById(req.params.id);
     
@@ -230,10 +239,10 @@ router.get("/:id", async (req, res) => {
 });
 
 // -------------------------
-// DOWNLOAD PITCH DECK
+// DOWNLOAD PITCH DECK (PROTECTED)
 // -------------------------
 
-router.get("/:id/pitch-deck", async (req, res) => {
+router.get("/:id/pitch-deck", authMiddleware, async (req, res) => {
   try {
     const application = await Incubation.findById(req.params.id);
     
@@ -255,10 +264,10 @@ router.get("/:id/pitch-deck", async (req, res) => {
 });
 
 // -------------------------
-// VIEW PITCH DECK (inline in browser)
+// VIEW PITCH DECK (inline in browser - PROTECTED)
 // -------------------------
 
-router.get("/:id/pitch-deck/view", async (req, res) => {
+router.get("/:id/pitch-deck/view", authMiddleware, async (req, res) => {
   try {
     const application = await Incubation.findById(req.params.id);
     
@@ -279,10 +288,10 @@ router.get("/:id/pitch-deck/view", async (req, res) => {
 });
 
 // -------------------------
-// UPDATE APPLICATION STATUS (Admin route)
+// UPDATE APPLICATION STATUS (Admin route - PROTECTED)
 // -------------------------
 
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
     
@@ -319,10 +328,10 @@ router.patch("/:id/status", async (req, res) => {
 });
 
 // -------------------------
-// SEND STATUS EMAIL (Admin route)
+// SEND STATUS EMAIL (Admin route - PROTECTED)
 // -------------------------
 
-router.post("/:id/send-email", async (req, res) => {
+router.post("/:id/send-email", authMiddleware, async (req, res) => {
   try {
     const application = await Incubation.findById(req.params.id);
 
@@ -354,10 +363,10 @@ router.post("/:id/send-email", async (req, res) => {
 });
 
 // -------------------------
-// UPDATE APPLICATION NOTES (Admin route)
+// UPDATE APPLICATION NOTES (Admin route - PROTECTED)
 // -------------------------
 
-router.patch("/:id/notes", async (req, res) => {
+router.patch("/:id/notes", authMiddleware, async (req, res) => {
   try {
     const { notes } = req.body;
     
