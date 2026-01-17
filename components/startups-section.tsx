@@ -30,8 +30,8 @@ export default function StartupsSection() {
         setError(null)
 
         const [incubatedRes, graduatedRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/admin/incubated-startups`),
-          fetch(`${BACKEND_URL}/api/admin/graduated-startups`),
+          fetch(`${BACKEND_URL}/api/incubated-startups`),
+          fetch(`${BACKEND_URL}/api/graduated-startups`),
         ])
 
         if (!incubatedRes.ok || !graduatedRes.ok) {
