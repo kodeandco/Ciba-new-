@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const Gallery = require("../models/gallery_model");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -15,7 +16,12 @@ const upload = multer({
   }
 });
 
-router.post("/", upload.single("image"), async (req, res) => {
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
+// POST - Upload new media (PROTECTED)
+router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     const { title, description, aspectRatio = "16:9" } = req.body;
     if (!req.file) {
@@ -50,35 +56,73 @@ router.post("/", upload.single("image"), async (req, res) => {
         contentType: isVideo ? req.file.mimetype : "image/jpeg",
         filename: req.file.originalname,
       },
+      uploadedBy: req.user._id, // Track who uploaded it
     });
 
     await galleryItem.save();
-    res.status(201).json({ message: "Media uploaded successfully" });
+    res.status(201).json({ 
+      message: "Media uploaded successfully",
+      id: galleryItem._id 
+    });
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-router.patch("/:id", async (req, res) => {
+// PATCH - Update gallery item (PROTECTED)
+router.patch("/:id", authMiddleware, async (req, res) => {
   try {
     const { title, description, aspectRatio } = req.body;
     const updated = await Gallery.findByIdAndUpdate(
       req.params.id,
-      { title, description, aspectRatio },
+      { 
+        title, 
+        description, 
+        aspectRatio,
+        updatedAt: new Date() 
+      },
       { new: true }
-    );
-    if (!updated) return res.status(404).json({ message: "Item not found" });
-    res.json(updated);
+    ).select("-image.data");
+    
+    if (!updated) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+    
+    res.json({
+      message: "Gallery item updated successfully",
+      item: updated
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// DELETE - Delete gallery item (PROTECTED)
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    const deleted = await Gallery.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Gallery item not found" });
+    }
+    res.json({ 
+      message: "Gallery item deleted successfully",
+      deletedId: req.params.id 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
+// GET - List all gallery items (PUBLIC - metadata only)
 router.get("/", async (req, res) => {
   try {
     const galleryItems = await Gallery.find()
-      .select("-image.data")
+      .select("-image.data") // Don't send binary data in list
       .sort({ createdAt: -1 });
     res.json(galleryItems);
   } catch (err) {
@@ -86,6 +130,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET - Get specific media file (PUBLIC)
 router.get("/:id/image", async (req, res) => {
   try {
     const galleryItem = await Gallery.findById(req.params.id);
@@ -97,18 +142,6 @@ router.get("/:id/image", async (req, res) => {
     res.set("Content-Length", galleryItem.image.data.length);
     res.set("Cache-Control", "public, max-age=86400");
     res.send(galleryItem.image.data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.delete("/:id", async (req, res) => {
-  try {
-    const deleted = await Gallery.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Gallery item not found" });
-    }
-    res.json({ message: "Gallery item deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

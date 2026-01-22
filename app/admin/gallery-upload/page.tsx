@@ -20,6 +20,7 @@ export default function AdminGalleryPage() {
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const token = localStorage.getItem("admin-token");
 
   const fetchGallery = async () => {
     try {
@@ -59,7 +60,11 @@ export default function AdminGalleryPage() {
           `http://localhost:5000/api/gallery/${editingId}`,
           {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ title, description, aspectRatio }),
           }
         );
@@ -72,6 +77,10 @@ export default function AdminGalleryPage() {
 
         res = await fetch("http://localhost:5000/api/gallery", {
           method: "POST",
+          headers: {
+
+            'Authorization': `Bearer ${token}`
+          },
           body: formData,
         });
       }
@@ -93,7 +102,12 @@ export default function AdminGalleryPage() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/gallery/${id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        }
       );
       if (!res.ok) throw new Error("Delete failed");
       fetchGallery();
@@ -189,8 +203,8 @@ export default function AdminGalleryPage() {
                 {loading
                   ? "Processing..."
                   : editingId
-                  ? "Update"
-                  : "Upload"}
+                    ? "Update"
+                    : "Upload"}
               </button>
 
               {editingId && (
@@ -217,21 +231,19 @@ export default function AdminGalleryPage() {
                 <video
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   controls
-                  className={`w-full object-cover ${
-                    item.aspectRatio === "9:16"
-                      ? "aspect-[9/16]"
-                      : "aspect-video"
-                  }`}
+                  className={`w-full object-cover ${item.aspectRatio === "9:16"
+                    ? "aspect-[9/16]"
+                    : "aspect-video"
+                    }`}
                 />
               ) : (
                 <img
                   src={`http://localhost:5000/api/gallery/${item._id}/image`}
                   alt={item.title}
-                  className={`w-full object-cover ${
-                    item.aspectRatio === "9:16"
-                      ? "aspect-[9/16]"
-                      : "aspect-video"
-                  }`}
+                  className={`w-full object-cover ${item.aspectRatio === "9:16"
+                    ? "aspect-[9/16]"
+                    : "aspect-video"
+                    }`}
                 />
               )}
 

@@ -38,7 +38,10 @@ export default function NewsletterManagement() {
     const [editTitle, setEditTitle] = useState("")
     const [editDescription, setEditDescription] = useState("")
     const [editDate, setEditDate] = useState("")
-
+    const token = localStorage.getItem("admin-token");
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    }
     useEffect(() => {
         fetchNewsletters()
     }, [])
@@ -73,6 +76,7 @@ export default function NewsletterManagement() {
             const res = await fetch(`${API_URL}/api/newsletter`, {
                 method: "POST",
                 body: formData,
+                headers
             })
 
             const data = await res.json()
@@ -110,6 +114,7 @@ export default function NewsletterManagement() {
         try {
             const res = await fetch(`${API_URL}/api/newsletter/${id}`, {
                 method: "DELETE",
+                headers
             })
 
             if (!res.ok) {
@@ -155,6 +160,7 @@ export default function NewsletterManagement() {
             const res = await fetch(`${API_URL}/api/newsletter/${id}`, {
                 method: "PUT",
                 body: formData,
+                headers
             })
 
             const data = await res.json()
@@ -187,7 +193,7 @@ export default function NewsletterManagement() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavbar />
-            
+
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
@@ -209,11 +215,10 @@ export default function NewsletterManagement() {
                 {/* Success/Error Message */}
                 {message && (
                     <div
-                        className={`mb-6 p-4 rounded-lg border-2 flex items-center gap-3 ${
-                            messageType === "success"
-                                ? "bg-green-50 dark:bg-green-950 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
-                                : "bg-red-50 dark:bg-red-950 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300"
-                        }`}
+                        className={`mb-6 p-4 rounded-lg border-2 flex items-center gap-3 ${messageType === "success"
+                            ? "bg-green-50 dark:bg-green-950 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
+                            : "bg-red-50 dark:bg-red-950 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300"
+                            }`}
                     >
                         <AlertCircle size={20} />
                         <p className="font-semibold flex-1">{message}</p>

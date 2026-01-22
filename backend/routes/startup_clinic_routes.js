@@ -3,9 +3,14 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const StartupClinic = require("../models/startup_clinic_model");
 const { createCalendarEvent } = require("../utils/googleCalendar");
+const authMiddleware = require("../middleware/authMiddleware");
+
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
 
 // -------------------------
-// CHECK SLOT AVAILABILITY FOR A DATE (MUST BE BEFORE /:id ROUTE)
+// CHECK SLOT AVAILABILITY FOR A DATE (PUBLIC - MUST BE BEFORE /:id ROUTE)
 // -------------------------
 router.get("/availability/:date", async (req, res) => {
   try {
@@ -41,7 +46,7 @@ router.get("/availability/:date", async (req, res) => {
 });
 
 // -------------------------
-// GET DATES WITH BOOKING COUNTS (for disabling fully booked dates)
+// GET DATES WITH BOOKING COUNTS (PUBLIC - for disabling fully booked dates)
 // -------------------------
 router.post("/dates-availability", async (req, res) => {
   try {
@@ -81,20 +86,7 @@ router.post("/dates-availability", async (req, res) => {
 });
 
 // -------------------------
-// GET ALL BOOKINGS (Admin route)
-// -------------------------
-router.get("/", async (req, res) => {
-  try {
-    const bookings = await StartupClinic.find().sort({ sessionDate: 1, createdAt: -1 });
-    res.status(200).json({ success: true, bookings });
-  } catch (err) {
-    console.error("Error fetching bookings:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// -------------------------
-// BOOKING API (Create new booking)
+// BOOKING API (PUBLIC - Create new booking)
 // -------------------------
 router.post("/", async (req, res) => {
   try {
@@ -279,12 +271,30 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
+
 // -------------------------
-// ADD TO GOOGLE CALENDAR (Manual - Admin Dashboard)
+// GET ALL BOOKINGS (PROTECTED - Admin route)
 // -------------------------
-router.post("/:id/add-to-calendar", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const bookings = await StartupClinic.find().sort({ sessionDate: 1, createdAt: -1 });
+    res.status(200).json({ success: true, bookings });
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// -------------------------
+// ADD TO GOOGLE CALENDAR (PROTECTED - Manual - Admin Dashboard)
+// -------------------------
+router.post("/:id/add-to-calendar", authMiddleware, async (req, res) => {
   try {
     console.log('📥 Received request to add booking to calendar:', req.params.id);
+    console.log('👤 Admin:', req.user.email);
     
     const booking = await StartupClinic.findById(req.params.id);
     
@@ -339,9 +349,9 @@ router.post("/:id/add-to-calendar", async (req, res) => {
 });
 
 // -------------------------
-// GET SINGLE BOOKING BY ID
+// GET SINGLE BOOKING BY ID (PROTECTED)
 // -------------------------
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const booking = await StartupClinic.findById(req.params.id);
     
@@ -357,9 +367,9 @@ router.get("/:id", async (req, res) => {
 });
 
 // -------------------------
-// DELETE BOOKING (Optional)
+// DELETE BOOKING (PROTECTED)
 // -------------------------
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const booking = await StartupClinic.findByIdAndDelete(req.params.id);
     

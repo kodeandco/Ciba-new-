@@ -69,10 +69,13 @@ export default function IncubationApplicationsDashboard() {
     const [syncingToSheets, setSyncingToSheets] = useState(false);
     const [creatingSheet, setCreatingSheet] = useState(false);
     const [sheetUrl, setSheetUrl] = useState<string | null>(null);
-
+    const token = localStorage.getItem("admin-token");
+    // const headers = {
+    //     'Authorization': `Bearer ${token}`
+    // }
     useEffect(() => {
         fetchApplications();
-        fetchSheetInfo();
+
     }, []);
 
     useEffect(() => {
@@ -81,7 +84,11 @@ export default function IncubationApplicationsDashboard() {
 
     const fetchApplications = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/incubation");
+            const res = await fetch("http://localhost:5000/api/incubation", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await res.json();
 
             if (data.success) {
@@ -95,18 +102,18 @@ export default function IncubationApplicationsDashboard() {
         }
     };
 
-    const fetchSheetInfo = async () => {
-        try {
-            const res = await fetch("http://localhost:5000/api/incubation/sheets/info");
-            const data = await res.json();
+    // const fetchSheetInfo = async () => {
+    //     try {
+    //         const res = await fetch("http://localhost:5000/api/incubation/sheets/info");
+    //         const data = await res.json();
 
-            if (data.success) {
-                setSheetUrl(data.spreadsheetUrl);
-            }
-        } catch (error) {
-            console.log("No sheet configured yet");
-        }
-    };
+    //         if (data.success) {
+    //             setSheetUrl(data.spreadsheetUrl);
+    //         }
+    //     } catch (error) {
+    //         console.log("No sheet configured yet");
+    //     }
+    // };
 
     const filterApplications = () => {
         let filtered = applications;
@@ -141,7 +148,10 @@ export default function IncubationApplicationsDashboard() {
         try {
             const res = await fetch(`http://localhost:5000/api/incubation/${id}/status`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ status: newStatus }),
             });
 
@@ -169,7 +179,10 @@ export default function IncubationApplicationsDashboard() {
         try {
             const res = await fetch(`http://localhost:5000/api/incubation/${id}/send-email`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`
+                },
             });
 
             const data = await res.json();
@@ -194,7 +207,10 @@ export default function IncubationApplicationsDashboard() {
         try {
             const res = await fetch(`http://localhost:5000/api/incubation/${selectedApp._id}/notes`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ notes: currentNotes }),
             });
 

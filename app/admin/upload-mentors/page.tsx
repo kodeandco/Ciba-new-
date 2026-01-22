@@ -133,7 +133,10 @@ export default function MentorsAdminPage() {
         website: "",
         image: null
     })
-
+    const token = localStorage.getItem("admin-token");
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    }
     /* ===============================
        FETCH
     =============================== */
@@ -227,7 +230,7 @@ export default function MentorsAdminPage() {
         const url = editingId ? `${API_URL}/${editingId}` : API_URL
 
         try {
-            const response = await fetch(url, { method, body: payload })
+            const response = await fetch(url, { method, headers, body: payload })
             if (response.ok) {
                 resetForm()
                 await fetchMentors()
@@ -261,7 +264,7 @@ export default function MentorsAdminPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this mentor?")) return
         try {
-            await fetch(`${API_URL}/${id}`, { method: "DELETE" })
+            await fetch(`${API_URL}/${id}`, { method: "DELETE", headers })
             fetchMentors()
         } catch (err) {
             console.error("Failed to delete", err)

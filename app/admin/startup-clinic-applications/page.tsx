@@ -94,6 +94,7 @@ function ExportToCSV<T>({
         document.body.removeChild(link);
     };
 
+
     const getButtonStyles = () => {
         const baseStyles =
             "px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed";
@@ -129,7 +130,7 @@ export default function StartupClinicDashboard() {
     const [addingToCalendar, setAddingToCalendar] = useState<string | null>(null);
     const [selectedMonth, setSelectedMonth] = useState<string>("all");
     const [selectedWeek, setSelectedWeek] = useState<string>("all");
-
+    const token = localStorage.getItem("admin-token");
     const months = [
         { value: "all", label: "All Months" },
         { value: "0", label: "January" },
@@ -156,7 +157,11 @@ export default function StartupClinicDashboard() {
 
     const fetchBookings = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/clinic");
+            const res = await fetch("http://localhost:5000/api/clinic", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await res.json();
 
             if (data.success) {
@@ -175,6 +180,10 @@ export default function StartupClinicDashboard() {
         try {
             const res = await fetch(`http://localhost:5000/api/clinic/${bookingId}/add-to-calendar`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+
             });
             const data = await res.json();
 

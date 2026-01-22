@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CIBAJob = require("../models/ciba_job_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 // GET all CIBA jobs with type filter
 router.get("/admin/ciba-jobs", async (req, res) => {
   try {

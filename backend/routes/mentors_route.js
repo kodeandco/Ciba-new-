@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const Mentor = require("../models/mentors_model");
-
+const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Configure multer to store files in memory

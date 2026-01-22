@@ -1,28 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const StartupSubmission = require("../models/startup_submission_model");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// Test route (optional, you can keep it for debugging)
+// ===================================
+// PUBLIC ROUTES (No authentication)
+// ===================================
+
+// Test route (optional, for debugging)
 router.get("/test", (req, res) => {
   res.json({ message: "Startup submission route is working!" });
 });
 
-// ========== CRITICAL: GET all startup submissions ==========
-router.get("/", async (req, res) => {
-  try {
-    const submissions = await StartupSubmission.find()
-      .sort({ createdAt: -1 }) // newest first
-      .lean();
-
-    // This format matches what your frontend expects
-    res.json({ submissions });
-  } catch (err) {
-    console.error("Error fetching startup submissions:", err);
-    res.status(500).json({ error: "Failed to fetch startup job postings" });
-  }
-});
-
-// Submit route (already working)
+// Submit route (PUBLIC - anyone can submit job postings)
 router.post("/submit", async (req, res) => {
   try {
     const submission = new StartupSubmission(req.body);
@@ -38,14 +28,35 @@ router.post("/submit", async (req, res) => {
   }
 });
 
-// ========== BONUS: Add these if not already present (for approve/reject/delete) ==========
+// ===================================
+// PROTECTED ROUTES (Admin only)
+// ===================================
 
-router.patch("/:id/status", async (req, res) => {
+// GET all startup submissions (PROTECTED)
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const submissions = await StartupSubmission.find()
+      .sort({ createdAt: -1 }) // newest first
+      .lean();
+
+    // This format matches what your frontend expects
+    res.json({ submissions });
+  } catch (err) {
+    console.error("Error fetching startup submissions:", err);
+    res.status(500).json({ error: "Failed to fetch startup job postings" });
+  }
+});
+
+// Update submission status (PROTECTED)
+router.patch("/:id/status", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
     const updated = await StartupSubmission.findByIdAndUpdate(
       req.params.id,
-      { status },
+      { 
+        status,
+        updatedBy: req.user._id // Track who updated it
+      },
       { new: true }
     );
     if (!updated) return res.status(404).json({ error: "Not found" });
@@ -55,7 +66,8 @@ router.patch("/:id/status", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+// Delete submission (PROTECTED)
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const deleted = await StartupSubmission.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: "Not found" });
