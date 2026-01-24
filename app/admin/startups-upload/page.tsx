@@ -71,30 +71,38 @@ export default function StartupAdminPage() {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormData>({
         companyName: '',
         tagline: '',
         careerUrl: '',
         image: null
     });
-    const token = localStorage.getItem("admin-token");
-    const headers = {
-        'Authorization': `Bearer ${token}`
-    }
+
+    // Get token on client side only
     useEffect(() => {
-        fetchStartups();
+        const storedToken = localStorage.getItem("admin-token");
+        setToken(storedToken);
     }, []);
 
+    useEffect(() => {
+        if (token) {
+            fetchStartups();
+        }
+    }, [token]);
+
     const fetchStartups = async () => {
+        if (!token) return;
+
         setLoading(true);
         try {
+            const headers = {
+                'Authorization': `Bearer ${token}`
+            };
+
             const [incubatedRes, graduatedRes] = await Promise.all([
-                fetch(`${API_BASE}/admin/incubated-startups`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }),
-                fetch(`${API_BASE}/admin/graduated-startups`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
+                fetch(`${API_BASE}/admin/incubated-startups`, { headers }),
+                fetch(`${API_BASE}/admin/graduated-startups`, { headers })
             ]);
 
             const incubatedData = await incubatedRes.json();
@@ -125,6 +133,11 @@ export default function StartupAdminPage() {
     };
 
     const handleAdd = async () => {
+        if (!token) {
+            alert('Not authenticated');
+            return;
+        }
+
         if (!formData.companyName || !formData.tagline || !formData.careerUrl) {
             alert('All fields are required');
             return;
@@ -146,7 +159,9 @@ export default function StartupAdminPage() {
             const res = await fetch(endpoint, {
                 method: 'POST',
                 body: formDataToSend,
-                headers
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             const data = await res.json();
@@ -167,6 +182,11 @@ export default function StartupAdminPage() {
     };
 
     const handleUpdate = async (id: string) => {
+        if (!token) {
+            alert('Not authenticated');
+            return;
+        }
+
         if (!formData.companyName || !formData.tagline || !formData.careerUrl) {
             alert('All fields are required');
             return;
@@ -188,7 +208,9 @@ export default function StartupAdminPage() {
             const res = await fetch(endpoint, {
                 method: 'PUT',
                 body: formDataToSend,
-                headers
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             const data = await res.json();
@@ -209,6 +231,11 @@ export default function StartupAdminPage() {
     };
 
     const handleDelete = async (id: string) => {
+        if (!token) {
+            alert('Not authenticated');
+            return;
+        }
+
         if (!confirm('Are you sure you want to delete this startup?')) return;
 
         const endpoint = activeTab === 'incubated'
@@ -216,7 +243,12 @@ export default function StartupAdminPage() {
             : `${API_BASE}/admin/graduated-startups/${id}`;
 
         try {
-            const res = await fetch(endpoint, { method: 'DELETE', headers });
+            const res = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await res.json();
 
             if (data.success) {
@@ -255,6 +287,18 @@ export default function StartupAdminPage() {
     };
 
     const currentStartups = activeTab === 'incubated' ? incubatedStartups : graduatedStartups;
+
+    // Show loading while token is being retrieved
+    if (token === null) {
+        return (
+            <div className="min-h-screen bg-background">
+                <AdminNavbar />
+                <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                    <div className="text-center py-12 text-muted-foreground">Loading...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -455,12 +499,15 @@ export default function StartupAdminPage() {
                                         ) : (
                                             <div className="flex items-start justify-between">
                                                 <div className="flex gap-4 flex-1">
-                                                    {startup.hasImage && (
-                                                        <div className="relative w-24 flex-shrink-0" style={{ paddingBottom: '18%' }}>
+                                                    {startup.hasImage && token && (
+                                                        <div className="relative w-24 h-18 flex-shrink-0">
                                                             <img
-                                                                src={`${API_BASE}/${activeTab}-startups/${startup._id}/image`}
+                                                                src={`${API_BASE}/admin/${activeTab}-startups/${startup._id}/image?t=${Date.now()}`}
                                                                 alt={startup.companyName}
-                                                                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg border border-border"
+                                                                className="w-full h-full object-cover rounded-lg border border-border"
+                                                                onError={(e) => {
+                                                                    console.error('Failed to load image for:', startup.companyName);
+                                                                }}
                                                             />
                                                         </div>
                                                     )}

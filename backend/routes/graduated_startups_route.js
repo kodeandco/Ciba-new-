@@ -20,11 +20,11 @@ const upload = multer({
 });
 
 // ===================================
-// PUBLIC ROUTES (No authentication)
+// PROTECTED ROUTES (Admin only) - MUST COME FIRST
 // ===================================
 
-// GET all graduated startups - PUBLIC (without image data for performance)
-router.get("/graduated-startups", async (req, res) => {
+// GET all graduated startups for admin panel (PROTECTED)
+router.get("/admin/graduated-startups", authMiddleware, async (req, res) => {
   try {
     const startups = await GraduatedStartup.find({})
       .select("-image.data") // Exclude image data from list
@@ -36,34 +36,15 @@ router.get("/graduated-startups", async (req, res) => {
       hasImage: !!(startup.image && startup.image.contentType)
     }));
     
-    res.json({ startups: startupsWithImageFlag });
+    res.json({ 
+      success: true,
+      startups: startupsWithImageFlag 
+    });
   } catch (error) {
     console.error("Error fetching graduated startups:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
-
-// GET single startup image - PUBLIC
-router.get("/graduated-startups/:id/image", async (req, res) => {
-  try {
-    const startup = await GraduatedStartup.findById(req.params.id);
-
-    if (!startup || !startup.image || !startup.image.data) {
-      return res.status(404).json({ error: "Image not found" });
-    }
-
-    res.set("Content-Type", startup.image.contentType);
-    res.set("Cache-Control", "public, max-age=86400");
-    res.send(startup.image.data);
-  } catch (error) {
-    console.error("Error fetching image:", error);
-    res.status(500).json({ error: "Failed to fetch image" });
-  }
-});
-
-// ===================================
-// PROTECTED ROUTES (Admin only)
-// ===================================
 
 // POST - Add new graduated startup (PROTECTED)
 router.post("/admin/graduated-startups", authMiddleware, upload.single("image"), async (req, res) => {
@@ -72,9 +53,7 @@ router.post("/admin/graduated-startups", authMiddleware, upload.single("image"),
     console.log("Request file:", req.file);
     console.log("Authenticated admin:", req.user.email);
     
-    const companyName = req.body.companyName;
-    const tagline = req.body.tagline;
-    const careerUrl = req.body.careerUrl;
+    const { companyName, tagline, careerUrl } = req.body;
 
     if (!companyName || !tagline || !careerUrl) {
       return res.status(400).json({ error: "All fields are required" });
@@ -84,10 +63,9 @@ router.post("/admin/graduated-startups", authMiddleware, upload.single("image"),
       companyName, 
       tagline, 
       careerUrl,
-      createdBy: req.user._id // Track who created it
+      createdBy: req.user._id
     };
 
-    // Add image if uploaded
     if (req.file) {
       startupData.image = {
         data: req.file.buffer,
@@ -112,6 +90,24 @@ router.post("/admin/graduated-startups", authMiddleware, upload.single("image"),
   }
 });
 
+// GET single startup image for admin (PUBLIC - images can't use auth headers in img tags)
+router.get("/admin/graduated-startups/:id/image", async (req, res) => {
+  try {
+    const startup = await GraduatedStartup.findById(req.params.id);
+
+    if (!startup || !startup.image || !startup.image.data) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    res.set("Content-Type", startup.image.contentType);
+    res.set("Cache-Control", "public, max-age=3600"); // 1 hour cache
+    res.send(startup.image.data);
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    res.status(500).json({ error: "Failed to fetch image" });
+  }
+});
+
 // PUT - Update graduated startup (PROTECTED)
 router.put("/admin/graduated-startups/:id", authMiddleware, upload.single("image"), async (req, res) => {
   try {
@@ -119,9 +115,7 @@ router.put("/admin/graduated-startups/:id", authMiddleware, upload.single("image
     console.log("Update request file:", req.file);
     console.log("Authenticated admin:", req.user.email);
     
-    const companyName = req.body.companyName;
-    const tagline = req.body.tagline;
-    const careerUrl = req.body.careerUrl;
+    const { companyName, tagline, careerUrl } = req.body;
 
     if (!companyName || !tagline || !careerUrl) {
       return res.status(400).json({ error: "All fields are required" });
@@ -131,11 +125,10 @@ router.put("/admin/graduated-startups/:id", authMiddleware, upload.single("image
       companyName, 
       tagline, 
       careerUrl,
-      updatedBy: req.user._id, // Track who updated it
+      updatedBy: req.user._id,
       updatedAt: new Date()
     };
 
-    // Add image if uploaded
     if (req.file) {
       updateData.image = {
         data: req.file.buffer,
@@ -190,34 +183,46 @@ router.delete("/admin/graduated-startups/:id", authMiddleware, async (req, res) 
 });
 
 // ===================================
-// ADMIN-SPECIFIC ROUTES (Protected)
+// PUBLIC ROUTES (No authentication) - MUST COME AFTER PROTECTED ROUTES
 // ===================================
 
-// GET all graduated startups for admin panel (PROTECTED)
-router.get("/admin/graduated-startups", authMiddleware, async (req, res) => {
+// GET all graduated startups - PUBLIC (WITH image data as base64)
+router.get("/graduated-startups", async (req, res) => {
   try {
     const startups = await GraduatedStartup.find({})
-      .select("-image.data") // Exclude image data from list
       .sort({ createdAt: -1 });
     
-    // Add hasImage flag
-    const startupsWithImageFlag = startups.map(startup => ({
-      ...startup.toObject(),
-      hasImage: !!(startup.image && startup.image.contentType)
-    }));
-    
-    res.json({ 
-      success: true,
-      startups: startupsWithImageFlag 
+    // Transform startups to include base64 encoded images
+    const startupsWithImages = startups.map(startup => {
+      const startupObj = startup.toObject();
+      
+      // Convert image buffer to base64 if image exists
+      if (startupObj.image && startupObj.image.data) {
+        return {
+          ...startupObj,
+          image: {
+            contentType: startupObj.image.contentType,
+            data: startupObj.image.data.toString('base64')
+          }
+        };
+      }
+      
+      // Return startup without image data if no image
+      return {
+        ...startupObj,
+        image: null
+      };
     });
+    
+    res.json({ startups: startupsWithImages });
   } catch (error) {
     console.error("Error fetching graduated startups:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// GET single startup image for admin (PROTECTED)
-router.get("/admin/graduated-startups/:id/image", authMiddleware, async (req, res) => {
+// GET single startup image - PUBLIC (kept for backward compatibility)
+router.get("/graduated-startups/:id/image", async (req, res) => {
   try {
     const startup = await GraduatedStartup.findById(req.params.id);
 
@@ -226,6 +231,7 @@ router.get("/admin/graduated-startups/:id/image", authMiddleware, async (req, re
     }
 
     res.set("Content-Type", startup.image.contentType);
+    res.set("Cache-Control", "public, max-age=86400");
     res.send(startup.image.data);
   } catch (error) {
     console.error("Error fetching image:", error);
