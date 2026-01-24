@@ -12,7 +12,10 @@ interface Startup {
   companyName: string
   tagline: string
   careerUrl: string
-  hasImage?: boolean
+  image?: {
+    contentType: string
+    data: string // base64 string
+  } | null
   createdAt?: string
 }
 
@@ -31,8 +34,8 @@ export default function StartupsPage() {
         setError(null)
 
         const [incubatedRes, graduatedRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/admin/incubated-startups`),
-          fetch(`${BACKEND_URL}/api/admin/graduated-startups`),
+          fetch(`${BACKEND_URL}/api/incubated-startups`),
+          fetch(`${BACKEND_URL}/api/graduated-startups`),
         ])
 
         if (!incubatedRes.ok || !graduatedRes.ok) {
@@ -170,16 +173,15 @@ export default function StartupsPage() {
                       onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                     >
                       <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-600 dark:to-blue-800">
-                        {startup.hasImage ? (
+                        {startup.image?.data ? (
                           <motion.img
-                            src={`${BACKEND_URL}/api/admin/incubated-startups/${startup._id}/image`}
+                            src={`data:${startup.image.contentType};base64,${startup.image.data}`}
                             alt={startup.companyName}
                             className="w-full h-full object-cover"
                             whileHover={{ scale: 1.15 }}
                             transition={{ duration: 0.4 }}
                             onError={(e) => {
                               console.error('Failed to load image for:', startup.companyName);
-                              e.currentTarget.style.display = 'none';
                             }}
                           />
                         ) : (
@@ -247,13 +249,16 @@ export default function StartupsPage() {
                       onClick={() => window.open(startup.careerUrl, "_blank", "noopener,noreferrer")}
                     >
                       <div className="relative h-48 overflow-hidden bg-gradient-to-br from-green-400 to-emerald-600 dark:from-green-600 dark:to-emerald-800">
-                        {startup.hasImage ? (
+                        {startup.image?.data ? (
                           <motion.img
-                            src={`${BACKEND_URL}/api/admin/graduated-startups/${startup._id}/image`}
+                            src={`data:${startup.image.contentType};base64,${startup.image.data}`}
                             alt={startup.companyName}
                             className="w-full h-full object-cover"
                             whileHover={{ scale: 1.15 }}
                             transition={{ duration: 0.4 }}
+                            onError={(e) => {
+                              console.error('Failed to load image for:', startup.companyName);
+                            }}
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">

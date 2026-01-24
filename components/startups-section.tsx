@@ -11,7 +11,10 @@ interface Startup {
   companyName: string
   tagline: string
   careerUrl: string
-  hasImage?: boolean
+  image?: {
+    contentType: string
+    data: string // base64 string
+  } | null
   createdAt?: string
 }
 
@@ -146,9 +149,9 @@ export default function StartupsSection() {
                   >
                     {/* 4:3 Aspect Ratio Container */}
                     <div className="relative w-full overflow-hidden bg-gradient-to-br from-primary to-accent" style={{ paddingBottom: '75%' }}>
-                      {startup.hasImage ? (
+                      {startup.image?.data ? (
                         <img
-                          src={`${BACKEND_URL}/api/admin/incubated-startups/${startup._id}/image`}
+                          src={`data:${startup.image.contentType};base64,${startup.image.data}`}
                           alt={startup.companyName}
                           className="absolute top-0 left-0 w-full h-full object-cover"
                         />
@@ -205,9 +208,9 @@ export default function StartupsSection() {
                   >
                     {/* 4:3 Aspect Ratio Container */}
                     <div className="relative w-full overflow-hidden bg-gradient-to-br from-accent to-secondary" style={{ paddingBottom: '75%' }}>
-                      {startup.hasImage ? (
+                      {startup.image?.data ? (
                         <img
-                          src={`${BACKEND_URL}/api/admin/graduated-startups/${startup._id}/image`}
+                          src={`data:${startup.image.contentType};base64,${startup.image.data}`}
                           alt={startup.companyName}
                           className="absolute top-0 left-0 w-full h-full object-cover"
                         />

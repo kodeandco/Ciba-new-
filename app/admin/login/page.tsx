@@ -162,13 +162,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-            <div className="font-semibold mb-1">Debug Info:</div>
-            <div>API URL: {getApiUrl()}</div>
-          </div>
-        )}
 
         {/* Form */}
         <div className="space-y-5">

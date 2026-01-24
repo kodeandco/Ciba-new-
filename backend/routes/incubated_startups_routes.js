@@ -23,20 +23,35 @@ const upload = multer({
 // PUBLIC ROUTES (No authentication)
 // ===================================
 
-// GET all incubated startups - PUBLIC (without image data for performance)
+// GET all incubated startups - PUBLIC (WITH image data included)
 router.get("/incubated-startups", async (req, res) => {
   try {
     const startups = await IncubatedStartup.find({})
-      .select("-image.data") // Exclude image data from list
       .sort({ createdAt: -1 });
     
-    // Add hasImage flag
-    const startupsWithImageFlag = startups.map(startup => ({
-      ...startup.toObject(),
-      hasImage: !!(startup.image && startup.image.contentType)
-    }));
+    // Transform startups to include base64 encoded images
+    const startupsWithImages = startups.map(startup => {
+      const startupObj = startup.toObject();
+      
+      // Convert image buffer to base64 if image exists
+      if (startupObj.image && startupObj.image.data) {
+        return {
+          ...startupObj,
+          image: {
+            contentType: startupObj.image.contentType,
+            data: startupObj.image.data.toString('base64') // Convert buffer to base64
+          }
+        };
+      }
+      
+      // Return startup without image data if no image
+      return {
+        ...startupObj,
+        image: null
+      };
+    });
     
-    res.json({ startups: startupsWithImageFlag });
+    res.json({ startups: startupsWithImages });
   } catch (error) {
     console.error("Error fetching incubated startups:", error);
     res.status(500).json({ error: "Server error" });
