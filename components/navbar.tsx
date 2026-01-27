@@ -1,27 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "@/app/hooks/UseTheme";
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const { isDark, toggleTheme, mounted } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-
-  /* ---------------- THEME HANDLING ---------------- */
-  useEffect(() => {
-    setMounted(true);
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkMode);
-  }, []);
-
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-    setIsDark(prev => !prev);
-  };
 
   /* ---------------- NAVIGATION ---------------- */
   const navigateHome = () => {
@@ -76,33 +65,33 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
-            <NavButton 
-              onClick={navigateHome} 
-              label="Home" 
-              active={pathname === "/"} 
+            <NavButton
+              onClick={navigateHome}
+              label="Home"
+              active={pathname === "/"}
             />
-            <NavButton 
-              onClick={() => scrollToSection("programs")} 
+            <NavButton
+              onClick={() => scrollToSection("programs")}
               label="Programs"
               active={pathname.includes("#programs")}
             />
-            <NavButton 
-              onClick={navigateToStartup} 
-              label="Startups" 
-              active={pathname === "/startups"} 
+            <NavButton
+              onClick={navigateToStartup}
+              label="Startups"
+              active={pathname === "/startups"}
             />
-            <NavButton 
-              onClick={navigateToTeam} 
-              label="Our Team" 
-              active={pathname === "/Ourteam"} 
+            <NavButton
+              onClick={navigateToTeam}
+              label="Our Team"
+              active={pathname === "/Ourteam"}
             />
-            <NavButton 
-              onClick={navigateToJob} 
-              label="Jobs" 
-              active={pathname === "/job"} 
+            <NavButton
+              onClick={navigateToJob}
+              label="Jobs"
+              active={pathname === "/job"}
             />
-            <NavButton 
-              onClick={() => scrollToSection("contact")} 
+            <NavButton
+              onClick={() => scrollToSection("contact")}
               label="Contact Us"
               active={pathname.includes("#contact")}
             />
@@ -151,33 +140,33 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden pb-4 space-y-2 animate-slide-up">
-            <MobileButton 
-              onClick={navigateHome} 
+            <MobileButton
+              onClick={navigateHome}
               label="Home"
               active={pathname === "/"}
             />
-            <MobileButton 
-              onClick={() => scrollToSection("programs")} 
+            <MobileButton
+              onClick={() => scrollToSection("programs")}
               label="Programs"
               active={pathname.includes("#programs")}
             />
-            <MobileButton 
-              onClick={navigateToStartup} 
+            <MobileButton
+              onClick={navigateToStartup}
               label="Startups"
               active={pathname === "/startups"}
             />
-            <MobileButton 
-              onClick={navigateToTeam} 
+            <MobileButton
+              onClick={navigateToTeam}
               label="Our Team"
               active={pathname === "/Ourteam"}
             />
-            <MobileButton 
-              onClick={navigateToJob} 
+            <MobileButton
+              onClick={navigateToJob}
               label="Jobs"
               active={pathname === "/job"}
             />
-            <MobileButton 
-              onClick={() => scrollToSection("contact")} 
+            <MobileButton
+              onClick={() => scrollToSection("contact")}
               label="Contact Us"
               active={pathname.includes("#contact")}
             />
@@ -201,9 +190,8 @@ function NavButton({
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium relative group rounded-lg hover:bg-primary/5 ${
-        active ? "text-primary" : ""
-      }`}
+      className={`px-4 py-2 text-foreground hover:text-primary transition-all font-medium relative group rounded-lg hover:bg-primary/5 ${active ? "text-primary" : ""
+        }`}
     >
       {label}
       <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
@@ -224,9 +212,8 @@ function MobileButton({
   return (
     <button
       onClick={onClick}
-      className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary hover:shadow-md hover:shadow-primary/20 ${
-        active ? "bg-primary/5 text-primary" : ""
-      }`}
+      className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary hover:shadow-md hover:shadow-primary/20 ${active ? "bg-primary/5 text-primary" : ""
+        }`}
     >
       {label}
     </button>

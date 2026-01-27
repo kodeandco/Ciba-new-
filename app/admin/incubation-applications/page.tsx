@@ -238,10 +238,37 @@ export default function IncubationApplicationsDashboard() {
         setShowNotesModal(true);
     };
 
-    const viewPitchDeck = (id: string) => {
-        window.open(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, "_blank");
-    };
+    const viewPitchDeck = async (id: string) => {
+        try {
 
+
+            const res = await fetch(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                alert("Failed to load pitch deck");
+                return;
+            }
+
+            // Get the PDF as a blob
+            const blob = await res.blob();
+
+            // Create a URL for the blob
+            const url = window.URL.createObjectURL(blob);
+
+            // Open in new tab
+            window.open(url, '_blank');
+
+            // Clean up the URL after a short delay
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+        } catch (error) {
+            console.error("Error viewing pitch deck:", error);
+            alert("Failed to load pitch deck");
+        }
+    };
     const applicationColumns = [
         { header: "Startup Name", accessor: (app: Application) => app.startupName },
         { header: "Founder Name", accessor: (app: Application) => app.founderName },

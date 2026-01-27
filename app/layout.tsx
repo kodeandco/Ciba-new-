@@ -27,6 +27,7 @@ export default function RootLayout({
         className="font-sans antialiased"
         suppressHydrationWarning
       >
+        <ThemeToggle />
         {children}
         <Analytics />
       </body>
