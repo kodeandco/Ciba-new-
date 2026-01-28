@@ -20,11 +20,13 @@ export default function SectionTabs() {
   const [activeTab, setActiveTab] = useState('mentors')
 
   const tabs = [
-    { id: 'mentors', title: 'Mentorships', component: MentorsSection },
-    { id: 'assets', title: 'Assets', component: AssetsSection },
-    { id: 'partners', title: 'Growth Partners', component: PartnersSection },
-    { id: 'investment', title: 'Investment', component: InvestmentSection },
-    { id: 'coworking', title: 'Coworking', component: CoworkingSection }
+    { id: 'mentors', title: 'Mentors', component: MentorsSection },
+        { id: 'partners', title: 'Growth Partners', component: PartnersSection },
+            { id: 'investment', title: 'Investment', component: InvestmentSection },
+
+
+    { id: 'assets', title: 'ProtoLab', component: AssetsSection },
+    { id: 'coworking', title: 'WorkHub', component: CoworkingSection }
   ]
 
   const ActiveComponent =
