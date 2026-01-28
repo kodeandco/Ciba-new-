@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -129,7 +128,6 @@ export default function StartupClinicDashboard() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [addingToCalendar, setAddingToCalendar] = useState<string | null>(null);
     const [selectedMonth, setSelectedMonth] = useState<string>("all");
-    const [selectedWeek, setSelectedWeek] = useState<string>("all");
     const token = localStorage.getItem("admin-token");
     const months = [
         { value: "all", label: "All Months" },
@@ -153,7 +151,7 @@ export default function StartupClinicDashboard() {
 
     useEffect(() => {
         filterBookings();
-    }, [searchTerm, bookings, selectedMonth, selectedWeek]);
+    }, [searchTerm, bookings, selectedMonth]);
 
     const fetchBookings = async () => {
         try {
@@ -201,24 +199,6 @@ export default function StartupClinicDashboard() {
         }
     };
 
-    const getWeekNumber = (date: Date) => {
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-        return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-    };
-
-    const getCurrentWeekOptions = () => {
-        const options = [{ value: "all", label: "All Weeks" }];
-        const now = new Date();
-        const currentYear = now.getFullYear();
-
-        for (let i = 1; i <= 52; i++) {
-            options.push({ value: `${currentYear}-${i}`, label: `Week ${i}` });
-        }
-
-        return options;
-    };
-
     const filterBookings = () => {
         let filtered = bookings;
 
@@ -227,16 +207,6 @@ export default function StartupClinicDashboard() {
             filtered = filtered.filter((booking) => {
                 const bookingDate = new Date(booking.sessionDate);
                 return bookingDate.getMonth() === monthNum;
-            });
-        }
-
-        if (selectedWeek !== "all") {
-            const [year, week] = selectedWeek.split("-").map(Number);
-            filtered = filtered.filter((booking) => {
-                const bookingDate = new Date(booking.sessionDate);
-                const bookingYear = bookingDate.getFullYear();
-                const bookingWeek = getWeekNumber(bookingDate);
-                return bookingYear === year && bookingWeek === week;
             });
         }
 
@@ -250,15 +220,29 @@ export default function StartupClinicDashboard() {
             );
         }
 
+        // Sort by urgency: most upcoming meeting date first
         filtered.sort((a, b) => {
-            const dateA = new Date(a.sessionDate).getTime();
-            const dateB = new Date(b.sessionDate).getTime();
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
 
-            if (dateA === dateB) {
-                return a.slot.localeCompare(b.slot);
-            }
+            const dateA = new Date(a.sessionDate);
+            const dateB = new Date(b.sessionDate);
 
-            return dateA - dateB;
+            // Extract time from slot for more accurate comparison
+            const getSlotTime = (slot: string) => {
+                const match = slot.match(/(\d+):(\d+)/);
+                if (match) {
+                    return parseInt(match[1]) * 60 + parseInt(match[2]);
+                }
+                return 0;
+            };
+
+            // Combine date and time for accurate sorting
+            const dateTimeA = dateA.getTime() + (getSlotTime(a.slot) * 60000);
+            const dateTimeB = dateB.getTime() + (getSlotTime(b.slot) * 60000);
+
+            // Sort ascending (earliest/most urgent first)
+            return dateTimeA - dateTimeB;
         });
 
         setFilteredBookings(filtered);
@@ -426,30 +410,13 @@ export default function StartupClinicDashboard() {
                                     ))}
                                 </select>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Filter by Week
-                                </label>
-                                <select
-                                    value={selectedWeek}
-                                    onChange={(e) => setSelectedWeek(e.target.value)}
-                                    className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                                >
-                                    {getCurrentWeekOptions().map((week) => (
-                                        <option key={week.value} value={week.value}>
-                                            {week.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
                         </div>
 
-                        {(selectedMonth !== "all" || selectedWeek !== "all") && (
+                        {(selectedMonth !== "all") && (
                             <button
                                 onClick={() => {
                                     setSelectedMonth("all");
-                                    setSelectedWeek("all");
+
                                 }}
                                 className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors font-medium"
                             >

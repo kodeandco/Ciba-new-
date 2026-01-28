@@ -16,7 +16,7 @@ const StartupClinicSchema = new mongoose.Schema(
     question2: { type: String, required: true },
     question3: { type: String, required: true },
     
-    subscribeNewsletter: { type: Boolean, default: false },
+
   },
   { timestamps: true }
 );

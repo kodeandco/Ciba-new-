@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Rocket, Upload, CheckCircle2, Loader2, Send } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 export default function IncubationProgramApplication() {
     const [formSubmitted, setFormSubmitted] = useState(false);
@@ -160,319 +161,320 @@ export default function IncubationProgramApplication() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-12 px-4">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-4xl mx-auto"
-            >
-                <div className="text-center mb-8">
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                        className="inline-block mb-4"
-                    >
-                        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto">
-                            <Rocket className="w-10 h-10 text-white" />
-                        </div>
-                    </motion.div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                        Incubation Program Application
-                    </h1>
-                    <p className="text-gray-600">12 months | Scaling startups with traction</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="bg-white border-2 rounded-xl shadow-xl p-8 space-y-6">
-                    {/* Founder Information */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 border-b-2 border-blue-100 pb-2">
-                            Founder Information
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Lead Founder Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.founderName}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, founderName: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Co-Founders (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Names separated by commas"
-                                    value={formData.coFounders}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, coFounders: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Email *
-                                </label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, email: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Phone Number *
-                                </label>
-                                <input
-                                    type="tel"
-                                    required
-                                    value={formData.phone}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, phone: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Startup Info */}
-                    <div className="space-y-4 pt-4">
-                        <h3 className="text-lg font-semibold text-gray-900 border-b-2 border-blue-100 pb-2">
-                            Startup Information
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Startup Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.startupName}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, startupName: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Industry / Sector *
-                                </label>
-                                <select
-                                    required
-                                    value={formData.industry}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, industry: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                >
-                                    <option value="">Select Industry</option>
-                                    <option value="Fintech">Fintech</option>
-                                    <option value="Healthcare">Healthcare</option>
-                                    <option value="EdTech">EdTech</option>
-                                    <option value="E-commerce">E-commerce</option>
-                                    <option value="SaaS">SaaS</option>
-                                    <option value="AI/ML">AI/ML</option>
-                                    <option value="AgriTech">AgriTech</option>
-                                    <option value="Clean Energy">Clean Energy</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Current Stage *
-                                </label>
-                                <select
-                                    required
-                                    value={formData.stage}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, stage: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                >
-                                    <option value="">Select Stage</option>
-                                    <option value="MVP Ready">MVP Ready</option>
-                                    <option value="Early Revenue">Early Revenue</option>
-                                    <option value="Growth Stage">Growth Stage</option>
-                                    <option value="Scaling">Scaling</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Team Size *
-                                </label>
-                                <select
-                                    required
-                                    value={formData.teamSize}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, teamSize: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                >
-                                    <option value="">Select Team Size</option>
-                                    <option value="1-5">1-5 members</option>
-                                    <option value="6-10">6-10 members</option>
-                                    <option value="11-20">11-20 members</option>
-                                    <option value="20+">20+ members</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Funding Raised So Far *
-                                </label>
-                                <select
-                                    required
-                                    value={formData.fundingRaised}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, fundingRaised: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                >
-                                    <option value="">Select Amount</option>
-                                    <option value="Bootstrapped">Bootstrapped (₹0)</option>
-                                    <option value="<10L">Less than ₹10 Lakhs</option>
-                                    <option value="10L-50L">₹10 Lakhs - ₹50 Lakhs</option>
-                                    <option value="50L-1Cr">₹50 Lakhs - ₹1 Crore</option>
-                                    <option value=">1Cr">More than ₹1 Crore</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Monthly Revenue *
-                                </label>
-                                <select
-                                    required
-                                    value={formData.revenue}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, revenue: e.target.value })
-                                    }
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                >
-                                    <option value="">Select Revenue</option>
-                                    <option value="Pre-revenue">Pre-revenue (₹0)</option>
-                                    <option value="<1L">Less than ₹1 Lakh</option>
-                                    <option value="1L-5L">₹1 Lakh - ₹5 Lakhs</option>
-                                    <option value="5L-10L">₹5 Lakhs - ₹10 Lakhs</option>
-                                    <option value=">10L">More than ₹10 Lakhs</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Website / App Link *
-                            </label>
-                            <input
-                                type="url"
-                                required
-                                placeholder="https://yourwebsite.com"
-                                value={formData.website}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, website: e.target.value })
-                                }
-                                className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Describe Your Startup, Traction & Growth Strategy *
-                            </label>
-                            <textarea
-                                required
-                                rows={5}
-                                value={formData.description}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, description: e.target.value })
-                                }
-                                className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                                placeholder="Tell us about your startup, current traction (users/customers), key challenges, and why you're seeking incubation..."
-                            />
-                        </div>
-
-                        {/* Pitch Deck Upload */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Pitch Deck (PDF) *
-                            </label>
-                            <label
-                                htmlFor="pitchDeck"
-                                className="flex items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-lg appearance-none cursor-pointer hover:border-blue-500 focus:outline-none"
-                            >
-                                <span className="flex items-center space-x-2">
-                                    <Upload className="w-6 h-6 text-gray-600" />
-                                    <span className="font-medium text-gray-600">
-                                        {formData.pitchDeck
-                                            ? `✓ ${formData.pitchDeck.name}`
-                                            : "Click to upload pitch deck (PDF, max 10MB)"}
-                                    </span>
-                                </span>
-                                <input
-                                    id="pitchDeck"
-                                    type="file"
-                                    accept=".pdf"
-                                    required
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                            </label>
-                            {formData.pitchDeck && (
-                                <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                    File selected: {formData.pitchDeck.name} ({(formData.pitchDeck.size / 1024 / 1024).toFixed(2)} MB)
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="text-center pt-6">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="px-8 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-all hover:scale-105 shadow-lg"
+        <>
+            <Navbar />
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-12 px-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="text-center mb-8">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                            className="inline-block mb-4"
                         >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin mr-2" /> Submitting Application...
-                                </>
-                            ) : (
-                                <>
-                                    <Send className="w-5 h-5 mr-2" /> Submit Application
-                                </>
-                            )}
-                        </button>
-                        <p className="text-xs text-gray-500 mt-3">
-                            By submitting, you agree to our terms and conditions
-                        </p>
+
+                        </motion.div>
+                        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                            Incubation Program Application
+                        </h1>
+                        <p className="text-gray-600">24 months | Scaling startups with traction</p>
                     </div>
-                </form>
-            </motion.div>
-        </div>
+
+                    <form onSubmit={handleSubmit} className="bg-white border-2 rounded-xl shadow-xl p-8 space-y-6">
+                        {/* Founder Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-900 border-b-2 border-blue-100 pb-2">
+                                Founder Information
+                            </h3>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Lead Founder Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.founderName}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, founderName: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Co-Founders (Optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Names separated by commas"
+                                        value={formData.coFounders}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, coFounders: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Email *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={formData.email}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, email: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Phone Number *
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        required
+                                        value={formData.phone}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, phone: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Startup Info */}
+                        <div className="space-y-4 pt-4">
+                            <h3 className="text-lg font-semibold text-gray-900 border-b-2 border-blue-100 pb-2">
+                                Startup Information
+                            </h3>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Startup Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.startupName}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, startupName: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Industry / Sector *
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.industry}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, industry: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Industry</option>
+                                        <option value="Fintech">Fintech</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="EdTech">EdTech</option>
+                                        <option value="E-commerce">E-commerce</option>
+                                        <option value="SaaS">SaaS</option>
+                                        <option value="AI/ML">AI/ML</option>
+                                        <option value="AgriTech">AgriTech</option>
+                                        <option value="Clean Energy">Clean Energy</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Current Stage *
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.stage}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, stage: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Stage</option>
+                                        <option value="MVP Ready">MVP Ready</option>
+                                        <option value="Early Revenue">Early Revenue</option>
+                                        <option value="Growth Stage">Growth Stage</option>
+                                        <option value="Scaling">Scaling</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Team Size *
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.teamSize}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, teamSize: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Team Size</option>
+                                        <option value="1-5">1-5 members</option>
+                                        <option value="6-10">6-10 members</option>
+                                        <option value="11-20">11-20 members</option>
+                                        <option value="20+">20+ members</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Funding Raised So Far *
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.fundingRaised}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, fundingRaised: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Amount</option>
+                                        <option value="Bootstrapped">Bootstrapped (₹0)</option>
+                                        <option value="<10L">Less than ₹10 Lakhs</option>
+                                        <option value="10L-50L">₹10 Lakhs - ₹50 Lakhs</option>
+                                        <option value="50L-1Cr">₹50 Lakhs - ₹1 Crore</option>
+                                        <option value=">1Cr">More than ₹1 Crore</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Monthly Revenue *
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.revenue}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, revenue: e.target.value })
+                                        }
+                                        className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Revenue</option>
+                                        <option value="Pre-revenue">Pre-revenue (₹0)</option>
+                                        <option value="<1L">Less than ₹1 Lakh</option>
+                                        <option value="1L-5L">₹1 Lakh - ₹5 Lakhs</option>
+                                        <option value="5L-10L">₹5 Lakhs - ₹10 Lakhs</option>
+                                        <option value=">10L">More than ₹10 Lakhs</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Website / App Link *
+                                </label>
+                                <input
+                                    type="url"
+                                    required
+                                    placeholder="https://yourwebsite.com"
+                                    value={formData.website}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, website: e.target.value })
+                                    }
+                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Describe Your Startup, Traction & Growth Strategy *
+                                </label>
+                                <textarea
+                                    required
+                                    rows={5}
+                                    value={formData.description}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, description: e.target.value })
+                                    }
+                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    placeholder="Tell us about your startup, current traction (users/customers), key challenges, and why you're seeking incubation..."
+                                />
+                            </div>
+
+                            {/* Pitch Deck Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Pitch Deck (PDF) *
+                                </label>
+                                <label
+                                    htmlFor="pitchDeck"
+                                    className="flex items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-lg appearance-none cursor-pointer hover:border-blue-500 focus:outline-none"
+                                >
+                                    <span className="flex items-center space-x-2">
+                                        <Upload className="w-6 h-6 text-gray-600" />
+                                        <span className="font-medium text-gray-600">
+                                            {formData.pitchDeck
+                                                ? `✓ ${formData.pitchDeck.name}`
+                                                : "Click to upload pitch deck (PDF, max 10MB)"}
+                                        </span>
+                                    </span>
+                                    <input
+                                        id="pitchDeck"
+                                        type="file"
+                                        accept=".pdf"
+                                        required
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                                {formData.pitchDeck && (
+                                    <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        File selected: {formData.pitchDeck.name} ({(formData.pitchDeck.size / 1024 / 1024).toFixed(2)} MB)
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="text-center pt-6">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-8 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-all hover:scale-105 shadow-lg"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Submitting Application...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="w-5 h-5 mr-2" /> Submit Application
+                                    </>
+                                )}
+                            </button>
+                            <p className="text-xs text-gray-500 mt-3">
+                                By submitting, you agree to our terms and conditions
+                            </p>
+                        </div>
+                    </form>
+                </motion.div>
+            </div>
+        </>
     );
 }
