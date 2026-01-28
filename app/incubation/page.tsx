@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Rocket, Upload, CheckCircle2, Loader2, Send } from "lucide-react";
 import Navbar from "@/components/navbar";
+import FloatingWhatsApp from "@/components/FloatingWhatsapp";
 
 export default function IncubationProgramApplication() {
     const [formSubmitted, setFormSubmitted] = useState(false);
@@ -108,55 +109,58 @@ export default function IncubationProgramApplication() {
 
     if (formSubmitted) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center py-12 px-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    className="max-w-2xl w-full text-center p-12 border-2 border-blue-500 shadow-xl rounded-xl bg-white"
-                >
+            <>
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center py-12 px-4">
                     <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                            delay: 0.2,
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 15,
-                        }}
-                        className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                        className="max-w-2xl w-full text-center p-12 border-2 border-blue-500 shadow-xl rounded-xl bg-white"
                     >
-                        <CheckCircle2 className="w-16 h-16 text-white" />
-                    </motion.div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                        Application Received!
-                    </h2>
-                    <p className="text-gray-600 mb-6">
-                        Thank you for applying to the CIBA Incubation Program. Our
-                        selection committee will review your application and pitch deck.
-                        We'll contact you within 10 business days for the next steps.
-                    </p>
-                    <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                        <p className="text-sm text-gray-700">
-                            Confirmation email sent to <strong>{formData.email}</strong>
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{
+                                delay: 0.2,
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 15,
+                            }}
+                            className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6"
+                        >
+                            <CheckCircle2 className="w-16 h-16 text-white" />
+                        </motion.div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                            Application Received!
+                        </h2>
+                        <p className="text-gray-600 mb-6">
+                            Thank you for applying to the CIBA Incubation Program. Our
+                            selection committee will review your application and pitch deck.
+                            We'll contact you within 10 business days for the next steps.
                         </p>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="px-6 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all"
-                        >
-                            Submit Another Application
-                        </button>
-                        <button
-                            onClick={() => (window.location.href = "/")}
-                            className="px-6 py-3 rounded-lg text-blue-700 font-medium bg-blue-100 hover:bg-blue-200 transition-all"
-                        >
-                            Back to Home
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
+                        <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                            <p className="text-sm text-gray-700">
+                                Confirmation email sent to <strong>{formData.email}</strong>
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-6 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all"
+                            >
+                                Submit Another Application
+                            </button>
+                            <button
+                                onClick={() => (window.location.href = "/")}
+                                className="px-6 py-3 rounded-lg text-blue-700 font-medium bg-blue-100 hover:bg-blue-200 transition-all"
+                            >
+                                Back to Home
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+                <FloatingWhatsApp />
+            </>
         );
     }
 
@@ -475,6 +479,7 @@ export default function IncubationProgramApplication() {
                     </form>
                 </motion.div>
             </div>
+            <FloatingWhatsApp />
         </>
     );
 }

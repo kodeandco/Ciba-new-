@@ -21,7 +21,7 @@ export default function FloatingWhatsApp() {
 
   return (
     <>
-      {/* Tooltip */}
+      {/* Tooltip
       {showTooltip && (
         <div className="fixed bottom-24 right-4 z-50 animate-bounce">
           <div className="bg-[#25D366] text-white text-xs px-3 py-2 rounded-lg shadow-lg relative">
@@ -39,13 +39,13 @@ export default function FloatingWhatsApp() {
       )}
 
       {/* Close Button */}
-      <button
+      {/* <button
         onClick={() => setIsVisible(false)}
         className="fixed bottom-20 right-20 z-50 bg-gray-800 text-white p-1.5 rounded-full shadow-lg hover:bg-gray-700 hover:scale-110 transition-all"
         aria-label="Hide WhatsApp button"
       >
         <X className="w-3.5 h-3.5" />
-      </button>
+      </button> */}
 
       {/* WhatsApp Button */}
       <button

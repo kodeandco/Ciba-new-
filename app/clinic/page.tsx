@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, Calendar, Send, Loader2, ChevronLeft, ChevronRight, XCircle, AlertCircle } from "lucide-react";
 import Navbar from "@/components/navbar";
+import FloatingWhatsApp from "@/components/FloatingWhatsapp";
 
 interface FormData {
     name: string;
@@ -485,6 +486,7 @@ export default function StartupClinicBooking() {
                     </div>
                 </div>
             </div>
+            <FloatingWhatsApp />
         </>
     );
 }
