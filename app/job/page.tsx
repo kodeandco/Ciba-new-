@@ -30,7 +30,8 @@ export default function JobPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-subtle py-20 px-4">
+      {/* FIXED: Changed from bg-gradient-subtle to bg-background to respect dark mode */}
+      <div className="min-h-screen bg-background py-20 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <motion.div
