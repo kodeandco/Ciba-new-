@@ -1,29 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  /* ---------------- THEME HANDLING ---------------- */
-  useEffect(() => {
-    setMounted(true);
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkMode);
-  }, []);
-
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-    setIsDark(prev => !prev);
-  };
-
-  /* ---------------- NAVIGATION ---------------- */
   const navigateHome = () => {
     if (pathname === "/") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -57,12 +42,10 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
-  /* ---------------- JSX ---------------- */
   return (
     <nav className="fixed top-0 w-full bg-background/90 backdrop-blur-md z-50 border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <button
             onClick={navigateHome}
             className="flex items-center gap-3 group hover:opacity-80 transition-opacity"
@@ -74,73 +57,19 @@ export default function Navbar() {
             />
           </button>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
-            <NavButton 
-              onClick={navigateHome} 
-              label="Home" 
-              active={pathname === "/"} 
-            />
-            <NavButton 
-              onClick={() => scrollToSection("programs")} 
-              label="Programs"
-              active={pathname.includes("#programs")}
-            />
-            <NavButton 
-              onClick={navigateToStartup} 
-              label="Startups" 
-              active={pathname === "/startups"} 
-            />
-            <NavButton 
-              onClick={navigateToTeam} 
-              label="Our Team" 
-              active={pathname === "/Ourteam"} 
-            />
-            <NavButton 
-              onClick={navigateToJob} 
-              label="Jobs" 
-              active={pathname === "/job"} 
-            />
-            <NavButton 
-              onClick={() => scrollToSection("contact")} 
-              label="Contact Us"
-              active={pathname.includes("#contact")}
-            />
-
-            {/* Theme Toggle */}
-            {mounted && (
-              <button
-                onClick={toggleTheme}
-                className="ml-3 p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition-all hover:scale-110"
-                aria-label="Toggle theme"
-              >
-                {isDark ? (
-                  <Sun className="w-5 h-5 text-yellow-500" />
-                ) : (
-                  <Moon className="w-5 h-5 text-foreground" />
-                )}
-              </button>
-            )}
+            <NavButton onClick={navigateHome} label="Home" active={pathname === "/"} />
+            <NavButton onClick={() => scrollToSection("programs")} label="Programs" active={pathname.includes("#programs")} />
+            <NavButton onClick={navigateToStartup} label="Startups" active={pathname === "/startups"} />
+            <NavButton onClick={navigateToTeam} label="Our Team" active={pathname === "/Ourteam"} />
+            <NavButton onClick={navigateToJob} label="Jobs" active={pathname === "/job"} />
+            <NavButton onClick={() => scrollToSection("contact")} label="Contact Us" active={pathname.includes("#contact")} />
           </div>
 
-          {/* Mobile Controls */}
-          <div className="md:hidden flex items-center space-x-2">
-            {mounted && (
-              <button
-                onClick={toggleTheme}
-                className="p-2 hover:bg-muted rounded-lg transition-all"
-                aria-label="Toggle theme"
-              >
-                {isDark ? (
-                  <Sun className="w-5 h-5 text-yellow-500" />
-                ) : (
-                  <Moon className="w-5 h-5 text-foreground" />
-                )}
-              </button>
-            )}
+          <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 hover:bg-primary/10 rounded-lg transition-all hover:shadow-md hover:shadow-primary/20"
+              className="p-2 hover:bg-primary/10 rounded-lg transition-all"
               aria-label="Toggle menu"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -148,39 +77,14 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden pb-4 space-y-2 animate-slide-up">
-            <MobileButton 
-              onClick={navigateHome} 
-              label="Home"
-              active={pathname === "/"}
-            />
-            <MobileButton 
-              onClick={() => scrollToSection("programs")} 
-              label="Programs"
-              active={pathname.includes("#programs")}
-            />
-            <MobileButton 
-              onClick={navigateToStartup} 
-              label="Startups"
-              active={pathname === "/startups"}
-            />
-            <MobileButton 
-              onClick={navigateToTeam} 
-              label="Our Team"
-              active={pathname === "/Ourteam"}
-            />
-            <MobileButton 
-              onClick={navigateToJob} 
-              label="Jobs"
-              active={pathname === "/job"}
-            />
-            <MobileButton 
-              onClick={() => scrollToSection("contact")} 
-              label="Contact Us"
-              active={pathname.includes("#contact")}
-            />
+            <MobileButton onClick={navigateHome} label="Home" active={pathname === "/"} />
+            <MobileButton onClick={() => scrollToSection("programs")} label="Programs" active={pathname.includes("#programs")} />
+            <MobileButton onClick={navigateToStartup} label="Startups" active={pathname === "/startups"} />
+            <MobileButton onClick={navigateToTeam} label="Our Team" active={pathname === "/Ourteam"} />
+            <MobileButton onClick={navigateToJob} label="Jobs" active={pathname === "/job"} />
+            <MobileButton onClick={() => scrollToSection("contact")} label="Contact Us" active={pathname.includes("#contact")} />
           </div>
         )}
       </div>
@@ -188,16 +92,7 @@ export default function Navbar() {
   );
 }
 
-/* ---------------- REUSABLE BUTTONS ---------------- */
-function NavButton({
-  label,
-  onClick,
-  active = false,
-}: {
-  label: string;
-  onClick: () => void;
-  active?: boolean;
-}) {
+function NavButton({ label, onClick, active = false }: { label: string; onClick: () => void; active?: boolean }) {
   return (
     <button
       onClick={onClick}
@@ -212,19 +107,11 @@ function NavButton({
   );
 }
 
-function MobileButton({
-  label,
-  onClick,
-  active = false,
-}: {
-  label: string;
-  onClick: () => void;
-  active?: boolean;
-}) {
+function MobileButton({ label, onClick, active = false }: { label: string; onClick: () => void; active?: boolean }) {
   return (
     <button
       onClick={onClick}
-      className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary hover:shadow-md hover:shadow-primary/20 ${
+      className={`block w-full text-left px-4 py-3 text-foreground hover:bg-primary/10 rounded-lg transition-all hover:text-primary ${
         active ? "bg-primary/5 text-primary" : ""
       }`}
     >

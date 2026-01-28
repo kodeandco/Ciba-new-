@@ -97,10 +97,10 @@ export default function AdminNavbar() {
     setIsDropdownOpen(false);
   };
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
-  };
+  // const toggleTheme = () => {
+  //   setIsDark(!isDark);
+  //   document.documentElement.classList.toggle('dark');
+  // };
 
   const handleLogout = () => {
     // 1️⃣ Remove everything first
@@ -207,7 +207,7 @@ export default function AdminNavbar() {
             </div>
 
             {/* Theme Toggle Button */}
-            <button
+            {/* <button
               onClick={toggleTheme}
               className="ml-2 p-2 rounded-lg hover:bg-primary/10 transition-all"
               aria-label="Toggle theme"
@@ -217,7 +217,7 @@ export default function AdminNavbar() {
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
               )}
-            </button>
+            </button> */}
 
             {/* Logout Button */}
             <button
@@ -232,7 +232,7 @@ export default function AdminNavbar() {
           {/* Mobile Right Section */}
           <div className="lg:hidden flex items-center gap-2">
             {/* Theme Toggle Button - Mobile */}
-            <button
+            {/* <button
               onClick={toggleTheme}
               className="p-2 hover:bg-primary/10 rounded-lg transition-all"
               aria-label="Toggle theme"
@@ -242,7 +242,7 @@ export default function AdminNavbar() {
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
               )}
-            </button>
+            </button> */}
 
             {/* Menu Toggle */}
             <button

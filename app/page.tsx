@@ -40,9 +40,7 @@ export default function Home() {
             <Testimonials />
           </AnimatedSection>
         </section>
- <AnimatedSection direction="left" delay={0.1}>
-            <StartupsSection />
-          </AnimatedSection>
+
         <section id="tour" className="overflow-x-hidden">
           <TourSection />
         </section>

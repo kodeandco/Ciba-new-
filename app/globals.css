@@ -3,43 +3,45 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ONLY DARK MODE - Remove all light mode variables */
 :root {
-  /* Updated color scheme from orange/red to blue theme matching CIBA logo */
-  --background: oklch(97.923% 0.01042 220.071);
-  --foreground: oklch(0.15 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 250);
-  --primary: oklch(0.55 0.25 260);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.65 0.2 250);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.92 0.01 70);
-  --muted-foreground: oklch(0.5 0.05 250);
-  --accent: oklch(0.6 0.22 260);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.55 0.25 260);
-  --chart-2: oklch(0.6 0.22 250);
-  --chart-3: oklch(0.65 0.2 240);
-  --chart-4: oklch(0.5 0.25 270);
-  --chart-5: oklch(0.58 0.23 255);
+  /* Dark mode colors ONLY */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.65 0.25 260);
+  --primary-foreground: oklch(0.15 0.02 250);
+  --secondary: oklch(0.7 0.2 250);
+  --secondary-foreground: oklch(0.15 0.02 250);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.7 0.22 260);
+  --accent-foreground: oklch(0.15 0.02 250);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.65 0.25 260);
+  --chart-2: oklch(0.7 0.2 250);
+  --chart-3: oklch(0.75 0.18 240);
+  --chart-4: oklch(0.6 0.25 270);
+  --chart-5: oklch(0.68 0.23 255);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.55 0.25 260);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.65 0.25 260);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Keep .dark for compatibility but it's the same as :root now */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -76,7 +78,6 @@
 }
 
 @theme inline {
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -119,6 +120,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    background-color: #252525;
+    color-scheme: dark;
+  }
+  
   body {
     @apply bg-background text-foreground;
   }
