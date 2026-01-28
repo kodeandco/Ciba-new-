@@ -99,7 +99,7 @@ router.post("/", async (req, res) => {
       question1,
       question2,
       question3,
-      subscribeNewsletter,
+     
     } = req.body;
 
     if (!name || !email || !phone || !slot || !sessionDate) {
@@ -158,7 +158,7 @@ router.post("/", async (req, res) => {
       question1,
       question2,
       question3,
-      subscribeNewsletter,
+      
     });
 
     await newBooking.save();
@@ -239,7 +239,7 @@ router.post("/", async (req, res) => {
         <p><strong>Name:</strong> ${userName}</p>
         <p><strong>Email:</strong> ${userEmail}</p>
         <p><strong>Phone:</strong> ${userPhone}</p>
-        <p><strong>Newsletter Subscription:</strong> ${subscribeNewsletter ? "Yes" : "No"}</p>
+  
 
         <h3>Questions Submitted:</h3>
         <p><strong>Question 1:</strong> ${question1}</p>

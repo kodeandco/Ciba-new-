@@ -70,12 +70,9 @@ export default function IncubationApplicationsDashboard() {
     const [creatingSheet, setCreatingSheet] = useState(false);
     const [sheetUrl, setSheetUrl] = useState<string | null>(null);
     const token = localStorage.getItem("admin-token");
-    // const headers = {
-    //     'Authorization': `Bearer ${token}`
-    // }
+
     useEffect(() => {
         fetchApplications();
-
     }, []);
 
     useEffect(() => {
@@ -102,19 +99,6 @@ export default function IncubationApplicationsDashboard() {
         }
     };
 
-    // const fetchSheetInfo = async () => {
-    //     try {
-    //         const res = await fetch("http://localhost:5000/api/incubation/sheets/info");
-    //         const data = await res.json();
-
-    //         if (data.success) {
-    //             setSheetUrl(data.spreadsheetUrl);
-    //         }
-    //     } catch (error) {
-    //         console.log("No sheet configured yet");
-    //     }
-    // };
-
     const filterApplications = () => {
         let filtered = applications;
 
@@ -139,6 +123,13 @@ export default function IncubationApplicationsDashboard() {
                     app.industry.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
+
+        // Sort by urgency: most recent applications first (descending order)
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA; // Most recent first
+        });
 
         setFilteredApplications(filtered);
     };
@@ -240,8 +231,6 @@ export default function IncubationApplicationsDashboard() {
 
     const viewPitchDeck = async (id: string) => {
         try {
-
-
             const res = await fetch(`http://localhost:5000/api/incubation/${id}/pitch-deck/view`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -269,6 +258,7 @@ export default function IncubationApplicationsDashboard() {
             alert("Failed to load pitch deck");
         }
     };
+
     const applicationColumns = [
         { header: "Startup Name", accessor: (app: Application) => app.startupName },
         { header: "Founder Name", accessor: (app: Application) => app.founderName },

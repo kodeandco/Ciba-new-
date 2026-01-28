@@ -177,7 +177,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={loading}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
@@ -193,7 +193,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={loading}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
