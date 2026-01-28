@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { ChevronLeft, ChevronRight, Info, Maximize, Moon, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Maximize } from 'lucide-react';
 
 interface Hotspot {
   position: [number, number, number];
@@ -10,7 +10,9 @@ interface Hotspot {
 
 interface Scene {
   name: string;
-  image: string;
+  color1: string;
+  color2: string;
+  color3: string;
   hotspots: Hotspot[];
 }
 
@@ -27,7 +29,6 @@ export default function PanoramaTour() {
   const [currentScene, setCurrentScene] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [isDark, setIsDark] = useState<boolean>(false);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -35,40 +36,115 @@ export default function PanoramaTour() {
   const hotspotRefs = useRef<THREE.Mesh[]>([]);
   const animationFrameRef = useRef<number | null>(null);
 
+  // Scenes with color schemes for procedural generation
   const scenes: Scene[] = [
     {
-      name: "Living Room",
-      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=2048&h=1024&fit=crop",
+      name: "Main Workspace",
+      color1: '#1e3a8a',
+      color2: '#3b82f6',
+      color3: '#60a5fa',
       hotspots: [
-        { position: [5, 0, -3], nextScene: 1, label: "Go to Kitchen" }
+        { position: [5, 0, -3], nextScene: 1, label: "Go to Meeting Rooms" }
       ]
     },
     {
-      name: "Kitchen",
-      image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=2048&h=1024&fit=crop",
+      name: "Meeting Rooms",
+      color1: '#7c3aed',
+      color2: '#a78bfa',
+      color3: '#c4b5fd',
       hotspots: [
-        { position: [-5, 0, 3], nextScene: 0, label: "Back to Living Room" },
-        { position: [5, 0, 2], nextScene: 2, label: "Go to Bedroom" }
+        { position: [-5, 0, 3], nextScene: 0, label: "Back to Main Workspace" },
+        { position: [5, 0, 2], nextScene: 2, label: "Go to Innovation Lab" }
       ]
     },
     {
-      name: "Bedroom",
-      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=2048&h=1024&fit=crop",
+      name: "Innovation Lab",
+      color1: '#059669',
+      color2: '#10b981',
+      color3: '#6ee7b7',
       hotspots: [
-        { position: [-5, 0, -2], nextScene: 1, label: "Back to Kitchen" }
+        { position: [-5, 0, -2], nextScene: 1, label: "Back to Meeting Rooms" },
+        { position: [3, 0, -5], nextScene: 3, label: "Go to Lounge Area" }
+      ]
+    },
+    {
+      name: "Lounge Area",
+      color1: '#dc2626',
+      color2: '#f97316',
+      color3: '#fbbf24',
+      hotspots: [
+        { position: [5, 0, 3], nextScene: 2, label: "Back to Innovation Lab" },
+        { position: [-5, 0, -3], nextScene: 0, label: "Go to Main Workspace" }
       ]
     }
   ];
 
-  // Theme toggle
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+  // Generate a procedural 360° panorama texture
+  const generatePanoramaTexture = (scene: Scene): THREE.Texture => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('Could not get canvas context');
     }
-  }, [isDark]);
+
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, scene.color1);
+    gradient.addColorStop(0.5, scene.color2);
+    gradient.addColorStop(1, scene.color3);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add some visual interest - grid pattern
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 2;
+
+    // Vertical lines
+    for (let x = 0; x < canvas.width; x += 100) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    // Horizontal lines
+    for (let y = 0; y < canvas.height; y += 100) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    // Add scene name text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = 'bold 72px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(scene.name, canvas.width / 2, canvas.height / 2);
+
+    // Add subtitle
+    ctx.font = '36px Arial';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText('CIBA WorkHub - 360° Tour', canvas.width / 2, canvas.height / 2 + 80);
+
+    // Add decorative elements - dots
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    for (let i = 0; i < 50; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const radius = Math.random() * 5 + 2;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  };
 
   // Detect mobile device
   useEffect(() => {
@@ -97,8 +173,9 @@ export default function PanoramaTour() {
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true
+      alpha: false
     });
+    renderer.setClearColor(0x000000, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
     containerRef.current.appendChild(renderer.domElement);
@@ -258,6 +335,7 @@ export default function PanoramaTour() {
     setIsLoading(true);
     const scene = sceneRef.current;
 
+    // Clean up previous scene
     while (scene.children.length > 0) {
       const child = scene.children[0];
       scene.remove(child);
@@ -270,47 +348,42 @@ export default function PanoramaTour() {
     }
     hotspotRefs.current = [];
 
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(
-      scenes[currentScene].image,
-      (texture) => {
-        const geometry = new THREE.SphereGeometry(500, 60, 40);
-        geometry.scale(-1, 1, 1);
+    // Generate panorama texture
+    const texture = generatePanoramaTexture(scenes[currentScene]);
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+    // Create sphere geometry
+    const geometry = new THREE.SphereGeometry(500, 60, 40);
+    geometry.scale(-1, 1, 1);
 
-        scenes[currentScene].hotspots.forEach((hotspot) => {
-          const hotspotSize = isMobile ? 0.5 : 0.3;
-          const hotspotGeometry = new THREE.SphereGeometry(hotspotSize, 16, 16);
-          const hotspotMaterial = new THREE.MeshBasicMaterial({
-            color: 0x0066cc,
-            transparent: true,
-            opacity: 0.8
-          });
-          const hotspotMesh = new THREE.Mesh(hotspotGeometry, hotspotMaterial);
-          hotspotMesh.position.set(...hotspot.position);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
 
-          hotspotMesh.userData = {
-            scale: 1,
-            growing: true,
-            nextScene: hotspot.nextScene
-          };
+    // Add hotspots
+    scenes[currentScene].hotspots.forEach((hotspot) => {
+      const hotspotSize = isMobile ? 0.6 : 0.4;
+      const hotspotGeometry = new THREE.SphereGeometry(hotspotSize, 16, 16);
+      const hotspotMaterial = new THREE.MeshBasicMaterial({
+        color: 0x8b5cf6,
+        transparent: true,
+        opacity: 0.85
+      });
+      const hotspotMesh = new THREE.Mesh(hotspotGeometry, hotspotMaterial);
+      hotspotMesh.position.set(...hotspot.position);
 
-          scene.add(hotspotMesh);
-          hotspotRefs.current.push(hotspotMesh);
-        });
+      hotspotMesh.userData = {
+        scale: 1,
+        growing: true,
+        nextScene: hotspot.nextScene
+      };
 
-        setIsLoading(false);
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading texture:', error);
-        setIsLoading(false);
-      }
-    );
+      scene.add(hotspotMesh);
+      hotspotRefs.current.push(hotspotMesh);
+    });
 
+    setIsLoading(false);
+
+    // Animate hotspots
     let animationId: number;
     const animateHotspots = () => {
       hotspotRefs.current.forEach((hotspot) => {
@@ -327,6 +400,7 @@ export default function PanoramaTour() {
     };
     animateHotspots();
 
+    // Reset camera rotation
     if (cameraRef.current) {
       cameraRef.current.rotation.set(0, 0, 0);
     }
@@ -337,81 +411,74 @@ export default function PanoramaTour() {
   }, [currentScene, isMobile]);
 
   return (
-    <div className="w-full h-screen overflow-hidden relative" style={{ background: 'transparent' }}>
-      <div ref={containerRef} className="w-full h-full cursor-grab" />
+    <div className="w-full h-screen overflow-hidden relative bg-black">
+      <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-50 animate-fade-in">
-          <div className="text-white text-xl font-medium">
-            Loading {scenes[currentScene].name}...
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-50 animate-fade-in">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <div className="text-foreground text-base sm:text-xl font-medium px-4 text-center">
+              Loading {scenes[currentScene].name}...
+            </div>
           </div>
         </div>
       )}
 
-      {/* Theme Toggle */}
-      <button
-        onClick={() => setIsDark(!isDark)}
-        className="absolute top-4 right-4 p-3 bg-card/80 backdrop-blur-sm rounded-full border border-border hover:bg-card transition-all z-20 hover-lift"
-        aria-label="Toggle theme"
-      >
-        {isDark ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
-      </button>
-
       {/* Scene Info */}
-      <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm text-card-foreground p-4 rounded-lg shadow-xl max-w-xs z-10 border border-border animate-slide-in-left">
-        <h2 className="text-lg font-bold mb-1 text-primary">
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-card/90 backdrop-blur-md text-card-foreground p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-lg max-w-[90%] sm:max-w-xs z-10 border border-border animate-slide-in-left">
+        <h2 className="text-base sm:text-lg font-bold mb-1 text-primary">
           {scenes[currentScene].name}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          {isMobile ? 'Swipe to look • Tap blue spheres' : 'Drag to look around • Click blue spheres to move'}
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          {isMobile ? 'Swipe to explore • Tap purple spheres' : 'Drag to look around • Click purple spheres to move'}
         </p>
       </div>
 
       {/* Navigation buttons */}
-      <div className="absolute bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+      <div className="absolute bottom-20 sm:bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-10">
         <button
           onClick={() => setCurrentScene((prev) => (prev - 1 + scenes.length) % scenes.length)}
-          className="p-3 bg-primary/80 backdrop-blur-sm text-primary-foreground rounded-full border border-primary hover:bg-primary transition-all hover-lift"
+          className="p-2 sm:p-3 bg-primary/90 backdrop-blur-sm text-primary-foreground rounded-full border border-primary/50 hover:bg-primary transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95"
           aria-label="Previous scene"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={isMobile ? 20 : 24} />
         </button>
         <button
           onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)}
-          className="p-3 bg-primary/80 backdrop-blur-sm text-primary-foreground rounded-full border border-primary hover:bg-primary transition-all hover-lift"
+          className="p-2 sm:p-3 bg-primary/90 backdrop-blur-sm text-primary-foreground rounded-full border border-primary/50 hover:bg-primary transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95"
           aria-label="Next scene"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={isMobile ? 20 : 24} />
         </button>
       </div>
 
-      {/* Instructions */}
+      {/* Instructions - Desktop only */}
       {!isMobile && (
-        <div className="absolute bottom-6 right-6 bg-card/90 backdrop-blur-sm text-card-foreground p-3 rounded-lg shadow-lg flex items-center gap-2 text-sm z-10 border border-border animate-slide-in-right">
-          <Info size={16} className="text-primary" />
-          <span>Look for glowing blue spheres to navigate</span>
+        <div className="absolute bottom-6 right-6 bg-card/90 backdrop-blur-md text-card-foreground p-3 rounded-xl shadow-lg flex items-center gap-2 text-sm z-10 border border-border animate-slide-in-right max-w-xs">
+          <Info size={16} className="text-primary flex-shrink-0" />
+          <span>Look for glowing purple spheres to navigate</span>
         </div>
       )}
 
       {/* Mobile hint */}
       {isMobile && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm text-card-foreground px-4 py-2 rounded-full text-xs flex items-center gap-2 z-10 border border-border animate-bounce-subtle">
-          <Maximize size={12} className="text-primary" />
-          <span>Rotate device for better view</span>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-md text-card-foreground px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs flex items-center gap-1.5 sm:gap-2 z-10 border border-border animate-bounce-subtle max-w-[90%]">
+          <Maximize size={12} className="text-primary flex-shrink-0" />
+          <span className="whitespace-nowrap">Rotate device for better view</span>
         </div>
       )}
 
       {/* Scene indicators */}
-      <div className="absolute bottom-32 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div className="absolute bottom-32 sm:bottom-36 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10">
         {scenes.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentScene(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentScene
-                ? 'bg-primary w-8'
-                : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
-            }`}
+            className={`h-1.5 sm:h-2 rounded-full transition-all ${index === currentScene
+                ? 'bg-primary w-6 sm:w-8 shadow-lg shadow-primary/50'
+                : 'bg-muted w-1.5 sm:w-2 hover:bg-muted-foreground/60'
+              }`}
             aria-label={`Go to ${scenes[index].name}`}
           />
         ))}

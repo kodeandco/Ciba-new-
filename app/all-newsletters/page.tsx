@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { X, Mail, FileText, ArrowLeft, Calendar } from "lucide-react"
 import PDFViewer from "@/components/PDFViewer"
+import FloatingWhatsApp from "@/components/FloatingWhatsapp"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"
 
@@ -247,6 +248,8 @@ export default function AllNewsletters() {
                     </div>
                 </div>
             )}
+
+            <FloatingWhatsApp />
         </>
     )
 }

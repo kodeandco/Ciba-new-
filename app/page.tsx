@@ -7,18 +7,14 @@ import Gallery from "@/components/gallery"
 import Newsletter from "@/components/newsletter"
 import Footer from "@/components/footer"
 import AnimatedSection from "@/components/animated-section"
-import TourSection from "@/components/tour-section"
-import MentorsSection from "@/components/mentors-section"
-import StartupsSection from "@/components/startups-section"
-import PartnersSection from "@/components/partners-section"
 import FloatingWhatsApp from "@/components/FloatingWhatsapp"
-import SectionTabs from "@/components/section-tabs"
+import SectionTabsWithTour from "@/components/section-tabs"
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      
+
       <main className="min-h-screen bg-gradient-subtle scroll-smooth overflow-x-hidden scrollbar-hide">
         {/* Video Hero Section */}
         <section id="home">
@@ -31,9 +27,9 @@ export default function Home() {
             <Hero />
           </AnimatedSection>
         </section>
-        
-        {/* MAGIC Navigation Section */}
-        <SectionTabs />
+
+        {/* MAGIC Navigation Section with WorkHub (Tour) integrated */}
+        <SectionTabsWithTour />
 
         <section id="testimonials" className="overflow-x-hidden">
           <AnimatedSection direction="left" delay={0.1}>
@@ -41,17 +37,6 @@ export default function Home() {
           </AnimatedSection>
         </section>
 
-        <section id="tour" className="overflow-x-hidden">
-          <TourSection />
-        </section>
-
-        {/* MAGIC Navigation Section */}
-
-
-        
-
-        {/* A - Assets (Startups) */}
-        
         {/* G - Gallery */}
         <section id="gallery" className="overflow-x-hidden">
           <AnimatedSection direction="left" delay={0.1}>
@@ -61,7 +46,6 @@ export default function Home() {
 
         {/* I - Impact (Partners & Programs) */}
         <section id="impact" className="overflow-x-hidden">
-         
           <AnimatedSection direction="up" delay={0.1}>
             <Programs />
           </AnimatedSection>

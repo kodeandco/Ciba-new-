@@ -20,6 +20,7 @@ import {
     Linkedin
 } from "lucide-react";
 import Navbar from "@/components/navbar";
+import FloatingWhatsApp from "@/components/FloatingWhatsapp";
 
 interface Startup {
     name: string;
@@ -699,6 +700,7 @@ export default function NidhiSSPPage() {
                     )}
                 </AnimatePresence>
             </div>
+            <FloatingWhatsApp />
         </>
     );
 }
